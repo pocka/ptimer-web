@@ -13,3 +13,8 @@ indent_style = tab
 
 [*.md]
 trim_trailing_whitespace = false
+
+# YAML cannot handle tabs
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
