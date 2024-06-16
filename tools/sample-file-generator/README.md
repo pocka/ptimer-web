@@ -11,5 +11,7 @@ This simple CLI application generates timer file for testing purpose.
 ## Usage
 
 ```
-$ go run . -- ../../sample.ptimer
+$ go run .
 ```
+
+This command generates `sample.ptimer` file in this directory.
