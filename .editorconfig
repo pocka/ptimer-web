@@ -18,3 +18,8 @@ trim_trailing_whitespace = false
 [*.{yml,yaml}]
 indent_style = space
 indent_size = 2
+
+# Align to elm-format, as it insists on space indentation
+[{*.elm,elm.json}]
+indent_style = space
+indent_size = 4

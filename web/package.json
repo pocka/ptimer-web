@@ -1,0 +1,16 @@
+{
+	"private": true,
+	"devDependencies": {
+		"@parcel/transformer-elm": "2.12.0",
+		"elm": "^0.19.1-6",
+		"elm-format": "^0.8.7",
+		"parcel": "^2.12.0"
+	},
+	"source": [
+		"src/index.html"
+	],
+	"scripts": {
+		"dev": "parcel --no-autoinstall",
+		"build": "parcel build --no-autoinstall"
+	}
+}
