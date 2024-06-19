@@ -14,11 +14,11 @@ The timer file is a SQLite database file.
 
 This table can contain exactly one record.
 
-| Column      | Data type       | Description                       |
-| ----------- | --------------- | --------------------------------- |
-| title       | TEXT            | Title of the timer.               |
-| description | TEXT or NULL    | Description of the timer.         |
-| lang        | TEXT            | Language code for timer contents. |
+| Column      | Data type    | Description                       |
+| ----------- | ------------ | --------------------------------- |
+| title       | TEXT         | Title of the timer.               |
+| description | TEXT or NULL | Description of the timer.         |
+| lang        | TEXT         | Language code for timer contents. |
 
 ### `step` table
 
