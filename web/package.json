@@ -12,5 +12,9 @@
 	"scripts": {
 		"dev": "parcel --no-autoinstall",
 		"build": "parcel build --no-autoinstall"
+	},
+	"dependencies": {
+		"@sqlite.org/sqlite-wasm": "^3.46.0-build2",
+		"process": "^0.11.10"
 	}
 }
