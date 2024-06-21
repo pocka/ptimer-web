@@ -10,8 +10,8 @@
 		"src/index.html"
 	],
 	"scripts": {
-		"dev": "parcel --no-autoinstall",
-		"build": "parcel build --no-autoinstall"
+		"dev": "parcel --no-autoinstall --no-cache",
+		"build": "parcel build --no-autoinstall --no-cache"
 	},
 	"dependencies": {
 		"@sqlite.org/sqlite-wasm": "^3.46.0-build2",
