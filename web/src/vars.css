@@ -1,0 +1,23 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Shota FUJI <pockawoooh@gmail.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+:root {
+	--timer-hue-primary: 222deg;
+	--timer-hue-secondary: calc(var(--timer-hue-primary) + 180deg);
+
+	--timer-splash-bg: oklch(33% 44% var(--timer-hue-primary));
+	--timer-splash-fg: oklch(99% 11% var(--timer-hue-secondary));
+
+	--timer-ui-bg: oklch(97% 1% var(--timer-hue-primary));
+	--timer-ui-fg: oklch(2% 10% var(--timer-hue-primary));
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--timer-ui-bg: oklch(5% 5% var(--timer-hue-primary));
+		--timer-ui-fg: oklch(98% 1% var(--timer-hue-primary));
+	}
+}

@@ -4,8 +4,35 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>Timer (web)</title>
-		<link rel="stylesheet" href="style.css" />
 		<script type="module" defer src="main.ts"></script>
+		<style>
+			@import "./vars.css";
+			@import "./inline.css";
+		</style>
+		<noscript>
+			<link rel="stylesheet" href="noscript.css" />
+		</noscript>
 	</head>
-	<body></body>
+	<body>
+		<div class="splash">
+			<h1 class="splash-title">Timer (web)</h1>
+			<noscript>
+				<p class="splash-noscript">This is a browser application. Enable JavaScript to start.</p>
+			</noscript>
+			<ul class="splash-load-items">
+				<li aria-live="polite">
+					<span>Application Core:</span>
+					<span id="splash_core">Loading</span>
+				</li>
+				<li aria-live="polite">
+					<span>Database Engine:</span>
+					<span id="splash_db">Loading</span>
+				</li>
+				<li aria-live="polite">
+					<span>Assets:</span>
+					<span id="splash_assets">Loading</span>
+				</li>
+			</ul>
+		</div>
+	</body>
 </html>
