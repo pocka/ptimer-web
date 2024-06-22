@@ -2,6 +2,9 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+import type { SQLite3Worker1Promiser } from "@sqlite.org/sqlite-wasm";
+import type { CompiledElmNamespaces } from "./Main.elm";
+
 const SPLASH_MIN_DURATION_MS = 800;
 
 /**
@@ -9,24 +12,20 @@ const SPLASH_MIN_DURATION_MS = 800;
  * is glitching. Non-disturbing minimal artificial wait is necessary.
  */
 function splashMinDuration(): Promise<void> {
-	return new Promise((resolve, reject) => {
+	return new Promise((resolve) => {
 		setTimeout(() => {
 			resolve();
 		}, SPLASH_MIN_DURATION_MS);
 	});
 }
 
-interface ElmApp {
-	ports: {};
-}
-
-async function loadElm(): Promise<{ Main: { init(): ElmApp } }> {
+async function loadElm(): Promise<CompiledElmNamespaces> {
 	const { Elm } = await import("./Main.elm");
 
 	return Elm;
 }
 
-async function loadSQLite(): Promise<unknown> {
+async function loadSQLite(): Promise<SQLite3Worker1Promiser> {
 	const { sqlite3Worker1Promiser } = await import("@sqlite.org/sqlite-wasm");
 
 	return new Promise(resolve => {
@@ -57,6 +56,7 @@ async function runTask<T>(task: Promise<T>, statusID: string): Promise<T> {
 		el.textContent = "NG";
 
 		// TODO: Display error details
+		return Promise.reject(error);
 	}
 }
 
@@ -67,7 +67,10 @@ async function main() {
 		runTask(loadSQLite(), "splash_db"),
 	]);
 
-	const app = Elm.Main.init();
+	Elm.Main.init();
+
+	const sqliteConfig = await sqlite({ type: "config-get" });
+	console.info(sqliteConfig.result.version.libVersion);
 }
 
 main();
