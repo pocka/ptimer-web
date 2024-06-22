@@ -2,6 +2,14 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+interface ElmToJsPort<Payload> {
+	subscribe(callback: (payload: Payload) => void): () => void;
+}
+
+interface JsToElmPort<Payload> {
+	send(payload: Payload): void;
+}
+
 declare module "*.elm" {
 	interface ElmApp<Ports> {
 		ports: Ports;
@@ -12,7 +20,11 @@ declare module "*.elm" {
 	}
 
 	interface CompiledElmNamespaces {
-		Main: ElmDocumentProgram<{}>;
+		Main: ElmDocumentProgram<{
+			sendSelectedFile: ElmToJsPort<File>;
+			receiveParsedFile: JsToElmPort<unknown>;
+			receiveFileParseError: JsToElmPort<string>;
+		}>;
 	}
 
 	export const Elm: CompiledElmNamespaces;

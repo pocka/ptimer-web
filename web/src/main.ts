@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import type { SQLite3Worker1Promiser } from "@sqlite.org/sqlite-wasm";
 import type { CompiledElmNamespaces } from "./Main.elm";
+import { isFileLoaderToMainThreadMessage, type MainThreadToFileLoaderMessage } from "./messages";
 
 const SPLASH_MIN_DURATION_MS = 800;
 
@@ -25,14 +25,37 @@ async function loadElm(): Promise<CompiledElmNamespaces> {
 	return Elm;
 }
 
-async function loadSQLite(): Promise<SQLite3Worker1Promiser> {
-	const { sqlite3Worker1Promiser } = await import("@sqlite.org/sqlite-wasm");
+async function loadWorker(): Promise<Worker> {
+	const worker = new Worker(
+		new URL("workers/file_loader.ts", import.meta.url),
+		{ type: "module" },
+	);
 
-	return new Promise(resolve => {
-		const promiser = sqlite3Worker1Promiser({
-			onready() {
-				resolve(promiser);
-			},
+	return new Promise((resolve, reject) => {
+		const listener = (ev: MessageEvent) => {
+			if (!isFileLoaderToMainThreadMessage(ev.data)) {
+				console.warn("Illegal message sent by file loader worker.", {
+					message: ev.data,
+				});
+				return;
+			}
+
+			if (ev.data.type !== "ready") {
+				console.warn("Unexpected worker message received before ready message", {
+					message: ev.data,
+				});
+				return;
+			}
+
+			resolve(worker);
+			worker.removeEventListener("message", listener);
+			return;
+		};
+
+		worker.addEventListener("message", listener);
+
+		worker.addEventListener("error", ev => {
+			reject(ev.error);
 		});
 	});
 }
@@ -61,16 +84,48 @@ async function runTask<T>(task: Promise<T>, statusID: string): Promise<T> {
 }
 
 async function main() {
-	const [, Elm, sqlite] = await Promise.all([
+	const [, Elm, worker] = await Promise.all([
 		splashMinDuration(),
 		runTask(loadElm(), "splash_core"),
-		runTask(loadSQLite(), "splash_db"),
+		runTask(loadWorker(), "splash_db"),
 	]);
 
-	Elm.Main.init();
+	const app = Elm.Main.init();
 
-	const sqliteConfig = await sqlite({ type: "config-get" });
-	console.info(sqliteConfig.result.version.libVersion);
+	app.ports.sendSelectedFile.subscribe(async file => {
+		const stream = file.stream();
+
+		worker.postMessage(
+			{
+				type: "file_parse_request",
+				data: stream,
+			} satisfies MainThreadToFileLoaderMessage,
+			{
+				transfer: [stream],
+			},
+		);
+	});
+
+	worker.addEventListener("message", ev => {
+		if (!isFileLoaderToMainThreadMessage(ev.data)) {
+			console.warn("Illegal message sent by file loader worker.", {
+				message: ev.data,
+			});
+			return;
+		}
+
+		switch (ev.data.type) {
+			case "file_parsed":
+				app.ports.receiveParsedFile.send(ev.data.file);
+				return;
+			case "file_parse_error":
+				console.warn(ev.data.error);
+				app.ports.receiveFileParseError.send(
+					ev.data.error instanceof Error ? ev.data.error.message : String(ev.data.error),
+				);
+				return;
+		}
+	});
 }
 
 main();
