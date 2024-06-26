@@ -88,9 +88,20 @@ async function main() {
 		splashMinDuration(),
 		runTask(loadElm(), "splash_core"),
 		runTask(loadWorker(), "splash_db"),
+		runTask(import("./Main.css"), "splash_assets"),
 	]);
 
 	const app = Elm.Main.init();
+
+	window.addEventListener("dragenter", ev => {
+		ev.preventDefault();
+
+		app.ports.receiveDragEnter.send(ev.dataTransfer?.files);
+	}, { capture: true });
+
+	window.addEventListener("dragover", ev => {
+		ev.preventDefault();
+	}, { capture: true });
 
 	app.ports.sendSelectedFile.subscribe(async file => {
 		const stream = file.stream();

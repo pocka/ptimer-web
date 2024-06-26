@@ -6,8 +6,8 @@
 port module Main exposing (main)
 
 import Browser
-import Html exposing (audio, div, input, label, li, p, span, text, ul)
-import Html.Attributes
+import Html exposing (audio, div, input, li, p, text, ul)
+import Html.Attributes exposing (class)
 import Html.Events
 import Json.Decode
 import Ptimer.Ptimer as Ptimer
@@ -48,6 +48,9 @@ port receiveParsedFile : (Json.Decode.Value -> msg) -> Sub msg
 port receiveFileParseError : (String -> msg) -> Sub msg
 
 
+port receiveDragEnter : (Json.Decode.Value -> msg) -> Sub msg
+
+
 
 -- MODEL
 
@@ -59,14 +62,20 @@ type TimerFileLoading
     | Loaded Ptimer.PtimerFile
 
 
+type DragState
+    = NotDragging
+    | Dragging
+
+
 type alias Model =
     { file : TimerFileLoading
+    , dragging : DragState
     }
 
 
 init : Flags -> ( Model, Cmd Msg )
 init _ =
-    ( { file = NotSelected }, Cmd.none )
+    ( { file = NotSelected, dragging = NotDragging }, Cmd.none )
 
 
 
@@ -77,6 +86,9 @@ type Msg
     = SelectFile Json.Decode.Value
     | GotPtimerFile Ptimer.PtimerFile
     | GotFileParseError String
+    | NoOp
+    | DragEnter
+    | DragLeave
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -84,20 +96,26 @@ update msg model =
     case msg of
         SelectFile file ->
             case model.file of
-                NotSelected ->
-                    ( { model | file = Loading }, sendSelectedFile file )
-
-                Loaded _ ->
-                    ( { model | file = Loading }, sendSelectedFile file )
+                Loading ->
+                    ( model, Cmd.none )
 
                 _ ->
-                    ( model, Cmd.none )
+                    ( { model | file = Loading, dragging = NotDragging }, sendSelectedFile file )
 
         GotPtimerFile file ->
             ( { model | file = Loaded file }, Cmd.none )
 
         GotFileParseError error ->
             ( { model | file = FailedToLoad error }, Cmd.none )
+
+        DragEnter ->
+            ( { model | dragging = Dragging }, Cmd.none )
+
+        DragLeave ->
+            ( { model | dragging = NotDragging }, Cmd.none )
+
+        NoOp ->
+            ( model, Cmd.none )
 
 
 
@@ -111,25 +129,32 @@ fileDecoder =
         (Json.Decode.index 0 Json.Decode.value)
 
 
+dropOverlay : List (Html.Attribute msg) -> Html.Html msg
+dropOverlay attrs =
+    div
+        (class "main--drop-overlay" :: attrs)
+        [ p [] [ text "Drop .ptimer file to open" ] ]
+
+
+dropDecoder : Json.Decode.Decoder Json.Decode.Value
+dropDecoder =
+    Json.Decode.at [ "dataTransfer", "files" ]
+        (Json.Decode.index 0 Json.Decode.value)
+
+
 view : Model -> Browser.Document Msg
-view { file } =
+view { file, dragging } =
     { title = "Timer (web)"
     , body =
         [ case file of
             NotSelected ->
-                div
-                    []
-                    [ label []
-                        [ span [] [ text "Select or drop timer file here" ]
-                        , input
-                            [ Html.Attributes.type_ "file"
-                            , Html.Events.on
-                                "change"
-                                (Json.Decode.map SelectFile fileDecoder)
-                            ]
-                            []
-                        ]
+                input
+                    [ Html.Attributes.type_ "file"
+                    , Html.Events.on
+                        "change"
+                        (Json.Decode.map SelectFile fileDecoder)
                     ]
+                    []
 
             Loading ->
                 p [] [ text "Loading timer file" ]
@@ -164,6 +189,15 @@ view { file } =
                                 )
                         )
                     ]
+        , case dragging of
+            Dragging ->
+                dropOverlay
+                    [ Html.Events.preventDefaultOn "dragleave" (Json.Decode.succeed ( DragLeave, True ))
+                    , Html.Events.preventDefaultOn "drop" (Json.Decode.map (\value -> ( SelectFile value, True )) dropDecoder)
+                    ]
+
+            NotDragging ->
+                text ""
         ]
     }
 
@@ -190,4 +224,6 @@ subscriptions model =
                 ]
 
         _ ->
-            Sub.none
+            Sub.batch
+                [ receiveDragEnter (\_ -> DragEnter)
+                ]

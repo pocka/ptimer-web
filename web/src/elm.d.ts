@@ -24,6 +24,7 @@ declare module "*.elm" {
 			sendSelectedFile: ElmToJsPort<File>;
 			receiveParsedFile: JsToElmPort<unknown>;
 			receiveFileParseError: JsToElmPort<string>;
+			receiveDragEnter: JsToElmPort<FileList | undefined>;
 		}>;
 	}
 

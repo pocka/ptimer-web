@@ -13,6 +13,9 @@
 
 	--timer-ui-bg: oklch(97% 1% var(--timer-hue-primary));
 	--timer-ui-fg: oklch(2% 10% var(--timer-hue-primary));
+
+	--timer-px-spacing: 8px;
+	--timer-em-spacing: 0.5rem;
 }
 
 @media (prefers-color-scheme: dark) {
