@@ -133,7 +133,9 @@ dropOverlay : List (Html.Attribute msg) -> Html.Html msg
 dropOverlay attrs =
     div
         (class "main--drop-overlay" :: attrs)
-        [ p [] [ text "Drop .ptimer file to open" ] ]
+        [ Html.node "lucide-upload" [ class "main--drop-overlay--icon" ] []
+        , p [ class "main--drop-overlay--desc" ] [ text "Drop .ptimer file to open" ]
+        ]
 
 
 dropDecoder : Json.Decode.Decoder Json.Decode.Value

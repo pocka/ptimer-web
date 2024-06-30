@@ -88,7 +88,13 @@ async function main() {
 		splashMinDuration(),
 		runTask(loadElm(), "splash_core"),
 		runTask(loadWorker(), "splash_db"),
-		runTask(import("./Main.css"), "splash_assets"),
+		runTask(
+			Promise.all([
+				import("./Main.css"),
+				import("./custom_elements"),
+			]),
+			"splash_assets",
+		),
 	]);
 
 	const app = Elm.Main.init();

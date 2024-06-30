@@ -13,9 +13,19 @@
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	gap: var(--timer-px-spacing);
 
 	background-color: oklch(var(--timer-ui-bg) / 80%);
 }
 .main--drop-overlay * {
 	pointer-events: none;
+}
+
+.main--drop-overlay--icon {
+	font-size: 2rem;
+}
+
+.main--drop-overlay--desc {
+	font-size: 1.2rem;
+	font-weight: bold;
 }
