@@ -29,3 +29,117 @@
 	font-size: 1.2rem;
 	font-weight: bold;
 }
+
+.main--file-picker-scene {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: calc(var(--timer-px-spacing) * 3);
+}
+
+.main--file-picker-scene--slot {
+	display: block;
+	min-height: 2rem;
+}
+
+@keyframes ripple {
+	from {
+		opacity: 1;
+		transform: scale(0);
+	}
+
+	to {
+		opacity: 0;
+		transform: scale(1);
+	}
+}
+
+.main--button {
+	position: relative;
+	padding: var(--timer-px-spacing) calc(var(--timer-px-spacing) * 1.5);
+	border: 1px solid oklch(var(--timer-ui-fg));
+	font-size: 1rem;
+
+	background-color: oklch(var(--timer-ui-fg));
+	border-radius: calc(var(--timer-px-spacing) * 0.5);
+	color: oklch(var(--timer-ui-bg));
+	cursor: pointer;
+}
+.main--button:focus-visible, .main--button:has(:focus-visible) {
+	border-color: oklch(var(--timer-highlight));
+	box-shadow: 0 0 0 var(--timer-ring-size) oklch(var(--timer-highlight) / var(--timer-ring-alpha));
+}
+.main--button::before, .main--button::after {
+	content: "";
+	position: absolute;
+
+	pointer-events: none;
+
+	opacity: 0;
+}
+.main--button::before {
+	inset: 0;
+
+	background-color: oklch(var(--timer-ui-bg) / 5%);
+}
+.main--button::after {
+	inset: 0;
+	margin: auto;
+	aspect-ratio: 1 / 1;
+
+	background-color: oklch(var(--timer-ui-bg) / 20%);
+	border-radius: 50%;
+}
+.main--button:hover::before {
+	opacity: 1;
+}
+.main--button:active::after {
+	animation: ripple 0.2s ease-out;
+}
+.main--button:active {
+	transform: scale(0.99);
+}
+.main--button:disabled, .main--button:has(:disabled) {
+	background-color: oklch(var(--timer-ui-fg) / 0.5);
+	border-color: oklch(var(--timer-ui-fg) / 0.2);
+	color: oklch(var(--timer-ui-bg) / 0.4);
+	cursor: not-allowed;
+
+	transform: none;
+}
+.main--button:disabled::before,
+.main--button:has(:disabled)::before,
+.main--button:disabled::after,
+.main--button:has(:disabled)::after {
+	display: none;
+}
+
+.main--file-picker--input {
+	position: absolute;
+	width: 0;
+	height: 0;
+	top: 0;
+	left: 0;
+
+	opacity: 0;
+}
+
+.main--loading {
+	font-size: 0.9rem;
+}
+
+.main--load-error {
+	display: flex;
+	flex-direction: column;
+	gap: calc(var(--timer-em-spacing) * 0.5);
+	max-width: 40em;
+	font-size: 0.9rem;
+
+	color: oklch(var(--timer-ui-error));
+}
+.main--load-error > :first-child {
+	font-weight: bold;
+}

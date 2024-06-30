@@ -6,7 +6,7 @@
 port module Main exposing (main)
 
 import Browser
-import Html exposing (audio, div, input, li, p, text, ul)
+import Html exposing (audio, div, input, label, li, p, text, ul)
 import Html.Attributes exposing (class)
 import Html.Events
 import Json.Decode
@@ -129,6 +129,27 @@ fileDecoder =
         (Json.Decode.index 0 Json.Decode.value)
 
 
+filePickerScene : Bool -> List (Html.Html Msg) -> Html.Html Msg
+filePickerScene disabled children =
+    div
+        [ class "main--file-picker-scene" ]
+        [ div [ class "main--file-picker-scene--slot" ] children
+        , label
+            [ class "main--button" ]
+            [ input
+                [ class "main--file-picker--input"
+                , Html.Attributes.type_ "file"
+                , Html.Events.on
+                    "change"
+                    (Json.Decode.map SelectFile fileDecoder)
+                , Html.Attributes.disabled disabled
+                ]
+                []
+            , text "Open .ptimer file"
+            ]
+        ]
+
+
 dropOverlay : List (Html.Attribute msg) -> Html.Html msg
 dropOverlay attrs =
     div
@@ -150,21 +171,21 @@ view { file, dragging } =
     , body =
         [ case file of
             NotSelected ->
-                input
-                    [ Html.Attributes.type_ "file"
-                    , Html.Events.on
-                        "change"
-                        (Json.Decode.map SelectFile fileDecoder)
-                    ]
-                    []
+                filePickerScene False []
 
             Loading ->
-                p [] [ text "Loading timer file" ]
+                filePickerScene
+                    True
+                    [ p [ class "main--loading" ] [ text "Loading timer file..." ]
+                    ]
 
             FailedToLoad details ->
-                p []
-                    [ text "Failed to load timer file: "
-                    , text details
+                filePickerScene
+                    False
+                    [ div [ class "main--load-error" ]
+                        [ p [] [ text "Failed to load timer file" ]
+                        , Html.pre [] [ text details ]
+                        ]
                     ]
 
             Loaded { metadata, steps, assets } ->
