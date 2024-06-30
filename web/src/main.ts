@@ -60,25 +60,60 @@ async function loadWorker(): Promise<Worker> {
 	});
 }
 
-async function runTask<T>(task: Promise<T>, statusID: string): Promise<T> {
+function showError(error: unknown, label?: string): void {
+	const container = document.getElementById("splash-error");
+	if (!container) {
+		return;
+	}
+
+	const el = document.createElement("li");
+	el.classList.add("splash-error--item");
+
+	const labelEl = document.createElement("span");
+	labelEl.classList.add("splash-error--item--label");
+
+	if (label) {
+		labelEl.textContent = `ERROR (${label})`;
+	} else {
+		labelEl.textContent = "ERROR";
+	}
+
+	el.appendChild(labelEl);
+
+	const message = document.createElement("span");
+	message.textContent = error instanceof Error ? error.message : typeof error === "string" ? error : String(error);
+
+	el.appendChild(message);
+	container.appendChild(el);
+}
+
+interface TaskOptions {
+	/**
+	 * Document ID of an element representing task's status.
+	 */
+	statusID: string;
+
+	name?: string;
+}
+
+async function runTask<T>(task: Promise<T>, { statusID, name }: TaskOptions): Promise<T> {
 	const el = document.getElementById(statusID);
 	if (!el) {
 		return Promise.reject(new Error(`Splash screen is not loaded: element with ID=${statusID} does not exist`));
 	}
 
-	el.textContent = "...";
-
 	try {
 		const value = await task;
 
-		el.textContent = "OK";
+		el.textContent = "Ready";
 
 		return value;
 	} catch (error) {
 		console.error(error);
-		el.textContent = "NG";
+		el.textContent = "Error";
 
-		// TODO: Display error details
+		showError(error, name);
+
 		return Promise.reject(error);
 	}
 }
@@ -86,14 +121,23 @@ async function runTask<T>(task: Promise<T>, statusID: string): Promise<T> {
 async function main() {
 	const [, Elm, worker] = await Promise.all([
 		splashMinDuration(),
-		runTask(loadElm(), "splash_core"),
-		runTask(loadWorker(), "splash_db"),
+		runTask(loadElm(), {
+			statusID: "splash_core",
+			name: "Application Core",
+		}),
+		runTask(loadWorker(), {
+			statusID: "splash_db",
+			name: "Database Engine",
+		}),
 		runTask(
 			Promise.all([
 				import("./Main.css"),
 				import("./custom_elements"),
 			]),
-			"splash_assets",
+			{
+				statusID: "splash_assets",
+				name: "Assets",
+			},
 		),
 	]);
 

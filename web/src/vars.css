@@ -7,9 +7,7 @@
 :root {
 	--timer-hue-primary: 222deg;
 	--timer-hue-secondary: calc(var(--timer-hue-primary) + 180deg);
-
-	--timer-splash-bg: 33% 44% var(--timer-hue-primary);
-	--timer-splash-fg: 99% 11% var(--timer-hue-secondary);
+	--timer-hue-error: 7deg;
 
 	--timer-ui-bg-lightness: 97%;
 	--timer-ui-bg-chroma: 1%;
@@ -20,6 +18,13 @@
 	--timer-ui-fg-chroma: 10%;
 	--timer-ui-fg-hue: var(--timer-hue-primary);
 	--timer-ui-fg: var(--timer-ui-fg-lightness) var(--timer-ui-fg-chroma) var(--timer-ui-fg-hue);
+
+	--timer-ui-error-lightness: 40%;
+	--timer-ui-error-chroma: 80%;
+	--timer-ui-error-hue: var(--timer-hue-error);
+	--timer-ui-error: var(--timer-ui-error-lightness) var(--timer-ui-error-chroma) var(
+		--timer-ui-error-hue
+	);
 
 	--timer-px-spacing: 8px;
 	--timer-em-spacing: 0.5rem;
