@@ -14,8 +14,7 @@
 	align-items: center;
 	justify-content: center;
 
-	background-color: oklch(2% 5% var(--timer-hue-primary) / 50%);
-	color: oklch(98% 0% var(--timer-hue-primary));
+	background-color: oklch(var(--timer-ui-bg) / 80%);
 }
 .main--drop-overlay * {
 	pointer-events: none;

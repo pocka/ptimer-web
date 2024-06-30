@@ -15,8 +15,8 @@
 body {
 	font-size: 1rem;
 
-	background-color: var(--timer-ui-bg);
-	color: var(--timer-ui-fg);
+	background-color: oklch(var(--timer-ui-bg));
+	color: oklch(var(--timer-ui-fg));
 }
 
 .splash {
@@ -28,8 +28,8 @@ body {
 	justify-content: center;
 	gap: 1rem;
 
-	background-color: var(--timer-splash-bg);
-	color: var(--timer-splash-fg);
+	background-color: oklch(var(--timer-splash-bg));
+	color: oklch(var(--timer-splash-fg));
 }
 
 .splash-title {

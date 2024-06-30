@@ -8,11 +8,18 @@
 	--timer-hue-primary: 222deg;
 	--timer-hue-secondary: calc(var(--timer-hue-primary) + 180deg);
 
-	--timer-splash-bg: oklch(33% 44% var(--timer-hue-primary));
-	--timer-splash-fg: oklch(99% 11% var(--timer-hue-secondary));
+	--timer-splash-bg: 33% 44% var(--timer-hue-primary);
+	--timer-splash-fg: 99% 11% var(--timer-hue-secondary);
 
-	--timer-ui-bg: oklch(97% 1% var(--timer-hue-primary));
-	--timer-ui-fg: oklch(2% 10% var(--timer-hue-primary));
+	--timer-ui-bg-lightness: 97%;
+	--timer-ui-bg-chroma: 1%;
+	--timer-ui-bg-hue: var(--timer-hue-primary);
+	--timer-ui-bg: var(--timer-ui-bg-lightness) var(--timer-ui-bg-chroma) var(--timer-ui-bg-hue);
+
+	--timer-ui-fg-lightness: 2%;
+	--timer-ui-fg-chroma: 10%;
+	--timer-ui-fg-hue: var(--timer-hue-primary);
+	--timer-ui-fg: var(--timer-ui-fg-lightness) var(--timer-ui-fg-chroma) var(--timer-ui-fg-hue);
 
 	--timer-px-spacing: 8px;
 	--timer-em-spacing: 0.5rem;
@@ -20,7 +27,10 @@
 
 @media (prefers-color-scheme: dark) {
 	:root {
-		--timer-ui-bg: oklch(5% 5% var(--timer-hue-primary));
-		--timer-ui-fg: oklch(98% 1% var(--timer-hue-primary));
+		--timer-ui-bg-lightness: 5%;
+		--timer-ui-bg-chroma: 5%;
+
+		--timer-ui-fg-lightness: 98%;
+		--timer-ui-fg-chroma: 1%;
 	}
 }
