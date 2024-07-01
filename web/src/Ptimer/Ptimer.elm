@@ -9,7 +9,7 @@ module Ptimer.Ptimer exposing
     , Metadata
     , PtimerFile
     , Step
-    , StepAction
+    , StepAction(..)
     , StepId
     , decoder
     )

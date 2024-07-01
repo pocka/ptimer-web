@@ -6,10 +6,11 @@
 port module Main exposing (main)
 
 import Browser
-import Html exposing (audio, div, input, label, li, p, text, ul)
+import Html exposing (div, input, label, p, text)
 import Html.Attributes exposing (class)
 import Html.Events
 import Json.Decode
+import Player
 import Ptimer.Ptimer as Ptimer
 
 
@@ -59,7 +60,7 @@ type TimerFileLoading
     = NotSelected
     | Loading
     | FailedToLoad String
-    | Loaded Ptimer.PtimerFile
+    | Loaded Player.Model
 
 
 type DragState
@@ -89,6 +90,7 @@ type Msg
     | NoOp
     | DragEnter
     | DragLeave
+    | PlayerMsg Player.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -103,7 +105,11 @@ update msg model =
                     ( { model | file = Loading, dragging = NotDragging }, sendSelectedFile file )
 
         GotPtimerFile file ->
-            ( { model | file = Loaded file }, Cmd.none )
+            let
+                ( playerModel, playerCmd ) =
+                    Player.init file
+            in
+            ( { model | file = Loaded playerModel }, Cmd.map PlayerMsg playerCmd )
 
         GotFileParseError error ->
             ( { model | file = FailedToLoad error }, Cmd.none )
@@ -113,6 +119,18 @@ update msg model =
 
         DragLeave ->
             ( { model | dragging = NotDragging }, Cmd.none )
+
+        PlayerMsg subMsg ->
+            case model.file of
+                Loaded playerModel ->
+                    let
+                        ( nextModel, cmd ) =
+                            Player.update subMsg playerModel
+                    in
+                    ( { model | file = Loaded nextModel }, Cmd.map PlayerMsg cmd )
+
+                _ ->
+                    ( model, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
@@ -188,30 +206,8 @@ view { file, dragging } =
                         ]
                     ]
 
-            Loaded { metadata, steps, assets } ->
-                div []
-                    [ p [] [ text metadata.title ]
-                    , ul []
-                        (steps
-                            |> List.map
-                                (\step ->
-                                    li [] [ text step.title ]
-                                )
-                        )
-                    , ul []
-                        (assets
-                            |> List.map
-                                (\asset ->
-                                    li []
-                                        [ audio
-                                            [ Html.Attributes.src asset.url
-                                            , Html.Attributes.controls True
-                                            ]
-                                            []
-                                        ]
-                                )
-                        )
-                    ]
+            Loaded playerModel ->
+                Html.map PlayerMsg (Player.view playerModel)
         , case dragging of
             Dragging ->
                 dropOverlay
@@ -245,6 +241,9 @@ subscriptions model =
                     )
                 , receiveFileParseError GotFileParseError
                 ]
+
+        Loaded playerModel ->
+            Sub.batch [ receiveDragEnter (\_ -> DragEnter), Player.subscriptions playerModel |> Sub.map PlayerMsg ]
 
         _ ->
             Sub.batch

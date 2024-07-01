@@ -1,0 +1,38 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Shota FUJI <pockawoooh@gmail.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.player--layout {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: var(--timer-px-spacing);
+}
+
+.player--container {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	justify-content: center;
+	gap: calc(var(--timer-px-spacing) * 2);
+	width: 100%;
+	max-width: 25rem;
+	min-height: min(80vh, 10rem);
+}
+
+.player--spacer {
+	flex-grow: 1;
+
+	pointer-events: none;
+}
+
+.player--title {
+	font-weight: bold;
+	font-size: 1.2rem;
+	line-height: 1.2;
+}
