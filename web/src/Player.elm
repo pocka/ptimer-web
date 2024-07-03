@@ -6,7 +6,7 @@
 module Player exposing (Model, Msg, init, subscriptions, update, view)
 
 import Html
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, disabled)
 import Html.Events exposing (onClick)
 import Ptimer.Ptimer as Ptimer
 import Task
@@ -127,67 +127,125 @@ spacer =
     Html.div [ class "player--spacer" ] []
 
 
+startScene : Model -> Html.Html Msg
+startScene model =
+    Html.div
+        [ class "player--container"
+        , case model.state of
+            NotStarted ->
+                class "active"
+
+            _ ->
+                class ""
+        ]
+        [ Html.p [ class "player--title" ] [ Html.text model.file.metadata.title ]
+        , case model.file.metadata.description of
+            Just description ->
+                Html.p [] [ Html.text description ]
+
+            Nothing ->
+                Html.text ""
+        , spacer
+        , Html.button
+            [ class "main--button"
+            , case model.state of
+                NotStarted ->
+                    onClick Start
+
+                _ ->
+                    disabled True
+            ]
+            [ Html.text "Start" ]
+        ]
+
+
+stepScene : Model -> Ptimer.Step -> Html.Html Msg
+stepScene model step =
+    let
+        isCurrent =
+            case model.state of
+                Playing current _ _ ->
+                    current == step
+
+                _ ->
+                    False
+    in
+    Html.div
+        [ class "player--container"
+        , class
+            (if isCurrent then
+                "active"
+
+             else
+                ""
+            )
+        ]
+        [ Html.p [ class "player--title" ] [ Html.text step.title ]
+        , case step.description of
+            Just description ->
+                Html.p [] [ Html.text description ]
+
+            Nothing ->
+                Html.text ""
+        , spacer
+        , case step.action of
+            Ptimer.Timer duration ->
+                if isCurrent then
+                    case model.state of
+                        Playing _ _ (Just { remainings }) ->
+                            Html.p [] [ Html.text ("wait " ++ String.fromInt remainings ++ " seconds") ]
+
+                        _ ->
+                            Html.p [] [ Html.text ("wait " ++ String.fromInt duration ++ " seconds") ]
+
+                else
+                    Html.p [] [ Html.text "wait 0 seconds" ]
+
+            Ptimer.UserInteraction ->
+                Html.button
+                    [ class "main--button"
+                    , if isCurrent then
+                        onClick NextStep
+
+                      else
+                        disabled True
+                    ]
+                    [ Html.text "Next" ]
+        ]
+
+
+endScene : Model -> Html.Html Msg
+endScene model =
+    Html.div
+        [ class "player--container"
+        , case model.state of
+            Completed ->
+                class "active"
+
+            _ ->
+                class ""
+        ]
+        [ Html.p [ class "player--title" ] [ Html.text "Completed" ]
+        , spacer
+        , Html.button
+            [ class "main--button"
+            , case model.state of
+                Completed ->
+                    onClick Reset
+
+                _ ->
+                    disabled True
+            ]
+            [ Html.text "Back to start" ]
+        ]
+
+
 view : Model -> Html.Html Msg
 view model =
-    Html.div
-        [ class "player--layout" ]
-        [ Html.div [ class "player--container" ]
-            (case model.state of
-                NotStarted ->
-                    [ Html.p [ class "player--title" ] [ Html.text model.file.metadata.title ]
-                    , case model.file.metadata.description of
-                        Just description ->
-                            Html.p [] [ Html.text description ]
-
-                        Nothing ->
-                            Html.text ""
-                    , spacer
-                    , Html.button
-                        [ class "main--button"
-                        , onClick Start
-                        ]
-                        [ Html.text "Start" ]
-                    ]
-
-                Playing current rest timer ->
-                    [ Html.p [ class "player--title" ] [ Html.text current.title ]
-                    , case current.description of
-                        Just description ->
-                            Html.p [] [ Html.text description ]
-
-                        Nothing ->
-                            Html.text ""
-                    , spacer
-                    , case current.action of
-                        Ptimer.Timer _ ->
-                            case timer of
-                                Just { remainings } ->
-                                    Html.p [] [ Html.text ("wait " ++ String.fromInt remainings ++ " seconds") ]
-
-                                Nothing ->
-                                    Html.text ""
-
-                        Ptimer.UserInteraction ->
-                            Html.button
-                                [ class "main--button"
-                                , onClick NextStep
-                                ]
-                                [ Html.text
-                                    (if List.length rest == 0 then
-                                        "Done"
-
-                                     else
-                                        "Next"
-                                    )
-                                ]
-                    ]
-
-                Completed ->
-                    [ Html.p [ class "player--title" ] [ Html.text "Completed" ]
-                    , spacer
-                    , Html.button [ class "main--button", onClick Reset ] [ Html.text "Back to start" ]
-                    ]
-            )
+    Html.div [ class "player--layout" ]
+        [ Html.div
+            [ class "player--grid" ]
+            (startScene model :: (model.file.steps |> List.map (stepScene model)) ++ [ endScene model ])
         ]
 
 
