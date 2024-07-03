@@ -150,7 +150,7 @@ view model =
                     ]
 
                 Playing current rest timer ->
-                    [ Html.p [] [ Html.text current.title ]
+                    [ Html.p [ class "player--title" ] [ Html.text current.title ]
                     , case current.description of
                         Just description ->
                             Html.p [] [ Html.text description ]
@@ -183,7 +183,7 @@ view model =
                     ]
 
                 Completed ->
-                    [ Html.p [] [ Html.text "Completed!" ]
+                    [ Html.p [ class "player--title" ] [ Html.text "Completed" ]
                     , spacer
                     , Html.button [ class "main--button", onClick Reset ] [ Html.text "Back to start" ]
                     ]
