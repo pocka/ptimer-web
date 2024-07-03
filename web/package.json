@@ -15,6 +15,7 @@
 		"build": "parcel build --no-autoinstall --no-cache"
 	},
 	"dependencies": {
+		"@fontsource-variable/rubik": "^5.0.22",
 		"@sqlite.org/sqlite-wasm": "^3.46.0-build2",
 		"lucide": "^0.399.0",
 		"process": "^0.11.10"
