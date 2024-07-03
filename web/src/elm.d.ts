@@ -25,6 +25,15 @@ declare module "*.elm" {
 			receiveParsedFile: JsToElmPort<unknown>;
 			receiveFileParseError: JsToElmPort<string>;
 			receiveDragEnter: JsToElmPort<FileList | undefined>;
+			sendWakeLockStatusRequest: ElmToJsPort<void>;
+			sendWakeLockAcquireRequest: ElmToJsPort<void>;
+			sendWakeLockReleaseRequest: ElmToJsPort<WakeLockSentinel>;
+			receiveWakeLockState: JsToElmPort<
+				{ type: "NotAvailable" | "RequestingStatus" | "Unlocked" | "AcquiringLock" | "ReleasingLock" } | {
+					type: "Locked";
+					sentinel: WakeLockSentinel;
+				}
+			>;
 		}>;
 	}
 

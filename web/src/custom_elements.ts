@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { createElement, type IconNode, Upload } from "lucide";
+import { createElement, type IconNode, Lock, LockOpen, Upload } from "lucide";
 
 function createLucideCustomElement(icon: IconNode): typeof HTMLElement {
 	return class extends HTMLElement {
@@ -23,3 +23,11 @@ function createLucideCustomElement(icon: IconNode): typeof HTMLElement {
 export const LucideUpload = createLucideCustomElement(Upload);
 
 customElements.define("lucide-upload", LucideUpload);
+
+export const LucideLockOpen = createLucideCustomElement(LockOpen);
+
+customElements.define("lucide-lock-open", LucideLockOpen);
+
+export const LucideLock = createLucideCustomElement(Lock);
+
+customElements.define("lucide-lock", LucideLock);

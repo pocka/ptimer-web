@@ -11,6 +11,8 @@ import Html.Attributes exposing (class)
 import Html.Events
 import Json.Decode
 import Player
+import Player.Menu as Menu
+import Player.Session as Session
 import Ptimer.Ptimer as Ptimer
 
 
@@ -71,12 +73,22 @@ type DragState
 type alias Model =
     { file : TimerFileLoading
     , dragging : DragState
+    , session : Session.Session
     }
 
 
 init : Flags -> ( Model, Cmd Msg )
 init _ =
-    ( { file = NotSelected, dragging = NotDragging }, Cmd.none )
+    let
+        ( session, sessionCmd ) =
+            Session.init
+    in
+    ( { file = NotSelected
+      , dragging = NotDragging
+      , session = session
+      }
+    , Cmd.map SessionMsg sessionCmd
+    )
 
 
 
@@ -91,6 +103,7 @@ type Msg
     | DragEnter
     | DragLeave
     | PlayerMsg Player.Msg
+    | SessionMsg Session.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -131,6 +144,12 @@ update msg model =
 
                 _ ->
                     ( model, Cmd.none )
+
+        SessionMsg subMsg ->
+            Session.update subMsg model.session
+                |> Tuple.mapBoth
+                    (\session -> { model | session = session })
+                    (Cmd.map SessionMsg)
 
         NoOp ->
             ( model, Cmd.none )
@@ -184,7 +203,7 @@ dropDecoder =
 
 
 view : Model -> Browser.Document Msg
-view { file, dragging } =
+view { file, dragging, session } =
     { title = "Timer (web)"
     , body =
         [ case file of
@@ -217,6 +236,7 @@ view { file, dragging } =
 
             NotDragging ->
                 text ""
+        , Menu.view session |> Html.map SessionMsg
         ]
     }
 
@@ -227,25 +247,28 @@ view { file, dragging } =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    case model.file of
-        Loading ->
-            Sub.batch
-                [ receiveParsedFile
-                    (\value ->
-                        case Json.Decode.decodeValue Ptimer.decoder value of
-                            Ok file ->
-                                GotPtimerFile file
+    Sub.batch
+        [ case model.file of
+            Loading ->
+                Sub.batch
+                    [ receiveParsedFile
+                        (\value ->
+                            case Json.Decode.decodeValue Ptimer.decoder value of
+                                Ok file ->
+                                    GotPtimerFile file
 
-                            Err error ->
-                                GotFileParseError (Json.Decode.errorToString error)
-                    )
-                , receiveFileParseError GotFileParseError
-                ]
+                                Err error ->
+                                    GotFileParseError (Json.Decode.errorToString error)
+                        )
+                    , receiveFileParseError GotFileParseError
+                    ]
 
-        Loaded playerModel ->
-            Sub.batch [ receiveDragEnter (\_ -> DragEnter), Player.subscriptions playerModel |> Sub.map PlayerMsg ]
+            Loaded playerModel ->
+                Sub.batch [ receiveDragEnter (\_ -> DragEnter), Player.subscriptions playerModel |> Sub.map PlayerMsg ]
 
-        _ ->
-            Sub.batch
-                [ receiveDragEnter (\_ -> DragEnter)
-                ]
+            _ ->
+                Sub.batch
+                    [ receiveDragEnter (\_ -> DragEnter)
+                    ]
+        , Session.subscriptions model.session |> Sub.map SessionMsg
+        ]

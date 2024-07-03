@@ -167,6 +167,79 @@ async function main() {
 		);
 	});
 
+	app.ports.sendWakeLockStatusRequest.subscribe(() => {
+		if (!navigator.wakeLock) {
+			app.ports.receiveWakeLockState.send({
+				type: "NotAvailable",
+			});
+			return;
+		}
+
+		app.ports.receiveWakeLockState.send({
+			type: "Unlocked",
+		});
+	});
+
+	app.ports.sendWakeLockAcquireRequest.subscribe(async () => {
+		if (!navigator.wakeLock) {
+			app.ports.receiveWakeLockState.send({
+				type: "NotAvailable",
+			});
+			return;
+		}
+
+		app.ports.receiveWakeLockState.send({
+			type: "AcquiringLock",
+		});
+
+		try {
+			const wakeLock = await navigator.wakeLock.request("screen");
+
+			wakeLock.addEventListener("release", () => {
+				app.ports.receiveWakeLockState.send({
+					type: "Unlocked",
+				});
+			}, { once: true });
+
+			app.ports.receiveWakeLockState.send({
+				type: "Locked",
+				sentinel: wakeLock,
+			});
+
+			return;
+		} catch (error) {
+			console.warn("Failed to acquire WakeLock: ", error);
+
+			app.ports.receiveWakeLockState.send({
+				type: "Unlocked",
+			});
+			return;
+		}
+	});
+
+	app.ports.sendWakeLockReleaseRequest.subscribe(async sentinel => {
+		app.ports.receiveWakeLockState.send({
+			type: "ReleasingLock",
+		});
+
+		try {
+			await sentinel.release();
+
+			app.ports.receiveWakeLockState.send({
+				type: "Unlocked",
+			});
+			return;
+		} catch (error) {
+			console.warn("Failed to release WakeLock: ", error);
+
+			app.ports.receiveWakeLockState.send({
+				type: "Locked",
+				sentinel,
+			});
+			return;
+		}
+	});
+
 	worker.addEventListener("message", ev => {
 		if (!isFileLoaderToMainThreadMessage(ev.data)) {
 			console.warn("Illegal message sent by file loader worker.", {

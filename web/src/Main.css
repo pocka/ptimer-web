@@ -5,6 +5,7 @@
  */
 
 @import "./Player.css";
+@import "./Player/Menu.css";
 
 .main--drop-overlay {
 	display: block;
