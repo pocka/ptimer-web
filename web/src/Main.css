@@ -69,6 +69,7 @@
 	border-radius: calc(var(--timer-px-spacing) * 0.5);
 	color: oklch(var(--timer-ui-bg));
 	cursor: pointer;
+	overflow: hidden;
 }
 .main--button:focus-visible, .main--button:has(:focus-visible) {
 	border-color: oklch(var(--timer-highlight));
