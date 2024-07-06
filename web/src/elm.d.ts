@@ -34,6 +34,10 @@ declare module "*.elm" {
 					sentinel: WakeLockSentinel;
 				}
 			>;
+			requestAudioElementPlayback: ElmToJsPort<string>;
+			requestSavePreferences: ElmToJsPort<unknown>;
+			requestLoadPreferences: ElmToJsPort<void>;
+			receiveSavedPreferences: JsToElmPort<unknown>;
 		}>;
 	}
 

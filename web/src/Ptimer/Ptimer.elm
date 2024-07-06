@@ -11,6 +11,7 @@ module Ptimer.Ptimer exposing
     , Step
     , StepAction(..)
     , StepId
+    , assetIdToString
     , decoder
     )
 
@@ -24,6 +25,13 @@ type AssetId
 assetIdDecoder : JD.Decoder AssetId
 assetIdDecoder =
     JD.int |> JD.map AssetId
+
+
+assetIdToString : AssetId -> String
+assetIdToString id =
+    case id of
+        AssetId num ->
+            String.fromInt num
 
 
 type alias Asset =

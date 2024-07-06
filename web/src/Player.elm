@@ -3,14 +3,22 @@
 -- SPDX-License-Identifier: Apache-2.0
 
 
-module Player exposing (Model, Msg, init, subscriptions, update, view)
+port module Player exposing (Model, Msg, init, subscriptions, update, view)
 
 import Html
 import Html.Attributes exposing (class, disabled)
 import Html.Events exposing (onClick)
+import Player.Preferences as Preferences
 import Ptimer.Ptimer as Ptimer
 import Task
 import Time
+
+
+
+-- PORTS
+
+
+port requestAudioElementPlayback : String -> Cmd msg
 
 
 
@@ -53,14 +61,14 @@ type Msg
     | Tick Time.Posix
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Preferences.Model -> Msg -> Model -> ( Model, Cmd Msg )
+update preferences msg model =
     case msg of
         NoOp ->
             ( model, Cmd.none )
 
         Start ->
-            update NextStep model
+            update preferences NextStep model
 
         NextStep ->
             let
@@ -78,12 +86,20 @@ update msg model =
 
                 step :: rest ->
                     ( { model | state = Playing step rest Nothing }
-                    , case step.action of
-                        Ptimer.Timer _ ->
-                            Task.perform Tick Time.now
+                    , Cmd.batch
+                        [ case step.action of
+                            Ptimer.Timer _ ->
+                                Task.perform Tick Time.now
 
-                        _ ->
-                            Cmd.none
+                            _ ->
+                                Cmd.none
+                        , case ( step.sound, preferences.value.audio ) of
+                            ( Just id, Preferences.Unmuted ) ->
+                                requestAudioElementPlayback (assetId id)
+
+                            _ ->
+                                Cmd.none
+                        ]
                     )
 
         Tick now ->
@@ -94,7 +110,7 @@ update msg model =
                             (Time.posixToMillis now - Time.posixToMillis startAt) // 1000
                     in
                     if diff >= duration then
-                        update NextStep model
+                        update preferences NextStep model
 
                     else
                         ( { model | state = Playing step rest (Just (Timer startAt duration (duration - diff))) }
@@ -240,12 +256,44 @@ endScene model =
         ]
 
 
+assetId : Ptimer.AssetId -> String
+assetId id =
+    "player_audio__" ++ Ptimer.assetIdToString id
+
+
 view : Model -> Html.Html Msg
 view model =
     Html.div [ class "player--layout" ]
         [ Html.div
             [ class "player--grid" ]
             (startScene model :: (model.file.steps |> List.map (stepScene model)) ++ [ endScene model ])
+        , Html.div
+            []
+            (model.file.assets
+                |> List.filter
+                    (\asset ->
+                        case asset.mime of
+                            "audio/wav" ->
+                                True
+
+                            "audio/flac" ->
+                                True
+
+                            "audio/mp3" ->
+                                True
+
+                            _ ->
+                                False
+                    )
+                |> List.map
+                    (\asset ->
+                        Html.audio
+                            [ Html.Attributes.id (assetId asset.id)
+                            , Html.Attributes.src asset.url
+                            ]
+                            []
+                    )
+            )
         ]
 
 

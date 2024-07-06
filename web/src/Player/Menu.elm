@@ -3,20 +3,30 @@
 -- SPDX-License-Identifier: Apache-2.0
 
 
-module Player.Menu exposing (view)
+module Player.Menu exposing (Msg(..), view)
 
 import Html
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
+import Player.Preferences as Preferences
 import Player.Session as Session
 import WakeLock
+
+
+
+-- UPDATE
+
+
+type Msg
+    = SessionMsg Session.Msg
+    | PreferencesMsg Preferences.Msg
 
 
 
 -- VIEW
 
 
-wakeLockButton : Session.Session -> Html.Html Session.Msg
+wakeLockButton : Session.Session -> Html.Html Msg
 wakeLockButton session =
     Html.button
         [ class "player-menu--button"
@@ -58,7 +68,7 @@ wakeLockButton session =
                     "Releasing Screen WakeLock"
             )
         , onClick
-            (case session.wakeLock of
+            ((case session.wakeLock of
                 WakeLock.Unlocked ->
                     Session.AcquireWakeLock
 
@@ -67,6 +77,8 @@ wakeLockButton session =
 
                 _ ->
                     Session.NoOp
+             )
+                |> SessionMsg
             )
         ]
         [ Html.node
@@ -85,8 +97,46 @@ wakeLockButton session =
         ]
 
 
-view : Session.Session -> Html.Html Session.Msg
-view session =
+muteButton : Preferences.Model -> Html.Html Msg
+muteButton preferences =
+    Html.button
+        [ class "player-menu--button"
+        , Html.Attributes.title
+            (case preferences.value.audio of
+                Preferences.Muted ->
+                    "Click to unmute"
+
+                Preferences.Unmuted ->
+                    "Click to mute"
+            )
+        , onClick
+            ((case preferences.value.audio of
+                Preferences.Muted ->
+                    Preferences.Unmute
+
+                Preferences.Unmuted ->
+                    Preferences.Mute
+             )
+                |> PreferencesMsg
+            )
+        ]
+        [ Html.node
+            (case preferences.value.audio of
+                Preferences.Muted ->
+                    "lucide-volume-x"
+
+                Preferences.Unmuted ->
+                    "lucide-volume-2"
+            )
+            []
+            []
+        ]
+
+
+view : Session.Session -> Preferences.Model -> Html.Html Msg
+view session preferences =
     Html.div
         [ class "player-menu--root" ]
-        [ wakeLockButton session ]
+        [ wakeLockButton session
+        , muteButton preferences
+        ]

@@ -5,6 +5,7 @@
 import type { CompiledElmNamespaces } from "./Main.elm";
 import { isFileLoaderToMainThreadMessage, type MainThreadToFileLoaderMessage } from "./messages";
 
+const PREFERENCES_STORAGE_KEY = "ptimer_prefrences_v1";
 const SPLASH_MIN_DURATION_MS = 800;
 
 /**
@@ -238,6 +239,36 @@ async function main() {
 			});
 			return;
 		}
+	});
+
+	app.ports.requestAudioElementPlayback.subscribe(id => {
+		const el = document.getElementById(id);
+		if (!el) {
+			console.warn(`AudioElementPlayback: Element (id=${id}) does not exist`);
+			return;
+		}
+
+		if (!(el instanceof HTMLAudioElement)) {
+			console.warn(`AudioElementPlayback: Element (id=${id}) is not a HTMLAudioElement`);
+			return;
+		}
+
+		el.pause();
+		el.currentTime = 0;
+		el.play();
+	});
+
+	app.ports.requestSavePreferences.subscribe(preferences => {
+		localStorage.setItem(PREFERENCES_STORAGE_KEY, JSON.stringify(preferences));
+	});
+
+	app.ports.requestLoadPreferences.subscribe(() => {
+		const item = localStorage.getItem(PREFERENCES_STORAGE_KEY);
+		if (!item) {
+			return;
+		}
+
+		app.ports.receiveSavedPreferences.send(JSON.parse(item));
 	});
 
 	worker.addEventListener("message", ev => {

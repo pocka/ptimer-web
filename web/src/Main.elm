@@ -12,6 +12,7 @@ import Html.Events
 import Json.Decode
 import Player
 import Player.Menu as Menu
+import Player.Preferences as Preferences
 import Player.Session as Session
 import Ptimer.Ptimer as Ptimer
 
@@ -74,6 +75,7 @@ type alias Model =
     { file : TimerFileLoading
     , dragging : DragState
     , session : Session.Session
+    , preferences : Preferences.Model
     }
 
 
@@ -82,12 +84,19 @@ init _ =
     let
         ( session, sessionCmd ) =
             Session.init
+
+        ( preferences, preferencesCmd ) =
+            Preferences.init
     in
     ( { file = NotSelected
       , dragging = NotDragging
       , session = session
+      , preferences = preferences
       }
-    , Cmd.map SessionMsg sessionCmd
+    , Cmd.batch
+        [ Cmd.map SessionMsg sessionCmd
+        , Cmd.map PreferencesMsg preferencesCmd
+        ]
     )
 
 
@@ -104,6 +113,8 @@ type Msg
     | DragLeave
     | PlayerMsg Player.Msg
     | SessionMsg Session.Msg
+    | PreferencesMsg Preferences.Msg
+    | MenuMsg Menu.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -135,7 +146,7 @@ update msg model =
         PlayerMsg subMsg ->
             case model.file of
                 Loaded playerModel ->
-                    Player.update subMsg playerModel
+                    Player.update model.preferences subMsg playerModel
                         |> Tuple.mapBoth
                             (\player -> { model | file = Loaded player })
                             (Cmd.map PlayerMsg)
@@ -148,6 +159,18 @@ update msg model =
                 |> Tuple.mapBoth
                     (\session -> { model | session = session })
                     (Cmd.map SessionMsg)
+
+        PreferencesMsg subMsg ->
+            Preferences.update subMsg model.preferences
+                |> Tuple.mapBoth
+                    (\preferences -> { model | preferences = preferences })
+                    (Cmd.map PreferencesMsg)
+
+        MenuMsg (Menu.SessionMsg subMsg) ->
+            update (SessionMsg subMsg) model
+
+        MenuMsg (Menu.PreferencesMsg subMsg) ->
+            update (PreferencesMsg subMsg) model
 
         NoOp ->
             ( model, Cmd.none )
@@ -201,7 +224,7 @@ dropDecoder =
 
 
 view : Model -> Browser.Document Msg
-view { file, dragging, session } =
+view { file, dragging, session, preferences } =
     { title = "Timer (web)"
     , body =
         [ case file of
@@ -234,7 +257,7 @@ view { file, dragging, session } =
 
             NotDragging ->
                 text ""
-        , Menu.view session |> Html.map SessionMsg
+        , Menu.view session preferences |> Html.map MenuMsg
         ]
     }
 
@@ -269,4 +292,5 @@ subscriptions model =
                     [ receiveDragEnter (\_ -> DragEnter)
                     ]
         , Session.subscriptions model.session |> Sub.map SessionMsg
+        , Preferences.subscriptions model.preferences |> Sub.map PreferencesMsg
         ]
