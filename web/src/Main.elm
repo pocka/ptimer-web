@@ -118,11 +118,10 @@ update msg model =
                     ( { model | file = Loading, dragging = NotDragging }, sendSelectedFile file )
 
         GotPtimerFile file ->
-            let
-                ( playerModel, playerCmd ) =
-                    Player.init file
-            in
-            ( { model | file = Loaded playerModel }, Cmd.map PlayerMsg playerCmd )
+            Player.init file
+                |> Tuple.mapBoth
+                    (\player -> { model | file = Loaded player })
+                    (Cmd.map PlayerMsg)
 
         GotFileParseError error ->
             ( { model | file = FailedToLoad error }, Cmd.none )
@@ -136,11 +135,10 @@ update msg model =
         PlayerMsg subMsg ->
             case model.file of
                 Loaded playerModel ->
-                    let
-                        ( nextModel, cmd ) =
-                            Player.update subMsg playerModel
-                    in
-                    ( { model | file = Loaded nextModel }, Cmd.map PlayerMsg cmd )
+                    Player.update subMsg playerModel
+                        |> Tuple.mapBoth
+                            (\player -> { model | file = Loaded player })
+                            (Cmd.map PlayerMsg)
 
                 _ ->
                     ( model, Cmd.none )
