@@ -164,7 +164,7 @@ func readAndSave(dbPath string, outdir string) error {
 		Assets:   assets,
 	}
 
-	timerJson, err := json.Marshal(file)
+	timerJson, err := json.MarshalIndent(file, "", "  ")
 	if err != nil {
 		return fmt.Errorf("Failed to generate JSON data: %s", err)
 	}
