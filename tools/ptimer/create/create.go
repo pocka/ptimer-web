@@ -80,7 +80,7 @@ func Command() *cobra.Command {
 				return err
 			}
 
-			if _, err := os.Stat(outPath); err == nil || os.IsNotExist(err) {
+			if _, err := os.Stat(outPath); err == nil {
 				if err := os.Remove(outPath); err != nil {
 					return fmt.Errorf("Failed to clean target file: %s", err)
 				}
