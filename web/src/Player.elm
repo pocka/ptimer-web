@@ -163,7 +163,7 @@ startScene model =
                 Html.text ""
         , spacer
         , Html.button
-            [ class "main--button"
+            [ class "shared--button"
             , case model.state of
                 NotStarted ->
                     onClick Start
@@ -219,7 +219,7 @@ stepScene model step =
 
             Ptimer.UserInteraction ->
                 Html.button
-                    [ class "main--button"
+                    [ class "shared--button"
                     , if isCurrent then
                         onClick NextStep
 
@@ -244,7 +244,7 @@ endScene model =
         [ Html.p [ class "player--title" ] [ Html.text "Completed" ]
         , spacer
         , Html.button
-            [ class "main--button"
+            [ class "shared--button"
             , case model.state of
                 Completed ->
                     onClick Reset

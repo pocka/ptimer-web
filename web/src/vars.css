@@ -33,7 +33,7 @@
 		--timer-highlight-hue
 	);
 
-	--timer-ring-size: 2px;
+	--timer-ring-size: 3px;
 	--timer-ring-alpha: 28%;
 
 	--timer-px-spacing: 8px;

@@ -3,7 +3,7 @@
 -- SPDX-License-Identifier: Apache-2.0
 
 
-port module Main exposing (main)
+module Main exposing (main)
 
 import Browser
 import Html exposing (div, input, label, p, text)
@@ -14,7 +14,9 @@ import Player
 import Player.Menu as Menu
 import Player.Preferences as Preferences
 import Player.Session as Session
+import Ptimer.Parser
 import Ptimer.Ptimer as Ptimer
+import UI.DropZone as DropZone
 
 
 
@@ -37,22 +39,6 @@ main =
 
 type alias Flags =
     ()
-
-
-
--- PORTS
-
-
-port sendSelectedFile : Json.Decode.Value -> Cmd msg
-
-
-port receiveParsedFile : (Json.Decode.Value -> msg) -> Sub msg
-
-
-port receiveFileParseError : (String -> msg) -> Sub msg
-
-
-port receiveDragEnter : (Json.Decode.Value -> msg) -> Sub msg
 
 
 
@@ -126,7 +112,7 @@ update msg model =
                     ( model, Cmd.none )
 
                 _ ->
-                    ( { model | file = Loading, dragging = NotDragging }, sendSelectedFile file )
+                    ( { model | file = Loading, dragging = NotDragging }, Ptimer.Parser.request file )
 
         GotPtimerFile file ->
             Player.init file
@@ -193,10 +179,9 @@ filePickerScene disabled children =
         [ class "main--file-picker-scene" ]
         [ div [ class "main--file-picker-scene--slot" ] children
         , label
-            [ class "main--button" ]
+            [ class "shared--button" ]
             [ input
-                [ class "main--file-picker--input"
-                , Html.Attributes.type_ "file"
+                [ Html.Attributes.type_ "file"
                 , Html.Events.on
                     "change"
                     (Json.Decode.map SelectFile fileDecoder)
@@ -206,21 +191,6 @@ filePickerScene disabled children =
             , text "Open .ptimer file"
             ]
         ]
-
-
-dropOverlay : List (Html.Attribute msg) -> Html.Html msg
-dropOverlay attrs =
-    div
-        (class "main--drop-overlay" :: attrs)
-        [ Html.node "lucide-upload" [ class "main--drop-overlay--icon" ] []
-        , p [ class "main--drop-overlay--desc" ] [ text "Drop .ptimer file to open" ]
-        ]
-
-
-dropDecoder : Json.Decode.Decoder Json.Decode.Value
-dropDecoder =
-    Json.Decode.at [ "dataTransfer", "files" ]
-        (Json.Decode.index 0 Json.Decode.value)
 
 
 view : Model -> Browser.Document Msg
@@ -250,10 +220,11 @@ view { file, dragging, session, preferences } =
                 Html.map PlayerMsg (Player.view playerModel)
         , case dragging of
             Dragging ->
-                dropOverlay
-                    [ Html.Events.preventDefaultOn "dragleave" (Json.Decode.succeed ( DragLeave, True ))
-                    , Html.Events.preventDefaultOn "drop" (Json.Decode.map (\value -> ( SelectFile value, True )) dropDecoder)
+                DropZone.view
+                    [ DropZone.onDragLeave DragLeave
+                    , DropZone.onDrop SelectFile
                     ]
+                    [ text "Drop .ptimer file to open" ]
 
             NotDragging ->
                 text ""
@@ -271,26 +242,27 @@ subscriptions model =
     Sub.batch
         [ case model.file of
             Loading ->
-                Sub.batch
-                    [ receiveParsedFile
-                        (\value ->
-                            case Json.Decode.decodeValue Ptimer.decoder value of
-                                Ok file ->
-                                    GotPtimerFile file
+                Ptimer.Parser.onReceiveParseResult
+                    (\result ->
+                        case result of
+                            Ok file ->
+                                GotPtimerFile file
 
-                                Err error ->
-                                    GotFileParseError (Json.Decode.errorToString error)
-                        )
-                    , receiveFileParseError GotFileParseError
-                    ]
+                            Err (Ptimer.Parser.DecodeError error) ->
+                                GotFileParseError (Json.Decode.errorToString error)
+
+                            Err (Ptimer.Parser.FormatError error) ->
+                                GotFileParseError error
+                    )
 
             Loaded playerModel ->
-                Sub.batch [ receiveDragEnter (\_ -> DragEnter), Player.subscriptions playerModel |> Sub.map PlayerMsg ]
+                Sub.batch
+                    [ DropZone.onDragEnter DragEnter
+                    , Player.subscriptions playerModel |> Sub.map PlayerMsg
+                    ]
 
             _ ->
-                Sub.batch
-                    [ receiveDragEnter (\_ -> DragEnter)
-                    ]
+                DropZone.onDragEnter DragEnter
         , Session.subscriptions model.session |> Sub.map SessionMsg
         , Preferences.subscriptions model.preferences |> Sub.map PreferencesMsg
         ]

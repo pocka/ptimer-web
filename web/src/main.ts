@@ -3,7 +3,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { CompiledElmNamespaces } from "./Main.elm";
-import { isFileLoaderToMainThreadMessage, type MainThreadToFileLoaderMessage } from "./messages";
+
+import { createParser } from "./Ptimer/Parser";
+import { listenForDropZoneEvents } from "./UI/DropZone";
 
 const PREFERENCES_STORAGE_KEY = "ptimer_prefrences_v1";
 const SPLASH_MIN_DURATION_MS = 800;
@@ -24,41 +26,6 @@ async function loadElm(): Promise<CompiledElmNamespaces> {
 	const { Elm } = await import("./Main.elm");
 
 	return Elm;
-}
-
-async function loadWorker(): Promise<Worker> {
-	const worker = new Worker(
-		new URL("workers/file_loader.ts", import.meta.url),
-		{ type: "module" },
-	);
-
-	return new Promise((resolve, reject) => {
-		const listener = (ev: MessageEvent) => {
-			if (!isFileLoaderToMainThreadMessage(ev.data)) {
-				console.warn("Illegal message sent by file loader worker.", {
-					message: ev.data,
-				});
-				return;
-			}
-
-			if (ev.data.type !== "ready") {
-				console.warn("Unexpected worker message received before ready message", {
-					message: ev.data,
-				});
-				return;
-			}
-
-			resolve(worker);
-			worker.removeEventListener("message", listener);
-			return;
-		};
-
-		worker.addEventListener("message", listener);
-
-		worker.addEventListener("error", ev => {
-			reject(ev.error);
-		});
-	});
 }
 
 function showError(error: unknown, label?: string): void {
@@ -120,13 +87,13 @@ async function runTask<T>(task: Promise<T>, { statusID, name }: TaskOptions): Pr
 }
 
 async function main() {
-	const [, Elm, worker] = await Promise.all([
+	const [, Elm, parser] = await Promise.all([
 		splashMinDuration(),
 		runTask(loadElm(), {
 			statusID: "splash_core",
 			name: "Application Core",
 		}),
-		runTask(loadWorker(), {
+		runTask(createParser(), {
 			statusID: "splash_db",
 			name: "Database Engine",
 		}),
@@ -144,29 +111,9 @@ async function main() {
 
 	const app = Elm.Main.init();
 
-	window.addEventListener("dragenter", ev => {
-		ev.preventDefault();
+	listenForDropZoneEvents(app);
 
-		app.ports.receiveDragEnter.send(ev.dataTransfer?.files);
-	}, { capture: true });
-
-	window.addEventListener("dragover", ev => {
-		ev.preventDefault();
-	}, { capture: true });
-
-	app.ports.sendSelectedFile.subscribe(async file => {
-		const stream = file.stream();
-
-		worker.postMessage(
-			{
-				type: "file_parse_request",
-				data: stream,
-			} satisfies MainThreadToFileLoaderMessage,
-			{
-				transfer: [stream],
-			},
-		);
-	});
+	parser.listen(app);
 
 	app.ports.sendWakeLockStatusRequest.subscribe(() => {
 		if (!navigator.wakeLock) {
@@ -269,27 +216,6 @@ async function main() {
 		}
 
 		app.ports.receiveSavedPreferences.send(JSON.parse(item));
-	});
-
-	worker.addEventListener("message", ev => {
-		if (!isFileLoaderToMainThreadMessage(ev.data)) {
-			console.warn("Illegal message sent by file loader worker.", {
-				message: ev.data,
-			});
-			return;
-		}
-
-		switch (ev.data.type) {
-			case "file_parsed":
-				app.ports.receiveParsedFile.send(ev.data.file);
-				return;
-			case "file_parse_error":
-				console.warn(ev.data.error);
-				app.ports.receiveFileParseError.send(
-					ev.data.error instanceof Error ? ev.data.error.message : String(ev.data.error),
-				);
-				return;
-		}
 	});
 }
 

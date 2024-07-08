@@ -11,6 +11,29 @@ interface JsToElmPort<Payload> {
 }
 
 declare module "*.elm" {
+	interface UIDropZonePorts {
+		uiDropZoneReceiveDragEnter: JsToElmPort<FileList | undefined>;
+	}
+
+	interface PtimerParserPorts {
+		ptimerParserRequestParse: ElmToJsPort<File>;
+		ptimerParserReceiveParsedFile: JsToElmPort<unknown>;
+		ptimerParserReceiveParseError: JsToElmPort<string>;
+	}
+
+	interface BuilderBuilderPorts {
+		builderBuilderRequestFileUrl: ElmToJsPort<File>;
+		builderBuilderReceiveFileUrl: JsToElmPort<{
+			url: string;
+			mime: string;
+			name: string;
+		}>;
+		builderBuilderRequestReleaseObjectUrl: ElmToJsPort<string>;
+		builderBuilderRequestCompile: ElmToJsPort<unknown>;
+		builderBuilderReceiveCompiledFile: JsToElmPort<string>;
+		builderBuilderReceiveCompileError: JsToElmPort<string>;
+	}
+
 	interface ElmApp<Ports> {
 		ports: Ports;
 	}
@@ -20,25 +43,38 @@ declare module "*.elm" {
 	}
 
 	interface CompiledElmNamespaces {
-		Main: ElmDocumentProgram<{
-			sendSelectedFile: ElmToJsPort<File>;
-			receiveParsedFile: JsToElmPort<unknown>;
-			receiveFileParseError: JsToElmPort<string>;
-			receiveDragEnter: JsToElmPort<FileList | undefined>;
-			sendWakeLockStatusRequest: ElmToJsPort<void>;
-			sendWakeLockAcquireRequest: ElmToJsPort<void>;
-			sendWakeLockReleaseRequest: ElmToJsPort<WakeLockSentinel>;
-			receiveWakeLockState: JsToElmPort<
-				{ type: "NotAvailable" | "RequestingStatus" | "Unlocked" | "AcquiringLock" | "ReleasingLock" } | {
-					type: "Locked";
-					sentinel: WakeLockSentinel;
+		Main: ElmDocumentProgram<
+			& {
+				sendWakeLockStatusRequest: ElmToJsPort<void>;
+				sendWakeLockAcquireRequest: ElmToJsPort<void>;
+				sendWakeLockReleaseRequest: ElmToJsPort<WakeLockSentinel>;
+				receiveWakeLockState: JsToElmPort<
+					{ type: "NotAvailable" | "RequestingStatus" | "Unlocked" | "AcquiringLock" | "ReleasingLock" } | {
+						type: "Locked";
+						sentinel: WakeLockSentinel;
+					}
+				>;
+				requestAudioElementPlayback: ElmToJsPort<string>;
+				requestSavePreferences: ElmToJsPort<unknown>;
+				requestLoadPreferences: ElmToJsPort<void>;
+				receiveSavedPreferences: JsToElmPort<unknown>;
+			}
+			& UIDropZonePorts
+			& PtimerParserPorts
+		>;
+
+		BuilderApp: {
+			Main: ElmDocumentProgram<
+				& {
+					builderRequestInitializingFileLoader: ElmToJsPort<void>;
+					builderReceiveFileLoader: JsToElmPort<null>;
+					builderReceiveFileLoaderInitializeError: JsToElmPort<string>;
 				}
+				& UIDropZonePorts
+				& PtimerParserPorts
+				& BuilderBuilderPorts
 			>;
-			requestAudioElementPlayback: ElmToJsPort<string>;
-			requestSavePreferences: ElmToJsPort<unknown>;
-			requestLoadPreferences: ElmToJsPort<void>;
-			receiveSavedPreferences: JsToElmPort<unknown>;
-		}>;
+		};
 	}
 
 	export const Elm: CompiledElmNamespaces;

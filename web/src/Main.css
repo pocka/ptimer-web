@@ -4,34 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+@import "./shared.css";
 @import "./Player.css";
 @import "./Player/Menu.css";
-
-.main--drop-overlay {
-	display: block;
-	position: fixed;
-	inset: 0;
-	padding: calc(var(--timer-px-spacing) * 2);
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	gap: var(--timer-px-spacing);
-
-	background-color: oklch(var(--timer-ui-bg) / 80%);
-}
-.main--drop-overlay * {
-	pointer-events: none;
-}
-
-.main--drop-overlay--icon {
-	font-size: 2rem;
-}
-
-.main--drop-overlay--desc {
-	font-size: 1.2rem;
-	font-weight: bold;
-}
+@import "./UI/DropZone.css";
 
 .main--file-picker-scene {
 	position: absolute;
@@ -46,89 +22,6 @@
 .main--file-picker-scene--slot {
 	display: block;
 	min-height: 2rem;
-}
-
-@keyframes ripple {
-	from {
-		opacity: 1;
-		transform: scale(0);
-	}
-
-	to {
-		opacity: 0;
-		transform: scale(1);
-	}
-}
-
-.main--button {
-	position: relative;
-	padding: var(--timer-px-spacing) calc(var(--timer-px-spacing) * 1.5);
-	border: 1px solid oklch(var(--timer-ui-fg));
-	font-size: 1rem;
-
-	background-color: oklch(var(--timer-ui-fg));
-	border-radius: calc(var(--timer-px-spacing) * 0.5);
-	color: oklch(var(--timer-ui-bg));
-	cursor: pointer;
-	overflow: hidden;
-}
-.main--button:focus-visible, .main--button:has(:focus-visible) {
-	border-color: oklch(var(--timer-highlight));
-	box-shadow: 0 0 0 var(--timer-ring-size) oklch(var(--timer-highlight) / var(--timer-ring-alpha));
-}
-.main--button::before, .main--button::after {
-	content: "";
-	position: absolute;
-
-	pointer-events: none;
-
-	opacity: 0;
-}
-.main--button::before {
-	inset: 0;
-
-	background-color: oklch(var(--timer-ui-bg) / 5%);
-}
-.main--button::after {
-	inset: 0;
-	margin: auto;
-	aspect-ratio: 1 / 1;
-
-	background-color: oklch(var(--timer-ui-bg) / 20%);
-	border-radius: 50%;
-}
-.main--button:hover::before {
-	opacity: 1;
-}
-.main--button:active::after {
-	animation: ripple 0.2s ease-out;
-}
-.main--button:active {
-	transform: scale(0.99);
-}
-.main--button:disabled, .main--button:has(:disabled) {
-	background-color: oklch(var(--timer-ui-fg) / 0.5);
-	border-color: oklch(var(--timer-ui-fg) / 0.2);
-	color: oklch(var(--timer-ui-bg) / 0.4);
-	cursor: not-allowed;
-
-	transform: none;
-}
-.main--button:disabled::before,
-.main--button:has(:disabled)::before,
-.main--button:disabled::after,
-.main--button:has(:disabled)::after {
-	display: none;
-}
-
-.main--file-picker--input {
-	position: absolute;
-	width: 0;
-	height: 0;
-	top: 0;
-	left: 0;
-
-	opacity: 0;
 }
 
 .main--loading {
