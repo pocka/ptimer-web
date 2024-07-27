@@ -23,7 +23,9 @@ const (
 
 func main() {
 	if err := os.Remove("sample.ptimer"); err != nil {
-		log.Fatal(err)
+		if !os.IsNotExist(err) {
+			log.Fatal(err)
+		}
 	}
 
 	db, err := sql.Open("sqlite", "sample.ptimer")
