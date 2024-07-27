@@ -3,3 +3,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 declare module "*.css" {}
+
+declare module "bundle-text:*" {
+	const contents: string;
+	export default contents;
+}
