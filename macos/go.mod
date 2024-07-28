@@ -2,11 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+module github.com/pocka/ptimer
+
 go 1.22.4
 
-use (
-	./macos
-	./sql
-	./tools/ptimer
-	./tools/sample-file-generator
-)
+require github.com/progrium/darwinkit v0.5.0
