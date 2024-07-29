@@ -22,7 +22,7 @@
 	"exec": {
 		"commands": [
 			{
-				"command": "bunx elm-format --stdin",
+				"command": "npx elm-format --stdin",
 				"exts": ["elm"]
 			},
 			{
