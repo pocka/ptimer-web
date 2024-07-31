@@ -9,7 +9,9 @@
 default: ptimer.app/Contents/MacOS/ptimer
 
 
-ptimer.app/Contents/MacOS/ptimer: *.go go.mod go.sum
+GO_FILES = $(shell find . -type f -name "*.go")
+
+ptimer.app/Contents/MacOS/ptimer: $(GO_FILES) go.mod go.sum
 	CGO_LDFLAGS="-Wl,-no_warn_duplicate_libraries" go build -o $@
 
 
