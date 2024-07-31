@@ -14,32 +14,23 @@ import (
 	"github.com/progrium/darwinkit/objc"
 
 	"github.com/pocka/ptimer/ptimer"
+	"github.com/pocka/ptimer/widget/wizard"
 )
 
 type state interface {
 	Render(timer *ptimer.Ptimer, moveTo func(state)) appkit.IView
+
+	Terminate()
 }
 
 type beforeStart struct{}
 
 func (s *beforeStart) Render(timer *ptimer.Ptimer, moveTo func(state)) appkit.IView {
-	title := appkit.TextField_WrappingLabelWithString(timer.Metadata.Title)
-	title.SetControlSize(appkit.ControlSizeLarge)
-	title.SetFont(appkit.Font_BoldSystemFontOfSize(16))
-
-	view := appkit.StackView_StackViewWithViews([]appkit.IView{title})
-	view.SetOrientation(appkit.UserInterfaceLayoutOrientationVertical)
-	view.SetDistribution(appkit.StackViewDistributionFill)
-	view.SetAlignment(appkit.LayoutAttributeLeading)
-	view.SetSpacing(8)
+	w := wizard.New(timer.Metadata.Title)
 
 	if timer.Metadata.Description != nil {
-		description := appkit.TextField_WrappingLabelWithString(*timer.Metadata.Description)
-		view.AddArrangedSubview(description)
+		w.SetDescription(*timer.Metadata.Description)
 	}
-
-	padding := appkit.NewView()
-	view.AddArrangedSubview(padding)
 
 	next := appkit.NewButtonWithTitle("Start")
 	next.SetKeyEquivalent("\r")
@@ -51,43 +42,64 @@ func (s *beforeStart) Render(timer *ptimer.Ptimer, moveTo func(state)) appkit.IV
 			moveTo(&allStepsDone{})
 		}
 	})
+	w.AddAction(&next)
 
-	actions := appkit.StackView_StackViewWithViews([]appkit.IView{next})
-	actions.SetOrientation(appkit.UserInterfaceLayoutOrientationHorizontal)
-	actions.SetAlignment(appkit.LayoutAttributeTrailing)
-	view.AddArrangedSubview(actions)
-
-	return &view
+	return w.Render()
 }
+
+func (s *beforeStart) Terminate() {}
 
 type playing struct {
 	stepIndex uint
+
+	timer *foundation.Timer
 }
 
 func (s *playing) Render(timer *ptimer.Ptimer, moveTo func(state)) appkit.IView {
-	children := make([]appkit.IView, 0, 3)
+	if s.stepIndex >= uint(len(timer.Steps)) {
+		w := wizard.New("Illegal step reached")
 
-	if s.stepIndex < uint(len(timer.Steps)) {
-		step := timer.Steps[s.stepIndex]
+		next := appkit.NewButtonWithTitle("Done")
+		next.SetKeyEquivalent("\r")
+		next.SetControlSize(appkit.ControlSizeLarge)
+		action.Set(next, func(sender objc.Object) {
+			moveTo(&beforeStart{})
+		})
+		w.AddAction(&next)
 
-		title := appkit.TextField_WrappingLabelWithString(step.Title)
-		title.SetControlSize(appkit.ControlSizeLarge)
-		title.SetFont(appkit.Font_BoldSystemFontOfSize(16))
+		return w.Render()
+	}
 
-		children = append(children, title)
+	step := timer.Steps[s.stepIndex]
 
-		if step.Description != nil {
-			description := appkit.TextField_WrappingLabelWithString(*step.Description)
-			children = append(children, description)
-		}
+	w := wizard.New(step.Title)
 
-		var actionsChildren appkit.IView
+	if step.Description != nil {
+		w.SetDescription(*step.Description)
+	}
 
-		if step.DurationSeconds == nil {
-			next := appkit.NewButtonWithTitle("Next")
-			next.SetKeyEquivalent("\r")
-			next.SetControlSize(appkit.ControlSizeLarge)
-			action.Set(next, func(sender objc.Object) {
+	if step.DurationSeconds == nil {
+		next := appkit.NewButtonWithTitle("Next")
+		next.SetKeyEquivalent("\r")
+		next.SetControlSize(appkit.ControlSizeLarge)
+		action.Set(next, func(sender objc.Object) {
+			nextIndex := s.stepIndex + 1
+
+			if nextIndex >= uint(len(timer.Steps)) {
+				moveTo(&allStepsDone{})
+			} else {
+				moveTo(&playing{stepIndex: nextIndex})
+			}
+		})
+		w.AddAction(&next)
+	} else {
+		next := appkit.TextField_WrappingLabelWithString(fmt.Sprintf("Wait for %d seconds", *step.DurationSeconds))
+		w.AddAction(&next)
+
+		t := foundation.Timer_ScheduledTimerWithTimeIntervalRepeatsBlock(
+			foundation.TimeInterval(*step.DurationSeconds),
+			false,
+			func(t foundation.Timer) {
 				nextIndex := s.stepIndex + 1
 
 				if nextIndex >= uint(len(timer.Steps)) {
@@ -95,80 +107,49 @@ func (s *playing) Render(timer *ptimer.Ptimer, moveTo func(state)) appkit.IView 
 				} else {
 					moveTo(&playing{stepIndex: nextIndex})
 				}
-			})
-
-			actionsChildren = next
-		} else {
-			next := appkit.TextField_WrappingLabelWithString(fmt.Sprintf("Wait for %d seconds", *step.DurationSeconds))
-
-			t := foundation.Timer_ScheduledTimerWithTimeIntervalRepeatsBlock(
-				foundation.TimeInterval(*step.DurationSeconds),
-				false,
-				func(t foundation.Timer) {
-					nextIndex := s.stepIndex + 1
-
-					if nextIndex >= uint(len(timer.Steps)) {
-						moveTo(&allStepsDone{})
-					} else {
-						moveTo(&playing{stepIndex: nextIndex})
-					}
-				},
-			)
-			objc.Retain(&t)
-
-			actionsChildren = next
-		}
-
-		actions := appkit.StackView_StackViewWithViews([]appkit.IView{actionsChildren})
-		actions.SetOrientation(appkit.UserInterfaceLayoutOrientationHorizontal)
-		actions.SetAlignment(appkit.LayoutAttributeTrailing)
-
-		children = append(children, actions)
-	} else {
-		text := appkit.TextField_WrappingLabelWithString("Illegal step reached")
-		children = append(children, text)
+			},
+		)
+		objc.Retain(&t)
+		s.timer = &t
 	}
 
-	view := appkit.StackView_StackViewWithViews(children)
-	view.SetOrientation(appkit.UserInterfaceLayoutOrientationVertical)
-	view.SetDistribution(appkit.StackViewDistributionFill)
-	view.SetAlignment(appkit.LayoutAttributeLeading)
-	view.SetSpacing(8)
+	return w.Render()
+}
 
-	return &view
+func (s *playing) Terminate() {
+	if s == nil {
+		return
+	}
+
+	if s.timer != nil {
+		s.timer.Invalidate()
+		s.timer = nil
+	}
 }
 
 type allStepsDone struct{}
 
 func (s *allStepsDone) Render(timer *ptimer.Ptimer, moveTo func(state)) appkit.IView {
-	title := appkit.TextField_WrappingLabelWithString("Completed")
-	title.SetControlSize(appkit.ControlSizeLarge)
-	title.SetFont(appkit.Font_BoldSystemFontOfSize(16))
+	w := wizard.New("Completed")
+	w.SetDescription("All steps completed.")
 
-	next := appkit.NewButtonWithTitle("Back to start")
+	next := appkit.NewButtonWithTitle("Done")
 	next.SetKeyEquivalent("\r")
 	next.SetControlSize(appkit.ControlSizeLarge)
 	action.Set(next, func(sender objc.Object) {
 		moveTo(&beforeStart{})
 	})
+	w.AddAction(&next)
 
-	actions := appkit.StackView_StackViewWithViews([]appkit.IView{next})
-	actions.SetOrientation(appkit.UserInterfaceLayoutOrientationHorizontal)
-	actions.SetAlignment(appkit.LayoutAttributeTrailing)
-
-	view := appkit.StackView_StackViewWithViews([]appkit.IView{title, actions})
-	view.SetOrientation(appkit.UserInterfaceLayoutOrientationVertical)
-	view.SetDistribution(appkit.StackViewDistributionFill)
-	view.SetAlignment(appkit.LayoutAttributeLeading)
-	view.SetSpacing(8)
-
-	return &view
+	return w.Render()
 }
+
+func (s *allStepsDone) Terminate() {}
 
 type playerScene struct {
 	ptimer *ptimer.Ptimer
 
-	window appkit.Window
+	window *appkit.Window
 
 	state state
 
@@ -176,8 +157,15 @@ type playerScene struct {
 }
 
 func (s *playerScene) Terminate() {
-	s.isTerminated = true
-	s.window.Close()
+	if s == nil {
+		return
+	}
+
+	if !s.isTerminated {
+		s.state.Terminate()
+		s.isTerminated = true
+		s.window.Close()
+	}
 }
 
 func (s *playerScene) update() {
@@ -186,6 +174,7 @@ func (s *playerScene) update() {
 	}
 
 	view := s.state.Render(s.ptimer, func(to state) {
+		s.state.Terminate()
 		s.state = to
 		s.update()
 	})
@@ -207,7 +196,7 @@ func New(timer *ptimer.Ptimer) *playerScene {
 	window.SetTitle(fmt.Sprintf("%s - Ptimer", timer.Metadata.Title))
 
 	scene := playerScene{
-		window:       window,
+		window:       &window,
 		ptimer:       timer,
 		state:        &beforeStart{},
 		isTerminated: false,

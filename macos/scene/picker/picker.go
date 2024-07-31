@@ -36,7 +36,7 @@ func DisplayOrIgnorePickerError(err error) {
 }
 
 type pickerScene struct {
-	window appkit.Window
+	window *appkit.Window
 }
 
 func (s *pickerScene) Terminate() {
@@ -79,7 +79,7 @@ func New(onPick func(timer *ptimer.Ptimer)) *pickerScene {
 	window.Center()
 
 	return &pickerScene{
-		window: window,
+		window: &window,
 	}
 }
 
