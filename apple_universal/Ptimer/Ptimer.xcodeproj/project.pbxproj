@@ -14,24 +14,8 @@
 		C36E73E82C5A348700A22F01 /* FilePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36E73E72C5A348700A22F01 /* FilePickerView.swift */; };
 		C3A8A7EE2C5A4D30001E28F5 /* Ptimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3A8A7ED2C5A4D30001E28F5 /* Ptimer.swift */; };
 		C3A8A7F12C5A4F63001E28F5 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = C3A8A7F02C5A4F63001E28F5 /* SQLite */; };
+		C3E1F6382C5BA4300027AB0E /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3E1F6372C5BA4300027AB0E /* PlayerView.swift */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		C36E64452C4FBB9F008479BF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C36E642B2C4FBB9D008479BF /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = C36E64322C4FBB9D008479BF;
-			remoteInfo = Ptimer;
-		};
-		C36E644F2C4FBB9F008479BF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C36E642B2C4FBB9D008479BF /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = C36E64322C4FBB9D008479BF;
-			remoteInfo = Ptimer;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		C36E64332C4FBB9D008479BF /* Ptimer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ptimer.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -40,11 +24,10 @@
 		C36E643A2C4FBB9E008479BF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C36E643C2C4FBB9E008479BF /* Ptimer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Ptimer.entitlements; sourceTree = "<group>"; };
 		C36E643E2C4FBB9E008479BF /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		C36E64442C4FBB9F008479BF /* PtimerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PtimerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		C36E644E2C4FBB9F008479BF /* PtimerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PtimerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C36E73E72C5A348700A22F01 /* FilePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilePickerView.swift; sourceTree = "<group>"; };
 		C39A57A52C506FF800C55450 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		C3A8A7ED2C5A4D30001E28F5 /* Ptimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ptimer.swift; sourceTree = "<group>"; };
+		C3E1F6372C5BA4300027AB0E /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,20 +36,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				C3A8A7F12C5A4F63001E28F5 /* SQLite in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C36E64412C4FBB9F008479BF /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C36E644B2C4FBB9F008479BF /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -86,8 +55,6 @@
 			isa = PBXGroup;
 			children = (
 				C36E64332C4FBB9D008479BF /* Ptimer.app */,
-				C36E64442C4FBB9F008479BF /* PtimerTests.xctest */,
-				C36E644E2C4FBB9F008479BF /* PtimerUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -102,6 +69,7 @@
 				C36E643C2C4FBB9E008479BF /* Ptimer.entitlements */,
 				C36E643D2C4FBB9E008479BF /* Preview Content */,
 				C36E73E72C5A348700A22F01 /* FilePickerView.swift */,
+				C3E1F6372C5BA4300027AB0E /* PlayerView.swift */,
 			);
 			path = Ptimer;
 			sourceTree = "<group>";
@@ -137,42 +105,6 @@
 			productReference = C36E64332C4FBB9D008479BF /* Ptimer.app */;
 			productType = "com.apple.product-type.application";
 		};
-		C36E64432C4FBB9F008479BF /* PtimerTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = C36E645B2C4FBB9F008479BF /* Build configuration list for PBXNativeTarget "PtimerTests" */;
-			buildPhases = (
-				C36E64402C4FBB9F008479BF /* Sources */,
-				C36E64412C4FBB9F008479BF /* Frameworks */,
-				C36E64422C4FBB9F008479BF /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				C36E64462C4FBB9F008479BF /* PBXTargetDependency */,
-			);
-			name = PtimerTests;
-			productName = PtimerTests;
-			productReference = C36E64442C4FBB9F008479BF /* PtimerTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		C36E644D2C4FBB9F008479BF /* PtimerUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = C36E645E2C4FBB9F008479BF /* Build configuration list for PBXNativeTarget "PtimerUITests" */;
-			buildPhases = (
-				C36E644A2C4FBB9F008479BF /* Sources */,
-				C36E644B2C4FBB9F008479BF /* Frameworks */,
-				C36E644C2C4FBB9F008479BF /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				C36E64502C4FBB9F008479BF /* PBXTargetDependency */,
-			);
-			name = PtimerUITests;
-			productName = PtimerUITests;
-			productReference = C36E644E2C4FBB9F008479BF /* PtimerUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -185,14 +117,6 @@
 				TargetAttributes = {
 					C36E64322C4FBB9D008479BF = {
 						CreatedOnToolsVersion = 15.4;
-					};
-					C36E64432C4FBB9F008479BF = {
-						CreatedOnToolsVersion = 15.4;
-						TestTargetID = C36E64322C4FBB9D008479BF;
-					};
-					C36E644D2C4FBB9F008479BF = {
-						CreatedOnToolsVersion = 15.4;
-						TestTargetID = C36E64322C4FBB9D008479BF;
 					};
 				};
 			};
@@ -213,8 +137,6 @@
 			projectRoot = "";
 			targets = (
 				C36E64322C4FBB9D008479BF /* Ptimer */,
-				C36E64432C4FBB9F008479BF /* PtimerTests */,
-				C36E644D2C4FBB9F008479BF /* PtimerUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -229,20 +151,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C36E64422C4FBB9F008479BF /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C36E644C2C4FBB9F008479BF /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -253,38 +161,12 @@
 				C3A8A7EE2C5A4D30001E28F5 /* Ptimer.swift in Sources */,
 				C36E64392C4FBB9D008479BF /* ContentView.swift in Sources */,
 				C36E64372C4FBB9D008479BF /* PtimerApp.swift in Sources */,
+				C3E1F6382C5BA4300027AB0E /* PlayerView.swift in Sources */,
 				C36E73E82C5A348700A22F01 /* FilePickerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C36E64402C4FBB9F008479BF /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C36E644A2C4FBB9F008479BF /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		C36E64462C4FBB9F008479BF /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = C36E64322C4FBB9D008479BF /* Ptimer */;
-			targetProxy = C36E64452C4FBB9F008479BF /* PBXContainerItemProxy */;
-		};
-		C36E64502C4FBB9F008479BF /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = C36E64322C4FBB9D008479BF /* Ptimer */;
-			targetProxy = C36E644F2C4FBB9F008479BF /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		C36E64562C4FBB9F008479BF /* Debug */ = {
@@ -486,92 +368,6 @@
 			};
 			name = Release;
 		};
-		C36E645C2C4FBB9F008479BF /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
-				MACOSX_DEPLOYMENT_TARGET = 14.5;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = jp.pocka.PtimerTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ptimer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ptimer";
-			};
-			name = Debug;
-		};
-		C36E645D2C4FBB9F008479BF /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
-				MACOSX_DEPLOYMENT_TARGET = 14.5;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = jp.pocka.PtimerTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ptimer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ptimer";
-			};
-			name = Release;
-		};
-		C36E645F2C4FBB9F008479BF /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
-				MACOSX_DEPLOYMENT_TARGET = 14.5;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = jp.pocka.PtimerUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Ptimer;
-			};
-			name = Debug;
-		};
-		C36E64602C4FBB9F008479BF /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
-				MACOSX_DEPLOYMENT_TARGET = 14.5;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = jp.pocka.PtimerUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Ptimer;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -589,24 +385,6 @@
 			buildConfigurations = (
 				C36E64592C4FBB9F008479BF /* Debug */,
 				C36E645A2C4FBB9F008479BF /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		C36E645B2C4FBB9F008479BF /* Build configuration list for PBXNativeTarget "PtimerTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				C36E645C2C4FBB9F008479BF /* Debug */,
-				C36E645D2C4FBB9F008479BF /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		C36E645E2C4FBB9F008479BF /* Build configuration list for PBXNativeTarget "PtimerUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				C36E645F2C4FBB9F008479BF /* Debug */,
-				C36E64602C4FBB9F008479BF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

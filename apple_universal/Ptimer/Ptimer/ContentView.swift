@@ -17,16 +17,6 @@ struct ContentView: View {
 	}
 }
 
-struct PlayerView: View {
-	let ptimer: Ptimer
-
-	var body: some View {
-		VStack {
-			Text(ptimer.metadata.title).font(.title)
-		}
-	}
-}
-
 #Preview {
 	ContentView()
 }
