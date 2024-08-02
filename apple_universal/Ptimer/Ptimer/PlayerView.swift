@@ -111,7 +111,7 @@ struct PlayerView: View {
 						label: {
 							Text("Start")
 						}
-						.keyboardShortcut(.return)
+						.keyboardShortcut(.defaultAction)
 						.controlSize(.large)
 					}
 				}
@@ -144,7 +144,7 @@ struct PlayerView: View {
 							} label: {
 								Text("Next")
 							}
-							.keyboardShortcut(.return)
+							.keyboardShortcut(.defaultAction)
 							.controlSize(.large)
 						}
 					}
@@ -165,7 +165,7 @@ struct PlayerView: View {
 						label: {
 							Text("Done")
 						}
-						.keyboardShortcut(.return)
+						.keyboardShortcut(.defaultAction)
 						.controlSize(.large)
 					}
 				}

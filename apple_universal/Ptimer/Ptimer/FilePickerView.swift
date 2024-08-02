@@ -22,7 +22,7 @@ struct FilePickerView: View {
 				Text("Open .ptimer file")
 			}
 			.controlSize(.extraLarge)
-			.keyboardShortcut(.return)
+			.keyboardShortcut(.defaultAction)
 			.fileImporter(
 				isPresented: $isFilePickerVisible,
 				allowedContentTypes: [.init(exportedAs: "jp.pocka.Ptimer-timer-document")],
