@@ -5,8 +5,8 @@
 package main
 
 import (
-	"tools/ptimer/create"
-	"tools/ptimer/extract"
+	"github.com/pocka/ptimer/cli/create"
+	"github.com/pocka/ptimer/cli/extract"
 
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"

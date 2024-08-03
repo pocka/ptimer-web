@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-module tools/ptimer
+module github.com/pocka/ptimer/cli
 
 go 1.22.4
 

@@ -11,7 +11,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"tools/ptimer/fileformat"
+	"github.com/pocka/ptimer/cli/fileformat"
 
 	"github.com/charmbracelet/log"
 	_ "modernc.org/sqlite"

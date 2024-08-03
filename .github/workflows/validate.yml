@@ -50,7 +50,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: 1.22.x
-          cache-dependency-path: "tools/ptimer/go.sum"
+          cache-dependency-path: "cli/go.sum"
       - name: Build CLI
         run: "go build"
-        working-directory: tools/ptimer
+        working-directory: cli

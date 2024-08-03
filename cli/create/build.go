@@ -12,7 +12,7 @@ import (
 
 	ptimerSQL "github.com/pocka/ptimer/sql"
 
-	"tools/ptimer/fileformat"
+	"github.com/pocka/ptimer/cli/fileformat"
 
 	_ "modernc.org/sqlite"
 )
