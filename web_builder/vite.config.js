@@ -5,6 +5,15 @@
 import { defineConfig } from "vite";
 import gleam from "vite-gleam";
 
-export default {
+export default defineConfig({
+	optimizeDeps: {
+		// Without this, Vite can't load WASM file
+		exclude: ["@sqlite.org/sqlite-wasm"],
+	},
+	resolve: {
+		alias: {
+			"@": new URL("./src", import.meta.url).pathname,
+		},
+	},
 	plugins: [gleam()],
-};
+});

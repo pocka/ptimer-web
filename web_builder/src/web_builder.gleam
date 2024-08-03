@@ -2,12 +2,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+import app
 import lustre
-import lustre/element
 
 pub fn main() {
-  let app = lustre.element(element.text("Hello, World!"))
-  let assert Ok(_) = lustre.start(app, "#app", Nil)
+  let app_instance = lustre.application(app.init, app.update, app.view)
+  let assert Ok(_) = lustre.start(app_instance, "#app", Nil)
 
   Nil
 }

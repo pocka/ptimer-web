@@ -1,0 +1,77 @@
+/*
+SPDX-FileCopyrightText: 2024 Shota FUJI <pockawoooh@gmail.com>
+
+SPDX-License-Identifier: Apache-2.0
+*/
+
+.layout {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	grid-template-columns: 100%;
+	grid-template-rows: minmax(0, 1fr) max-content;
+	grid-template-areas: "body" "menu";
+}
+
+.body {
+	grid-area: body;
+	position: relative;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.logs-container {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	justify-content: center;
+	padding: 12px;
+}
+
+.logs {
+	width: 100%;
+	max-width: 60rem;
+	padding: 4px 8px;
+	border: 1px solid oklch(var(--color-border) / var(--color-border-a));
+
+	background-color: oklch(var(--color-bg1));
+	border-radius: 3px;
+	overflow-y: scroll;
+}
+
+.placeholder {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 24px;
+}
+
+.placeholder-title {
+	font-size: 1.1rem;
+	font-weight: bold;
+}
+
+.placeholder-icon {
+	font-size: min(2.2rem, 64px);
+	display: inline-flex;
+	opacity: 0.3;
+}
+
+.welcome-actions {
+	display: inline-flex;
+	flex-direction: column;
+	justify-content: start;
+	align-items: stretch;
+	gap: 12px;
+}
+
+@media (orientation: landscape) {
+	.layout {
+		grid-template-columns: max-content minmax(0, 1fr);
+		grid-template-rows: 100%;
+		grid-template-areas: "menu body";
+	}
+}

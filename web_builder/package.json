@@ -1,6 +1,7 @@
 {
 	"private": true,
 	"devDependencies": {
+		"typescript": "^5.5.4",
 		"vite": "^5.3.5",
 		"vite-gleam": "^0.4.3"
 	},
@@ -8,5 +9,10 @@
 		"dev": "vite",
 		"build": "vite build"
 	},
-	"dependencies": {}
+	"dependencies": {
+		"@fontsource-variable/inconsolata": "^5.0.18",
+		"@fontsource-variable/inter": "^5.0.20",
+		"@sqlite.org/sqlite-wasm": "^3.46.0-build2",
+		"lucide": "^0.424.0"
+	}
 }

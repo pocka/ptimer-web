@@ -1,0 +1,115 @@
+/*
+SPDX-FileCopyrightText: 2024 Shota FUJI <pockawoooh@gmail.com>
+
+SPDX-License-Identifier: Apache-2.0
+*/
+
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/inconsolata";
+
+:where(body, body :not(svg, svg *)) {
+	all: unset;
+	box-sizing: border-box;
+}
+
+:root {
+	--font-sans: "Inter Variable", sans-serif;
+	--font-mono: "Inconsolata Variable", monospace;
+
+	--color-accent-h: 140deg;
+
+	--color-accent-bg-l: 50%;
+	--color-accent-bg-c: 55%;
+	--color-accent-bg-h: var(--color-accent-h);
+	--color-accent-bg: var(--color-accent-bg-l) var(--color-accent-bg-c) var(--color-accent-bg-h);
+
+	--color-accent-fg-l: 98%;
+	--color-accent-fg-c: 2%;
+	--color-accent-fg-h: var(--color-accent-h);
+	--color-accent-fg: var(--color-accent-fg-l) var(--color-accent-fg-c) var(--color-accent-fg-h);
+
+	--color-bg0-l: 99%;
+	--color-bg0-c: 2%;
+	--color-bg0-h: var(--color-accent-h);
+	--color-bg0: var(--color-bg0-l) var(--color-bg0-c) var(--color-bg0-h);
+
+	--color-bg1-l: 95%;
+	--color-bg1-c: 3%;
+	--color-bg1-h: var(--color-accent-h);
+	--color-bg1: var(--color-bg1-l) var(--color-bg1-c) var(--color-bg1-h);
+
+	--color-fg-l: 3%;
+	--color-fg-c: 6%;
+	--color-fg-h: var(--color-accent-h);
+	--color-fg: var(--color-fg-l) var(--color-fg-c) var(--color-fg-h);
+
+	--color-highlight-bg-l: 30%;
+	--color-highlight-bg-c: 8%;
+	--color-highlight-bg-h: var(--color-fg-h);
+	--color-highlight-bg: var(--color-highlight-bg-l) var(--color-highlight-bg-c) var(
+		--color-highlight-bg-h
+	);
+
+	--color-highlight-fg-l: var(--color-bg0-l);
+	--color-highlight-fg-c: var(--color-bg0-c);
+	--color-highlight-fg-h: var(--color-bg0-h);
+	--color-highlight-fg: var(--color-highlight-fg-l) var(--color-highlight-fg-c) var(
+		--color-highlight-fg-h
+	);
+
+	--color-border-l: var(--color-fg-l);
+	--color-border-c: var(--color-fg-c);
+	--color-border-h: var(--color-fg-h);
+	--color-border: var(--color-border-l) var(--color-border-c) var(--color-border-h);
+	--color-border-a: 3%;
+
+	--color-debug-l: 60%;
+	--color-debug-c: 0%;
+	--color-debug-h: 0deg;
+	--color-debug: var(--color-debug-l) var(--color-debug-c) var(--color-debug-h);
+
+	--color-info-l: 60%;
+	--color-info-c: 40%;
+	--color-info-h: 270deg;
+	--color-info: var(--color-info-l) var(--color-info-c) var(--color-info-h);
+
+	--color-warn-l: 70%;
+	--color-warn-c: 70%;
+	--color-warn-h: 100deg;
+	--color-warn: var(--color-warn-l) var(--color-warn-c) var(--color-warn-h);
+
+	--color-danger-l: 60%;
+	--color-danger-c: 50%;
+	--color-danger-h: 30deg;
+	--color-danger: var(--color-danger-l) var(--color-danger-c) var(--color-danger-h);
+
+	font-display: swap;
+	font-family: var(--font-sans);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-accent-bg-l: 50%;
+		--color-accent-bg-c: 45%;
+
+		--color-bg0-l: 15%;
+		--color-bg0-c: 5%;
+
+		--color-bg1-l: 18%;
+		--color-bg1-l: 24%;
+
+		--color-fg-l: 95%;
+		--color-fg-c: 5%;
+
+		--color-highlight-bg-l: var(--color-fg-l);
+		--color-highlight-bg-c: var(--color-fg-c);
+	}
+}
+
+body {
+	font-size: 1rem;
+	line-height: 1.25;
+
+	background-color: oklch(var(--color-bg0));
+	color: oklch(var(--color-fg));
+}

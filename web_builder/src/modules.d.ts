@@ -2,6 +2,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { main } from "./web_builder.gleam";
-
-main();
+declare module "*.gleam" {
+	export function main(): void;
+}

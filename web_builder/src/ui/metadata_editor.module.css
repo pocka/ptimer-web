@@ -1,0 +1,25 @@
+/*
+SPDX-FileCopyrightText: 2024 Shota FUJI <pockawoooh@gmail.com>
+
+SPDX-License-Identifier: Apache-2.0
+*/
+
+.form {
+	width: 100%;
+	max-width: 50rem;
+	margin: 0 auto;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	padding: 12px 24px;
+}
+
+.field {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.field > input, .field > textarea {
+	border: 1px solid oklch(var(--color-border) / var(--color-border-a));
+}
