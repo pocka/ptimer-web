@@ -54,3 +54,16 @@ jobs:
       - name: Build CLI
         run: "go build"
         working-directory: cli
+
+  web_builder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Gleam
+        uses: erlef/setup-beam@v1
+        with:
+          version-file: .tool-versions
+      - name: Perform type check
+        run: "gleam check"
+        working-directory: web_builder

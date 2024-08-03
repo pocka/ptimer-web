@@ -27,6 +27,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22.x"
+      - name: Setup Gleam
+        uses: erlef/setup-beam@v1
+        with:
+          version-file: .tool-versions
       - name: Install elm-format
         run: npm i -g elm-format
       - name: Cache swiftformat

@@ -7,3 +7,5 @@ elm         0.19
 golang      1.22
 nodejs      22
 swiftformat 0.54
+gleam       1.4
+erlang      27

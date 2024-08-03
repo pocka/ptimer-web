@@ -23,3 +23,8 @@ indent_size = 2
 [{*.elm,elm.json}]
 indent_style = space
 indent_size = 4
+
+# Align to `gleam format`, it cannot be configured to use tabs
+[*.gleam]
+indent_style = space
+indent_size = 2

@@ -2,11 +2,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# What: Node.js' dependency directory
-#  Why: Filesize is unnecessary large. Also it might include platform dependent files
-#       such as executables and caches.
-node_modules
-
 # What: Parcel's build cache directory
 #  Why: It's not designed to be checked-in.
 .parcel-cache

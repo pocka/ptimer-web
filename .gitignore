@@ -6,3 +6,8 @@
 #  Why: These are binary files and should not have to checked-in.
 #       Use in-memory database or create on-demand for testings.
 *.ptimer
+
+# What: Node.js' dependency directory
+#  Why: Filesize is unnecessary large. Also it might include platform dependent files
+#       such as executables and caches.
+node_modules
