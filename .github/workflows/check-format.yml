@@ -31,6 +31,7 @@ jobs:
         uses: erlef/setup-beam@v1
         with:
           version-file: .tool-versions
+          version-type: strict
       - name: Install elm-format
         run: npm i -g elm-format
       - name: Cache swiftformat
