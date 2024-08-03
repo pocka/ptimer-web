@@ -30,8 +30,8 @@ jobs:
       - name: Setup Gleam
         uses: erlef/setup-beam@v1
         with:
-          version-file: .tool-versions
-          version-type: strict
+          otp-version: "27"
+          gleam-version: "1.4"
       - name: Install elm-format
         run: npm i -g elm-format
       - name: Cache swiftformat
