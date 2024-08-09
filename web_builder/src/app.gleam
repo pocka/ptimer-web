@@ -276,7 +276,7 @@ fn with_file(
 
 pub fn view(model: Model) -> element.Element(Msg) {
   html.div([class(scoped("layout"))], [
-    menu.menu([], {
+    menu.menu([class(scoped("menu"))], {
       [
         menu.item(
           lucide.ClipboardList,

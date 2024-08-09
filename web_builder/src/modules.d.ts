@@ -4,4 +4,5 @@
 
 declare module "*.gleam" {
 	export function main(): void;
+	export function story(args: unknown, ctx: unknown): Element;
 }

@@ -2,12 +2,17 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+import gleam/dynamic
+import gleam/function
 import gleam/option.{None, Some}
+import gleam/result
+import lustre
 import lustre/attribute.{type Attribute, class}
 import lustre/element
 import lustre/element/html
 import lustre/event
 import ptimer
+import storybook
 
 // VIEW
 
@@ -85,4 +90,41 @@ pub fn view(
       ]),
     ]),
   ])
+}
+
+pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
+  use selector, flags, action <- storybook.story(args, ctx)
+
+  let is_empty =
+    flags
+    |> dynamic.field("empty", dynamic.bool)
+    |> result.unwrap(False)
+
+  let _ =
+    lustre.simple(
+      fn(_) {
+        case is_empty {
+          True -> ptimer.empty
+
+          False ->
+            ptimer.Ptimer(
+              metadata: ptimer.Metadata(
+                title: "Sample timer",
+                description: Some("Description"),
+                lang: "en-GB",
+              ),
+              steps: [],
+              assets: [],
+            )
+        }
+      },
+      fn(_, new_timer) {
+        action("on_update", dynamic.from(new_timer))
+        new_timer
+      },
+      fn(timer) { view(timer, function.identity, []) },
+    )
+    |> lustre.start(selector, Nil)
+
+  Nil
 }

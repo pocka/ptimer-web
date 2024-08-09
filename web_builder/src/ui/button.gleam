@@ -2,12 +2,16 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+import gleam/dynamic
+import gleam/function
 import gleam/list
-import gleam/option.{type Option, Some}
+import gleam/option.{type Option, None, Some}
+import lustre
 import lustre/attribute.{class}
 import lustre/element
 import lustre/element/html
 import lustre/event
+import storybook
 
 // VIEW
 
@@ -86,4 +90,35 @@ pub fn button(
     |> set_state_attrs(state)
 
   html.button(final_attrs, [html.span([], children), state_text(state)])
+}
+
+pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
+  use selector, flags, action <- storybook.story(args, ctx)
+
+  let variant = case flags |> dynamic.field("variant", dynamic.string) {
+    Ok("primary") -> Primary
+
+    _ -> Normal
+  }
+
+  let state = case flags |> dynamic.field("state", dynamic.string) {
+    Ok("disabled") -> Disabled(None)
+
+    Ok("loading") -> Loading(None)
+
+    _ -> Enabled("onClick")
+  }
+
+  let _ =
+    lustre.simple(
+      function.identity,
+      fn(a, b) {
+        action("story_update", dynamic.from(b))
+        a
+      },
+      fn(_) { button(variant, state, [], [element.text("Hello, Storybook!")]) },
+    )
+    |> lustre.start(selector, flags)
+
+  Nil
 }
