@@ -13,7 +13,7 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build",
-		"storybook": "storybook dev --no-open"
+		"storybook": "storybook dev --no-open --port 6006"
 	},
 	"dependencies": {
 		"@fontsource-variable/inconsolata": "^5.0.18",
