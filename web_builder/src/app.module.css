@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
 	width: 100%;
 	max-width: 60rem;
 	padding: 4px 8px;
-	border: 1px solid oklch(var(--color-border) / var(--color-border-a));
+	border: 1px solid oklch(var(--color-border) / var(--alpha-border-subtle));
 
 	background-color: oklch(var(--color-bg1));
 	border-radius: 3px;

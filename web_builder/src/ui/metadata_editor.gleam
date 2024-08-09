@@ -13,6 +13,7 @@ import lustre/element/html
 import lustre/event
 import ptimer
 import storybook
+import ui/textbox
 
 // VIEW
 
@@ -30,11 +31,9 @@ pub fn view(
     html.div([class(scoped("form")), ..attrs], [
       html.div([class(scoped("field"))], [
         html.label([attribute.for("metadata_title")], [element.text("Title")]),
-        html.input([
-          attribute.id("metadata_title"),
-          attribute.type_("text"),
-          attribute.value(metadata.title),
-          event.on_input(fn(value) {
+        textbox.textbox(
+          metadata.title,
+          textbox.Enabled(fn(value) {
             on_update(
               ptimer.Ptimer(
                 ..timer,
@@ -42,7 +41,8 @@ pub fn view(
               ),
             )
           }),
-        ]),
+          [attribute.id("metadata_title")],
+        ),
       ]),
       html.div([class(scoped("field"))], [
         html.label([attribute.for("metadata_description")], [
@@ -74,11 +74,9 @@ pub fn view(
         html.label([attribute.for("metadata_lang")], [
           element.text("Language Code"),
         ]),
-        html.input([
-          attribute.id("metadata_lang"),
-          attribute.type_("text"),
-          attribute.value(metadata.lang),
-          event.on_input(fn(value) {
+        textbox.textbox(
+          metadata.lang,
+          textbox.Enabled(fn(value) {
             on_update(
               ptimer.Ptimer(
                 ..timer,
@@ -86,7 +84,8 @@ pub fn view(
               ),
             )
           }),
-        ]),
+          [attribute.id("metadata_lang")],
+        ),
       ]),
     ]),
   ])

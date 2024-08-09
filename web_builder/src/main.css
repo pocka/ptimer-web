@@ -61,7 +61,6 @@ SPDX-License-Identifier: Apache-2.0
 	--color-border-c: var(--color-fg-c);
 	--color-border-h: var(--color-fg-h);
 	--color-border: var(--color-border-l) var(--color-border-c) var(--color-border-h);
-	--color-border-a: 3%;
 
 	--color-debug-l: 60%;
 	--color-debug-c: 0%;
@@ -83,6 +82,13 @@ SPDX-License-Identifier: Apache-2.0
 	--color-danger-h: 30deg;
 	--color-danger: var(--color-danger-l) var(--color-danger-c) var(--color-danger-h);
 
+	--alpha-disabled: 40%;
+
+	--alpha-border-shadow: 3%;
+	--alpha-border-subtle: 3%;
+	--alpha-border-medium: 12%;
+	--alpha-border-strong: 30%;
+
 	font-display: swap;
 	font-family: var(--font-sans);
 }
@@ -103,6 +109,21 @@ SPDX-License-Identifier: Apache-2.0
 
 		--color-highlight-bg-l: var(--color-fg-l);
 		--color-highlight-bg-c: var(--color-fg-c);
+
+		--alpha-disabled: 50%;
+
+		--alpha-border-shadow: 20%;
+		--alpha-border-subtle: 10%;
+		--alpha-border-medium: 24%;
+		--alpha-border-strong: 40%;
+	}
+}
+
+@media (prefers-contrast: more) {
+	:root {
+		--alpha-border-subtle: 80%;
+		--alpha-border-medium: 90%;
+		--alpha-border-strong: 100%;
 	}
 }
 
