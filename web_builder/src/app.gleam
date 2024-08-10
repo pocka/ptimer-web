@@ -7,6 +7,7 @@ import gleam/list
 import gleam/option.{type Option, None, Some}
 import log
 import lucide
+import lustre
 import lustre/attribute.{class}
 import lustre/effect
 import lustre/element
@@ -14,6 +15,7 @@ import lustre/element/html
 import lustre/event
 import platform_support/transferable_streams
 import ptimer
+import storybook
 import ui/button
 import ui/menu
 import ui/metadata_editor
@@ -355,4 +357,14 @@ pub fn view(model: Model) -> element.Element(Msg) {
       },
     ]),
   ])
+}
+
+pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
+  use selector, _flags, _action <- storybook.story(args, ctx)
+
+  let _ =
+    lustre.application(init, update, view)
+    |> lustre.start(selector, Nil)
+
+  Nil
 }
