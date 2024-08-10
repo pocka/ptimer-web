@@ -53,6 +53,11 @@ jobs:
         uses: oven-sh/setup-bun@v1
         with:
           bun-version: "1.1"
+      # Needs Node.js since bunx is not compatible with npx
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
       - name: Install dependencies
         run: "bun i"
         working-directory: web_builder
@@ -61,9 +66,9 @@ jobs:
         working-directory: web_builder
       - name: Run tests
         run: |
-          bunx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
-            "bunx http-server storybook-static --port 6006 --silent" \
-            "bunx wait-on tcp:6006 && bun run test:storybook"
+          npx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
+            "npx http-server storybook-static --port 6006 --silent" \
+            "npx wait-on tcp:6006 && bun run test:storybook"
         working-directory: web_builder
 
   build-web:
