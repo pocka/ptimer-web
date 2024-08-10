@@ -11,6 +11,27 @@ on:
       - "*"
 
 jobs:
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: "1.1"
+      - name: Install dependencies
+        run: "bun i"
+        working-directory: web
+      - name: Build the app
+        run: "bun run build --public-url '/${{ github.event.repository.name }}/'"
+        working-directory: web
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: main
+          path: web/dist
+
   build-builder-storybook:
     runs-on: ubuntu-latest
     steps:
@@ -36,61 +57,6 @@ jobs:
         with:
           name: builder-storybook
           path: web_builder/storybook-static
-
-  test-builder-storybook:
-    needs:
-      - build-builder-storybook
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Download built Storybook
-        uses: actions/download-artifact@v4
-        with:
-          path: web_builder/storybook-static
-          name: builder-storybook
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: "1.1"
-      # Needs Node.js since bunx is not compatible with npx
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22.x"
-      - name: Install dependencies
-        run: "bun i"
-        working-directory: web_builder
-      - name: Setup Playwright
-        run: "npx playwright install --with-deps"
-        working-directory: web_builder
-      - name: Run tests
-        run: |
-          npx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
-            "npx http-server storybook-static --port 6006 --silent" \
-            "npx wait-on tcp:6006 && bun run test:storybook"
-        working-directory: web_builder
-
-  build-web:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: "1.1"
-      - name: Install dependencies
-        run: "bun i"
-        working-directory: web
-      - name: Build the app
-        run: "bun run build --public-url '/${{ github.event.repository.name }}/'"
-        working-directory: web
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: main
-          path: web/dist
 
   prep-artifact-for-pages:
     # Deploy only on master branch
@@ -131,6 +97,40 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  test-builder-storybook:
+    needs:
+      - build-builder-storybook
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Download built Storybook
+        uses: actions/download-artifact@v4
+        with:
+          path: web_builder/storybook-static
+          name: builder-storybook
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: "1.1"
+      # Needs Node.js since bunx is not compatible with npx
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+      - name: Install dependencies
+        run: "bun i"
+        working-directory: web_builder
+      - name: Setup Playwright
+        run: "npx playwright install --with-deps"
+        working-directory: web_builder
+      - name: Run tests
+        run: |
+          npx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
+            "npx http-server storybook-static --port 6006 --silent" \
+            "npx wait-on tcp:6006 && bun run test:storybook"
+        working-directory: web_builder
 
   cleanup:
     needs:
