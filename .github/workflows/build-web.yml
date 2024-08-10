@@ -32,6 +32,32 @@ jobs:
           name: main
           path: web/dist
 
+  build-builder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Gleam
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: "27"
+          gleam-version: "1.4"
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: "1.1"
+      - name: Install dependencies
+        run: "bun i"
+        working-directory: web_builder
+      - name: Build the app
+        run: "bun run build --base '/${{ github.event.repository.name }}/builder-v2/'"
+        working-directory: web_builder
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-v2
+          path: web_builder/dist
+
   build-builder-storybook:
     runs-on: ubuntu-latest
     steps:
@@ -63,6 +89,7 @@ jobs:
     if: github.ref == 'refs/heads/master'
     needs:
       - build-web
+      - build-builder
       - build-builder-storybook
     runs-on: ubuntu-latest
     steps:
