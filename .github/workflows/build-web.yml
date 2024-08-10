@@ -64,6 +64,8 @@ jobs:
       - name: Setup Playwright
         run: "npx playwright install --with-deps"
         working-directory: web_builder
+      - name: Install tools globally
+        run: "npm i -g concurrently http-server wait-on"
       - name: Run tests
         run: |
           npx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
