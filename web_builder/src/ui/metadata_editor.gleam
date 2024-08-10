@@ -10,7 +10,6 @@ import lustre
 import lustre/attribute.{type Attribute, class}
 import lustre/element
 import lustre/element/html
-import lustre/event
 import ptimer
 import storybook
 import ui/textbox
@@ -41,6 +40,7 @@ pub fn view(
               ),
             )
           }),
+          textbox.SingleLine,
           [attribute.id("metadata_title")],
         ),
       ]),
@@ -48,26 +48,25 @@ pub fn view(
         html.label([attribute.for("metadata_description")], [
           element.text("Description"),
         ]),
-        html.textarea(
-          [
-            attribute.id("metadata_description"),
-            event.on_input(fn(value) {
-              on_update(
-                ptimer.Ptimer(
-                  ..timer,
-                  metadata: ptimer.Metadata(
-                    ..metadata,
-                    description: case value {
-                      "" -> None
-
-                      v -> Some(v)
-                    },
-                  ),
-                ),
-              )
-            }),
-          ],
+        textbox.textbox(
           metadata.description |> option.unwrap(""),
+          textbox.Enabled(fn(value) {
+            on_update(
+              ptimer.Ptimer(
+                ..timer,
+                metadata: ptimer.Metadata(
+                  ..metadata,
+                  description: case value {
+                    "" -> None
+
+                    str -> Some(str)
+                  },
+                ),
+              ),
+            )
+          }),
+          textbox.MultiLine(Some(4)),
+          [attribute.id("metadata_description")],
         ),
       ]),
       html.div([class(scoped("field"))], [
@@ -84,6 +83,7 @@ pub fn view(
               ),
             )
           }),
+          textbox.SingleLine,
           [attribute.id("metadata_lang")],
         ),
       ]),

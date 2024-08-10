@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import gleam/dynamic
+import gleam/option.{type Option, None, Some}
 import gleam/result
 import lustre
 import lustre/attribute.{type Attribute, class}
@@ -18,6 +19,11 @@ pub type State(msg) {
   Enabled(on_input: fn(String) -> msg)
 
   Disabled
+}
+
+pub type Mode {
+  SingleLine
+  MultiLine(rows: Option(Int))
 }
 
 fn set_state_attrs(
@@ -40,17 +46,35 @@ fn scoped(x: String) -> String
 pub fn textbox(
   value: String,
   state: State(msg),
+  mode: Mode,
   attrs: List(Attribute(msg)),
 ) -> element.Element(msg) {
-  html.input(
-    [
-      class(scoped("textbox")),
-      attribute.property("value", value),
-      attribute.type_("text"),
-      ..attrs
-    ]
-    |> set_state_attrs(state),
-  )
+  case mode {
+    SingleLine ->
+      html.input(
+        [
+          class(scoped("textbox")),
+          attribute.property("value", value),
+          attribute.type_("text"),
+          ..attrs
+        ]
+        |> set_state_attrs(state),
+      )
+    MultiLine(rows) ->
+      html.textarea(
+        [
+          class(scoped("textbox")),
+          class(scoped("multiline")),
+          case rows {
+            Some(n) -> attribute.rows(n)
+            None -> class(scoped("resizable-y"))
+          },
+          ..attrs
+        ]
+          |> set_state_attrs(state),
+        value,
+      )
+  }
 }
 
 pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
@@ -58,6 +82,21 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
 
   let default_value =
     flags |> dynamic.field("defaultValue", dynamic.string) |> result.unwrap("")
+
+  let rows = flags |> dynamic.field("rows", dynamic.int) |> result.unwrap(1)
+
+  let resizable =
+    flags |> dynamic.field("resize", dynamic.bool) |> result.unwrap(False)
+
+  let mode = case flags |> dynamic.field("multiline", dynamic.bool) {
+    Ok(True) ->
+      MultiLine(case resizable {
+        True -> None
+        False -> Some(rows)
+      })
+
+    _ -> SingleLine
+  }
 
   let state = case flags |> dynamic.field("state", dynamic.string) {
     Ok("disabled") -> Disabled
@@ -72,7 +111,7 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
         action(b.0, dynamic.from(b.1))
         a
       },
-      fn(value) { textbox(value, state, []) },
+      fn(value) { textbox(value, state, mode, []) },
     )
     |> lustre.start(selector, flags)
 

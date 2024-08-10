@@ -19,9 +19,3 @@ SPDX-License-Identifier: Apache-2.0
 	flex-direction: column;
 	gap: 2px;
 }
-
-.field > textarea {
-	border: 1px solid oklch(var(--color-border) / var(--alpha-border-subtle));
-
-	white-space: pre-wrap;
-}

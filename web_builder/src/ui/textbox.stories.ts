@@ -9,6 +9,12 @@ import { story } from "./textbox.gleam";
 interface Args {
 	defaultValue: string;
 
+	resize: boolean;
+
+	multiline: boolean;
+
+	rows: number;
+
 	state: "enabled" | "disabled";
 }
 
@@ -17,6 +23,9 @@ export default {
 	args: {
 		defaultValue: "Textbox",
 		state: "enabled",
+		rows: 3,
+		resize: false,
+		multiline: false,
 	},
 	argTypes: {
 		state: {
@@ -39,5 +48,20 @@ export const Empty: Story = {
 export const Disabled: Story = {
 	args: {
 		state: "disabled",
+	},
+};
+
+export const Multiline: Story = {
+	args: {
+		defaultValue: "Foo\nBar",
+		multiline: true,
+	},
+};
+
+export const ResizableMultiline: Story = {
+	args: {
+		defaultValue: "Foo\nBar",
+		multiline: true,
+		resize: true,
 	},
 };
