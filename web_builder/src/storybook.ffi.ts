@@ -17,7 +17,7 @@ export function render<T = unknown>(
 	const observer = new MutationObserver((mutationList) => {
 		for (const mutation of mutationList) {
 			mutation.addedNodes.forEach((node) => {
-				if (node === element) {
+				if (node === element && node.parentNode) {
 					onRender(selector, args, (type, payload) => action(type)(payload));
 					observer.disconnect();
 				}
