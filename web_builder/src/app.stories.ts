@@ -35,5 +35,10 @@ export const CreateFromScratch: Story = {
 		await userEvent.type(root.getByRole("textbox", { name: /title/i }), "New Timer");
 		await userEvent.type(root.getByRole("textbox", { name: /description/i }), "Description text,\nSecond line.");
 		await userEvent.type(root.getByRole("textbox", { name: /lang/i }), "{backspace}{backspace}GB");
+
+		await userEvent.click(root.getByRole("button", { name: "Steps" }));
+		await userEvent.click(root.getByRole("button", { name: /add step/i }));
+		await userEvent.type(root.getByRole("textbox", { name: /title/i }), "Step One");
+		await userEvent.type(root.getByRole("textbox", { name: /description/i }), "Description for{enter}Step One");
 	},
 };

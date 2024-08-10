@@ -19,6 +19,7 @@ import storybook
 import ui/button
 import ui/menu
 import ui/metadata_editor
+import ui/steps_editor
 
 // MODEL
 
@@ -333,11 +334,7 @@ pub fn view(model: Model) -> element.Element(Msg) {
         StepsEditor -> {
           use _, file <- with_file(model)
 
-          html.ol(
-            [],
-            file.steps
-              |> list.map(fn(step) { html.li([], [element.text(step.title)]) }),
-          )
+          steps_editor.view(file, UpdateTimer, [])
         }
 
         AssetsEditor -> {

@@ -9,6 +9,7 @@ pub type IconType {
   ClipboardList
   FileMusic
   FolderOpen
+  GripHorizontal
   ListOrdered
   Menu
   ScrollText
@@ -19,6 +20,7 @@ fn icon_type_to_string(icon_type: IconType) -> String {
     ClipboardList -> "clipboard-list"
     FileMusic -> "file-music"
     FolderOpen -> "folder-open"
+    GripHorizontal -> "grip-horizontal"
     ListOrdered -> "list-ordered"
     Menu -> "menu"
     ScrollText -> "scroll-text"

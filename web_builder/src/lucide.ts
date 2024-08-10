@@ -7,6 +7,7 @@ import {
 	createElement,
 	FileMusic,
 	FolderOpen,
+	GripHorizontal,
 	type IconNode,
 	ListOrdered,
 	Menu,
@@ -34,6 +35,7 @@ function createLucideCustomElement(icon: IconNode): typeof HTMLElement {
 export function register() {
 	customElements.define("lucide-list-ordered", createLucideCustomElement(ListOrdered));
 	customElements.define("lucide-file-music", createLucideCustomElement(FileMusic));
+	customElements.define("lucide-grip-horizontal", createLucideCustomElement(GripHorizontal));
 	customElements.define("lucide-scroll-text", createLucideCustomElement(ScrollText));
 	customElements.define("lucide-menu", createLucideCustomElement(Menu));
 	customElements.define("lucide-folder-open", createLucideCustomElement(FolderOpen));

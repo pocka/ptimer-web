@@ -83,6 +83,7 @@ SPDX-License-Identifier: Apache-2.0
 	--color-danger: var(--color-danger-l) var(--color-danger-c) var(--color-danger-h);
 
 	--alpha-disabled: 40%;
+	--alpha-dimmed: 60%;
 
 	--alpha-border-shadow: 3%;
 	--alpha-border-subtle: 3%;
@@ -111,6 +112,7 @@ SPDX-License-Identifier: Apache-2.0
 		--color-highlight-bg-c: var(--color-fg-c);
 
 		--alpha-disabled: 50%;
+		--alpha-dimmed: 70%;
 
 		--alpha-border-shadow: 20%;
 		--alpha-border-subtle: 10%;
