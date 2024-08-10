@@ -94,7 +94,7 @@ jobs:
 
   prep-artifact-for-pages:
     # Deploy only on master branch
-    if: github.ref == 'refs/head/master'
+    if: github.ref == 'refs/heads/master'
     needs:
       - build-web
       - build-builder-storybook
@@ -117,7 +117,7 @@ jobs:
 
   deploy:
     # Deploy only on master branch
-    if: github.ref == 'refs/head/master'
+    if: github.ref == 'refs/heads/master'
     needs:
       - prep-artifact-for-pages
     permissions:
