@@ -1,0 +1,139 @@
+# SPDX-FileCopyrightText: 2024 Shota FUJI <pockawoooh@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: Build and deploy web application
+
+on:
+  push:
+    # Runs on every push
+    branches:
+      - "*"
+
+jobs:
+  build-builder-storybook:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Gleam
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: "27"
+          gleam-version: "1.4"
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: "1.1"
+      - name: Install dependencies
+        run: "bun i"
+        working-directory: web_builder
+      - name: Build Storybook
+        run: "bun run build:storybook"
+        working-directory: web_builder
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-storybook
+          path: web_builder/storybook-static
+
+  test-builder-storybook:
+    needs:
+      - build-builder-storybook
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Download built Storybook
+        uses: actions/download-artifact@v4
+        with:
+          path: storybook-static
+          name: builder-storybook
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: "1.1"
+      - name: Install dependencies
+        run: "bun i"
+        working-directory: web_builder
+      - name: Setup Playwright
+        run: "npx playwright install --with-deps"
+        working-directory: web_builder
+      - name: Run tests
+        run: |
+          bunx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
+            "bunx http-server storybook-static --port 6006 --silent" \
+            "bunx wait-on tcp:6006 && bun run test:storybook"
+        working-directory: web_builder
+
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: "1.1"
+      - name: Install dependencies
+        run: "bun i"
+        working-directory: web
+      - name: Build the app
+        run: "bun run build --public-url '/${{ github.event.repository.name }}/'"
+        working-directory: web
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: main
+          path: web/dist
+
+  prep-artifact-for-pages:
+    # Deploy only on master branch
+    if: github.ref == 'refs/head/master'
+    needs:
+      - build-web
+      - build-builder-storybook
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download main artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          name: main
+      - name: Download sub artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: "!main"
+      - name: Upload artifact for Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: artifacts
+
+  deploy:
+    # Deploy only on master branch
+    if: github.ref == 'refs/head/master'
+    needs:
+      - prep-artifact-for-pages
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  cleanup:
+    needs:
+      - deploy
+      - test-builder-storybook
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete artifacts
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: "*"
