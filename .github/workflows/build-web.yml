@@ -47,7 +47,7 @@ jobs:
       - name: Download built Storybook
         uses: actions/download-artifact@v4
         with:
-          path: storybook-static
+          path: web_builder/storybook-static
           name: builder-storybook
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
@@ -64,8 +64,6 @@ jobs:
       - name: Setup Playwright
         run: "npx playwright install --with-deps"
         working-directory: web_builder
-      - name: Install tools globally
-        run: "npm i -g concurrently http-server wait-on"
       - name: Run tests
         run: |
           npx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
