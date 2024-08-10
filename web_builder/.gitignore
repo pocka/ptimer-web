@@ -15,3 +15,6 @@ erl_crash.dump
 
 # What: Built website files (Vite default).
 /dist
+
+# What: Built Storybook files (default location).
+/storybook-static
