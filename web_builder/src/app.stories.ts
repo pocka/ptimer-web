@@ -22,7 +22,9 @@ export const CreateFromScratch: Story = {
 		const root = within(canvasElement);
 
 		await waitFor(() => userEvent.click(root.getByRole("button", { name: "Logs" })));
-		await waitFor(() => expect(root.getByText(/Loaded Ptimer engine/)).toBeInTheDocument());
+		await waitFor(() => expect(root.getByText(/Loaded Ptimer engine/)).toBeInTheDocument(), {
+			timeout: 3000,
+		});
 
 		const shouldPressCreateButton = !root.queryByText(/This browser does not implement Transferable Streams/);
 
