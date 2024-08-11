@@ -115,6 +115,7 @@ jobs:
       group: deploy-ghpages
     needs:
       - prep-artifact-for-pages
+      - test-builder-storybook
     permissions:
       pages: write
       id-token: write
