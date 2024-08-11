@@ -10,7 +10,7 @@ pub type Ptimer {
   Ptimer(metadata: Metadata, steps: List(Step), assets: List(Asset))
 }
 
-fn decode_ptimer(value: dynamic.Dynamic) -> Result(Ptimer, dynamic.DecodeErrors) {
+pub fn decode(value: dynamic.Dynamic) -> Result(Ptimer, dynamic.DecodeErrors) {
   value
   |> dynamic.decode3(
     Ptimer,
@@ -24,7 +24,7 @@ pub type Metadata {
   Metadata(title: String, description: Option(String), lang: String)
 }
 
-fn decode_metadata(
+pub fn decode_metadata(
   value: dynamic.Dynamic,
 ) -> Result(Metadata, dynamic.DecodeErrors) {
   value
@@ -45,7 +45,7 @@ pub type Step {
   )
 }
 
-fn decode_step(value: dynamic.Dynamic) -> Result(Step, dynamic.DecodeErrors) {
+pub fn decode_step(value: dynamic.Dynamic) -> Result(Step, dynamic.DecodeErrors) {
   value
   |> dynamic.decode4(
     Step,
@@ -82,7 +82,9 @@ pub type Asset {
   )
 }
 
-fn decode_asset(value: dynamic.Dynamic) -> Result(Asset, dynamic.DecodeErrors) {
+pub fn decode_asset(
+  value: dynamic.Dynamic,
+) -> Result(Asset, dynamic.DecodeErrors) {
   value
   |> dynamic.decode5(
     Asset,
@@ -171,7 +173,7 @@ fn decode_parse_error(
 
 fn decode_parse_result(value: dynamic.Dynamic) -> Result(Ptimer, ParseError) {
   value
-  |> decode_result(decode_ptimer, decode_parse_error)
+  |> decode_result(decode, decode_parse_error)
   |> result.map_error(ParseResultDecodeError)
   |> result.flatten
 }

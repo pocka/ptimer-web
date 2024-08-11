@@ -65,6 +65,8 @@ pub fn textbox(
         [
           class(scoped("textbox")),
           class(scoped("multiline")),
+          // TODO: Remove me when Lustre fixed a textarea VDOM update bug.
+          attribute.property("value", value),
           case rows {
             Some(n) -> attribute.rows(n)
             None -> class(scoped("resizable-y"))

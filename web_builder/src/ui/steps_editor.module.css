@@ -11,18 +11,25 @@ SPDX-License-Identifier: Apache-2.0
 	display: flex;
 	flex-direction: column;
 	gap: 40px;
-	padding: 8px 16px;
+	padding: 16px;
 }
 
 .list {
 	display: flex;
 	flex-direction: column;
-	gap: 32px;
+	gap: 16px;
 }
 
 .step {
 	display: flex;
 	gap: 16px;
+}
+
+.insert-button {
+	opacity: 0;
+}
+.insert-button:hover, .insert-button:focus-visible {
+	opacity: 1;
 }
 
 .step-header {
