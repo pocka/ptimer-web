@@ -100,6 +100,20 @@ async function parseFile(
 }
 
 async function main() {
+	// SQLite WASM incorrectly emits OPFS warning regardless of OPFS storage usage.
+	// There is no "official" API and this is the only available option (hack).
+	// https://sqlite.org/forum/forumpost/6549a274f04ab0b4
+	// @ts-ignore
+	self.sqlite3ApiConfig = {
+		warn(msg: unknown) {
+			if (typeof msg === "string" && /OPFS/.test(msg)) {
+				return;
+			}
+
+			console.warn(msg);
+		},
+	};
+
 	const sqlite3 = await initSqlite3({
 		print: console.debug,
 		printErr: console.error,
