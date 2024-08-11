@@ -42,8 +42,8 @@ pub fn view(
             on_update(
               ptimer.Ptimer(
                 ..timer,
-                steps: list.map(timer.steps, fn(a) {
-                  case a == step {
+                steps: list.index_map(timer.steps, fn(a, j) {
+                  case i == j && a == step {
                     True -> payload
                     False -> a
                   }
