@@ -162,6 +162,19 @@ pub fn view(
                   _ -> element.none()
                 },
               ]),
+              html.div([class(scoped("step-actions"))], [
+                button.button(
+                  button.Normal,
+                  button.Enabled(on_update(
+                    ptimer.Ptimer(
+                      ..timer,
+                      steps: list.filter(timer.steps, fn(a) { a != step }),
+                    ),
+                  )),
+                  [],
+                  [element.text("Delete")],
+                ),
+              ]),
             ]),
           ])
         }),
