@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
+	ChevronDown,
 	ClipboardList,
 	createElement,
 	FileMusic,
@@ -33,6 +34,7 @@ function createLucideCustomElement(icon: IconNode): typeof HTMLElement {
 }
 
 export function register() {
+	customElements.define("lucide-chevron-down", createLucideCustomElement(ChevronDown));
 	customElements.define("lucide-list-ordered", createLucideCustomElement(ListOrdered));
 	customElements.define("lucide-file-music", createLucideCustomElement(FileMusic));
 	customElements.define("lucide-grip-horizontal", createLucideCustomElement(GripHorizontal));

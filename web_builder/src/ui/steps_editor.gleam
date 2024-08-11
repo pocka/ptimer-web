@@ -16,6 +16,7 @@ import lustre/element/html
 import ptimer
 import storybook
 import ui/button
+import ui/selectbox
 import ui/textbox
 
 // VIEW
@@ -35,6 +36,20 @@ pub fn view(
         list.index_map(timer.steps, fn(step, i) {
           let id_prefix = "step_" <> int.to_string(i) <> "_"
 
+          let update_step = fn(payload: ptimer.Step) {
+            on_update(
+              ptimer.Ptimer(
+                ..timer,
+                steps: list.map(timer.steps, fn(a) {
+                  case a == step {
+                    True -> payload
+                    False -> a
+                  }
+                }),
+              ),
+            )
+          }
+
           html.li([class(scoped("step"))], [
             html.div([class(scoped("step-header"))], [
               lucide.icon(lucide.GripHorizontal, [class(scoped("grip"))]),
@@ -48,17 +63,7 @@ pub fn view(
               textbox.textbox(
                 step.title,
                 textbox.Enabled(fn(title) {
-                  on_update(
-                    ptimer.Ptimer(
-                      ..timer,
-                      steps: list.map(timer.steps, fn(a) {
-                        case a == step {
-                          True -> ptimer.Step(..step, title:)
-                          False -> a
-                        }
-                      }),
-                    ),
-                  )
+                  update_step(ptimer.Step(..step, title:))
                 }),
                 textbox.SingleLine,
                 [attribute.id(id_prefix <> "title")],
@@ -69,27 +74,37 @@ pub fn view(
               textbox.textbox(
                 step.description |> option.unwrap(""),
                 textbox.Enabled(fn(description) {
-                  on_update(
-                    ptimer.Ptimer(
-                      ..timer,
-                      steps: list.map(timer.steps, fn(a) {
-                        case a == step {
-                          True ->
-                            ptimer.Step(
-                              ..step,
-                              description: case description {
-                                "" -> None
-                                str -> Some(str)
-                              },
-                            )
-                          False -> a
-                        }
-                      }),
+                  update_step(
+                    ptimer.Step(
+                      ..step,
+                      description: case description {
+                        "" -> None
+                        str -> Some(str)
+                      },
                     ),
                   )
                 }),
                 textbox.MultiLine(Some(3)),
                 [attribute.id(id_prefix <> "description")],
+              ),
+              html.label([attribute.for(id_prefix <> "type")], [
+                element.text("Type"),
+              ]),
+              selectbox.selectbox(
+                step.action,
+                [
+                  #("UserAction", ptimer.UserAction),
+                  #("Timer", case step.action {
+                    ptimer.Timer(_) -> step.action
+
+                    _ -> ptimer.Timer(3)
+                  }),
+                ],
+                selectbox.Enabled(fn(option) {
+                  update_step(ptimer.Step(..step, action: option))
+                }),
+                [attribute.id(id_prefix <> "type")],
+                [],
               ),
             ]),
           ])
@@ -149,7 +164,7 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
                   title: "Second Step",
                   description: None,
                   sound: None,
-                  action: ptimer.Timer(3),
+                  action: ptimer.Timer(5),
                 ),
               ],
               assets: [],

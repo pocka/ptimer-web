@@ -6,6 +6,7 @@ import lustre/attribute
 import lustre/element
 
 pub type IconType {
+  ChevronDown
   ClipboardList
   FileMusic
   FolderOpen
@@ -17,6 +18,7 @@ pub type IconType {
 
 fn icon_type_to_string(icon_type: IconType) -> String {
   case icon_type {
+    ChevronDown -> "chevron-down"
     ClipboardList -> "clipboard-list"
     FileMusic -> "file-music"
     FolderOpen -> "folder-open"

@@ -40,5 +40,6 @@ export const CreateFromScratch: Story = {
 		await userEvent.click(root.getByRole("button", { name: /add step/i }));
 		await userEvent.type(root.getByRole("textbox", { name: /title/i }), "Step One");
 		await userEvent.type(root.getByRole("textbox", { name: /description/i }), "Description for{enter}Step One");
+		await userEvent.selectOptions(root.getByRole("combobox", { name: /type$/i }), "Timer");
 	},
 };
