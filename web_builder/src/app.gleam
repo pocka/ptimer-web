@@ -258,12 +258,20 @@ fn with_file(
           element.text("Ptimer editor"),
         ]),
         html.div([class(scoped("welcome-actions"))], [
-          button.button(button.Primary, button.Enabled(OpenFilePicker), [], [
-            element.text("Select file"),
-          ]),
-          button.button(button.Normal, button.Enabled(CreateNewTimer), [], [
-            element.text("Create new timer"),
-          ]),
+          button.button(
+            button.Primary,
+            button.Enabled(OpenFilePicker),
+            button.Medium,
+            [],
+            [element.text("Select file")],
+          ),
+          button.button(
+            button.Normal,
+            button.Enabled(CreateNewTimer),
+            button.Medium,
+            [],
+            [element.text("Create new timer")],
+          ),
         ]),
       ])
 

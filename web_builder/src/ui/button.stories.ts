@@ -10,6 +10,8 @@ interface Args {
 	variant: "primary" | "normal";
 
 	state: "disabled" | "enabled" | "loading";
+
+	size: "small" | "medium";
 }
 
 export default {
@@ -19,6 +21,7 @@ export default {
 	args: {
 		variant: "primary",
 		state: "enabled",
+		size: "medium",
 	},
 	argTypes: {
 		variant: {
@@ -28,6 +31,10 @@ export default {
 		state: {
 			control: "radio",
 			options: ["enabled", "disabled", "loading"],
+		},
+		size: {
+			control: "radio",
+			options: ["small", "medium"],
 		},
 	},
 } satisfies Meta<Args>;
@@ -39,5 +46,11 @@ export const Primary: Story = {};
 export const Normal: Story = {
 	args: {
 		variant: "normal",
+	},
+};
+
+export const Small: Story = {
+	args: {
+		size: "small",
 	},
 };

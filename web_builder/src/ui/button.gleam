@@ -77,14 +77,27 @@ fn set_variant_attrs(
   }
 }
 
+pub type Size {
+  Small
+  Medium
+}
+
+fn size_attr(size: Size) -> attribute.Attribute(msg) {
+  case size {
+    Small -> class(scoped("small"))
+    Medium -> class(scoped("medium"))
+  }
+}
+
 pub fn button(
   variant: Variant,
   state: State(msg),
+  size: Size,
   attrs: List(attribute.Attribute(msg)),
   children: List(element.Element(msg)),
 ) -> element.Element(msg) {
   let final_attrs =
-    attrs
+    [size_attr(size), ..attrs]
     |> list.prepend(class(scoped("button")))
     |> set_variant_attrs(variant)
     |> set_state_attrs(state)
@@ -109,6 +122,12 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
     _ -> Enabled("onClick")
   }
 
+  let size = case flags |> dynamic.field("size", dynamic.string) {
+    Ok("small") -> Small
+    Ok("medium") -> Medium
+    _ -> Medium
+  }
+
   let _ =
     lustre.simple(
       function.identity,
@@ -116,7 +135,9 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
         action("story_update", dynamic.from(b))
         a
       },
-      fn(_) { button(variant, state, [], [element.text("Hello, Storybook!")]) },
+      fn(_) {
+        button(variant, state, size, [], [element.text("Hello, Storybook!")])
+      },
     )
     |> lustre.start(selector, flags)
 
