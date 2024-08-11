@@ -107,9 +107,9 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
   let _ =
     lustre.simple(
       fn(_) { default_value },
-      fn(a, b: #(String, String)) {
+      fn(_, b: #(String, String)) {
         action(b.0, dynamic.from(b.1))
-        a
+        b.1
       },
       fn(value) { textbox(value, state, mode, []) },
     )

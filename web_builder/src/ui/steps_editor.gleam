@@ -16,6 +16,7 @@ import lustre/element/html
 import ptimer
 import storybook
 import ui/button
+import ui/int_input
 import ui/selectbox
 import ui/textbox
 
@@ -106,6 +107,34 @@ pub fn view(
                 [attribute.id(id_prefix <> "type")],
                 [],
               ),
+              case step.action {
+                ptimer.Timer(duration) ->
+                  html.div([], [
+                    html.label([attribute.for(id_prefix <> "duration")], [
+                      element.text("Duration"),
+                    ]),
+                    int_input.view(
+                      duration,
+                      int_input.Enabled(fn(n) {
+                        update_step(
+                          ptimer.Step(
+                            ..step,
+                            action: ptimer.Timer(int.clamp(
+                              n,
+                              min: 1,
+                              max: 60 * 60 * 24,
+                            )),
+                          ),
+                        )
+                      }),
+                      Some(element.text("secs.")),
+                      [attribute.id(id_prefix <> "duration")],
+                      [],
+                    ),
+                  ])
+
+                _ -> element.none()
+              },
             ]),
           ])
         }),
