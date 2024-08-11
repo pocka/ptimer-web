@@ -123,6 +123,8 @@ SPDX-License-Identifier: Apache-2.0
 
 @media (prefers-contrast: more) {
 	:root {
+		--alpha-dimmed: 80%;
+
 		--alpha-border-subtle: 80%;
 		--alpha-border-medium: 90%;
 		--alpha-border-strong: 100%;
