@@ -42,5 +42,13 @@ export const CreateFromScratch: Story = {
 		await userEvent.type(root.getByRole("textbox", { name: /description/i }), "Description for{enter}Step One");
 		await userEvent.selectOptions(root.getByRole("combobox", { name: /type$/i }), "Timer");
 		await userEvent.type(root.getByRole("textbox", { name: /duration/i }), "{backspace}120");
+
+		await userEvent.click(root.getByRole("button", { name: /add step/i }));
+		await userEvent.type(root.getAllByRole("textbox", { name: /title/i }).at(1)!, "Step Two");
+		await userEvent.click(root.getAllByRole("button", { name: /delete/i }).at(1)!);
+
+		const stepTitles = root.getAllByRole("textbox", { name: /title/i });
+		await expect(stepTitles.length).toBe(1);
+		await expect(stepTitles[0]).toHaveValue("Step One");
 	},
 };
