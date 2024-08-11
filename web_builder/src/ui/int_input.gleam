@@ -100,6 +100,7 @@ pub fn view(
     html.input(
       [
         class(scoped_textbox("textbox")),
+        class(scoped("int")),
         // `<input type="number">` is dogshit: it returns empty `value` for invalid
         // values, displays ugly and most of the time useless spinner, not able to
         // specify format, etc...

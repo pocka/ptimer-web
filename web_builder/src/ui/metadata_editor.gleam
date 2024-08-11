@@ -12,6 +12,7 @@ import lustre/element
 import lustre/element/html
 import ptimer
 import storybook
+import ui/field
 import ui/textbox
 
 // VIEW
@@ -28,9 +29,10 @@ pub fn view(
 
   html.div([], [
     html.div([class(scoped("form")), ..attrs], [
-      html.div([class(scoped("field"))], [
-        html.label([attribute.for("metadata_title")], [element.text("Title")]),
-        textbox.textbox(
+      field.view(
+        id: "metadata_title",
+        label: [element.text("Title")],
+        input: textbox.textbox(
           metadata.title,
           textbox.Enabled(fn(value) {
             on_update(
@@ -41,14 +43,19 @@ pub fn view(
             )
           }),
           textbox.SingleLine,
-          [attribute.id("metadata_title")],
+          _,
         ),
-      ]),
-      html.div([class(scoped("field"))], [
-        html.label([attribute.for("metadata_description")], [
-          element.text("Description"),
+        note: Some([
+          element.text(
+            "Title text shown when a user open the .ptimer file. This will also be a generated filename.",
+          ),
         ]),
-        textbox.textbox(
+        attrs: [],
+      ),
+      field.view(
+        id: "metadata_description",
+        label: [element.text("Description")],
+        input: textbox.textbox(
           metadata.description |> option.unwrap(""),
           textbox.Enabled(fn(value) {
             on_update(
@@ -66,14 +73,15 @@ pub fn view(
             )
           }),
           textbox.MultiLine(Some(4)),
-          [attribute.id("metadata_description")],
+          _,
         ),
-      ]),
-      html.div([class(scoped("field"))], [
-        html.label([attribute.for("metadata_lang")], [
-          element.text("Language Code"),
-        ]),
-        textbox.textbox(
+        note: None,
+        attrs: [],
+      ),
+      field.view(
+        id: "metadata_lang",
+        label: [element.text("Language Code")],
+        input: textbox.textbox(
           metadata.lang,
           textbox.Enabled(fn(value) {
             on_update(
@@ -84,9 +92,24 @@ pub fn view(
             )
           }),
           textbox.SingleLine,
-          [attribute.id("metadata_lang")],
+          _,
         ),
-      ]),
+        note: Some([
+          html.a(
+            [
+              class(scoped("link")),
+              attribute.href("https://en.wikipedia.org/wiki/IETF_language_tag"),
+              attribute.target("_blank"),
+              attribute.rel("noopener"),
+            ],
+            [element.text("Language Code (IETF BCP 47 language tag)")],
+          ),
+          element.text(
+            " of this timer file. For example, if you write titles and descriptions in English (US), type \"en-US\".",
+          ),
+        ]),
+        attrs: [],
+      ),
     ]),
   ])
 }

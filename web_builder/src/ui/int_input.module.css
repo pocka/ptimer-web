@@ -10,6 +10,10 @@ SPDX-License-Identifier: Apache-2.0
 	position: relative;
 }
 
+.int.int {
+	width: 100%;
+}
+
 .unit {
 	position: absolute;
 	bottom: 4px;
