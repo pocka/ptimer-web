@@ -24,6 +24,10 @@ SPDX-License-Identifier: Apache-2.0
 	overflow-x: hidden;
 }
 
+.code {
+	font-family: var(--font-mono);
+}
+
 .logs-container {
 	position: absolute;
 	inset: 0;
@@ -41,35 +45,6 @@ SPDX-License-Identifier: Apache-2.0
 	background-color: oklch(var(--color-bg1));
 	border-radius: 3px;
 	overflow-y: scroll;
-}
-
-.placeholder {
-	position: absolute;
-	inset: 0;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	gap: 24px;
-}
-
-.placeholder-title {
-	font-size: 1.1rem;
-	font-weight: bold;
-}
-
-.placeholder-icon {
-	font-size: min(2.2rem, 64px);
-	display: inline-flex;
-	opacity: 0.3;
-}
-
-.welcome-actions {
-	display: inline-flex;
-	flex-direction: column;
-	justify-content: start;
-	align-items: stretch;
-	gap: 12px;
 }
 
 @media (orientation: landscape) {

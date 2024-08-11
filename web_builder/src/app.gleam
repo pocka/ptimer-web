@@ -19,6 +19,7 @@ import storybook
 import ui/button
 import ui/menu
 import ui/metadata_editor
+import ui/placeholder
 import ui/steps_editor
 
 // MODEL
@@ -253,11 +254,14 @@ fn with_file(
     Loaded(engine), Some(timer) -> callback(engine, timer)
 
     Loaded(_), None ->
-      html.div([class(scoped("placeholder"))], [
-        html.p([class(scoped("placeholder-title"))], [
-          element.text("Ptimer editor"),
-        ]),
-        html.div([class(scoped("welcome-actions"))], [
+      placeholder.view(
+        title: [element.text("Ptimer editor")],
+        description: [
+          element.text("This is an editor application for "),
+          html.code([class(scoped("code"))], [element.text(".ptimer")]),
+          element.text(" files."),
+        ],
+        actions: [
           button.button(
             button.Primary,
             button.Enabled(OpenFilePicker),
@@ -274,8 +278,9 @@ fn with_file(
             [],
             [element.text("Create new timer")],
           ),
-        ]),
-      ])
+        ],
+        attrs: [],
+      )
 
     Loading, _ -> html.p([], [element.text("Loading Ptimer engine...")])
 
