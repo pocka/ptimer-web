@@ -6,6 +6,7 @@ import gleam/dynamic
 import gleam/function
 import gleam/list
 import gleam/option.{type Option, None, Some}
+import lucide
 import lustre
 import lustre/attribute.{class}
 import lustre/element
@@ -93,6 +94,7 @@ pub fn button(
   variant: Variant,
   state: State(msg),
   size: Size,
+  icon: Option(lucide.IconType),
   attrs: List(attribute.Attribute(msg)),
   children: List(element.Element(msg)),
 ) -> element.Element(msg) {
@@ -102,7 +104,15 @@ pub fn button(
     |> set_variant_attrs(variant)
     |> set_state_attrs(state)
 
-  html.button(final_attrs, [html.span([], children), state_text(state)])
+  html.button(final_attrs, [
+    case icon {
+      Some(icon_type) -> lucide.icon(icon_type, [class(scoped("icon"))])
+
+      None -> element.none()
+    },
+    html.span([], children),
+    state_text(state),
+  ])
 }
 
 pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
@@ -128,6 +138,15 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
     _ -> Medium
   }
 
+  let icon = case
+    flags
+    |> dynamic.field("icon", dynamic.bool)
+  {
+    Ok(True) -> Some(lucide.FileMusic)
+
+    _ -> None
+  }
+
   let _ =
     lustre.simple(
       function.identity,
@@ -136,7 +155,9 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
         a
       },
       fn(_) {
-        button(variant, state, size, [], [element.text("Hello, Storybook!")])
+        button(variant, state, size, icon, [], [
+          element.text("Hello, Storybook!"),
+        ])
       },
     )
     |> lustre.start(selector, flags)

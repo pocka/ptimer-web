@@ -6,13 +6,20 @@ SPDX-License-Identifier: Apache-2.0
 
 .button {
 	display: inline-flex;
+	align-items: center;
 	justify-content: center;
+	gap: 6px;
 	font-size: 1rem;
 	border: 1px solid;
 
 	cursor: pointer;
 
 	text-align: center;
+}
+
+.icon {
+	font-size: 1.05em;
+	display: inline-flex;
 }
 
 .primary {

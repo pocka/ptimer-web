@@ -9,11 +9,14 @@ pub type IconType {
   ChevronDown
   ClipboardList
   FileMusic
+  FilePlus
   FolderOpen
   GripHorizontal
   ListOrdered
+  ListPlus
   Menu
   ScrollText
+  Trash2
 }
 
 fn icon_type_to_string(icon_type: IconType) -> String {
@@ -21,11 +24,14 @@ fn icon_type_to_string(icon_type: IconType) -> String {
     ChevronDown -> "chevron-down"
     ClipboardList -> "clipboard-list"
     FileMusic -> "file-music"
+    FilePlus -> "file-plus"
     FolderOpen -> "folder-open"
     GripHorizontal -> "grip-horizontal"
     ListOrdered -> "list-ordered"
+    ListPlus -> "list-plus"
     Menu -> "menu"
     ScrollText -> "scroll-text"
+    Trash2 -> "trash2"
   }
 }
 
