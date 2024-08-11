@@ -11,7 +11,7 @@ on:
       - "*"
 
 jobs:
-  build-web:
+  build-player:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,15 +22,15 @@ jobs:
           bun-version: "1.1"
       - name: Install dependencies
         run: "bun i"
-        working-directory: web
+        working-directory: web_player
       - name: Build the app
         run: "bun run build --public-url '/${{ github.event.repository.name }}/'"
-        working-directory: web
+        working-directory: web_player
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: main
-          path: web/dist
+          path: web_player/dist
 
   build-builder:
     runs-on: ubuntu-latest
@@ -88,7 +88,7 @@ jobs:
     # Deploy only on master branch
     if: github.ref == 'refs/heads/master'
     needs:
-      - build-web
+      - build-player
       - build-builder
       - build-builder-storybook
     runs-on: ubuntu-latest
