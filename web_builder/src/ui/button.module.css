@@ -5,6 +5,8 @@ SPDX-License-Identifier: Apache-2.0
 */
 
 .button {
+	--_alpha: 1;
+
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -16,6 +18,9 @@ SPDX-License-Identifier: Apache-2.0
 
 	text-align: center;
 }
+.button:disabled, .button[aria-disabled="true"] {
+	--_alpha: var(--alpha-disabled);
+}
 
 .icon {
 	font-size: 1.05em;
@@ -23,13 +28,14 @@ SPDX-License-Identifier: Apache-2.0
 }
 
 .primary {
-	background-color: oklch(var(--color-accent-bg));
+	background-color: oklch(var(--color-accent-bg) / var(--_alpha));
 	border-color: oklch(var(--color-accent-bg));
-	color: oklch(var(--color-accent-fg));
+	color: oklch(var(--color-accent-fg) / var(--_alpha));
 }
 
 .normal {
-	border-color: oklch(var(--color-border) / 0.5);
+	border-color: oklch(var(--color-border) / var(--alpha-border-strong));
+	color: oklch(var(--color-fg) / var(--_alpha));
 }
 
 .medium {

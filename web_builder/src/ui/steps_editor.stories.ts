@@ -127,3 +127,59 @@ export const ShouldInsertBlankStep: Story = {
 		await expect(root.getAllByRole("textbox", { name: /description/i }).at(1)).toHaveValue("1st description");
 	},
 };
+
+export const ShouldMoveCorrectly: Story = {
+	args: {
+		steps: [
+			{
+				title: "#4",
+				description: null,
+				sound: null,
+				duration_seconds: null,
+			},
+			{
+				title: "#3",
+				description: null,
+				sound: null,
+				duration_seconds: null,
+			},
+			{
+				title: "#1",
+				description: null,
+				sound: null,
+				duration_seconds: null,
+			},
+			{
+				title: "#2",
+				description: null,
+				sound: null,
+				duration_seconds: null,
+			},
+		],
+	},
+	async play({ canvasElement }) {
+		const root = within(canvasElement);
+
+		// [#4, #3, #1, #2]
+
+		await waitFor(() => userEvent.click(root.getAllByRole("button", { name: /move/i }).at(0)!));
+		await userEvent.click(root.getAllByRole("button", { name: /move.+here/i }).at(2)!);
+
+		// [#3, #1, #2, #4]
+
+		await userEvent.click(root.getAllByRole("button", { name: /move/i }).at(1)!);
+		await userEvent.click(root.getAllByRole("button", { name: /move.+here/i }).at(0)!);
+
+		// [#1, #3, #2, #4]
+
+		await userEvent.click(root.getAllByRole("button", { name: /move/i }).at(1)!);
+		await userEvent.click(root.getAllByRole("button", { name: /move.+here/i }).at(1)!);
+
+		// [#1, #2, #3, #4]
+
+		await expect(root.getAllByRole("textbox", { name: /title/i }).at(0)).toHaveValue("#1");
+		await expect(root.getAllByRole("textbox", { name: /title/i }).at(1)).toHaveValue("#2");
+		await expect(root.getAllByRole("textbox", { name: /title/i }).at(2)).toHaveValue("#3");
+		await expect(root.getAllByRole("textbox", { name: /title/i }).at(3)).toHaveValue("#4");
+	},
+};

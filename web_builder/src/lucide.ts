@@ -3,8 +3,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
+	ArrowDownUp,
+	Ban,
 	ChevronDown,
 	ClipboardList,
+	CornerLeftDown,
 	createElement,
 	FileMusic,
 	FilePlus,
@@ -37,7 +40,10 @@ function createLucideCustomElement(icon: IconNode): typeof HTMLElement {
 }
 
 export function register() {
+	customElements.define("lucide-arrow-down-up", createLucideCustomElement(ArrowDownUp));
+	customElements.define("lucide-ban", createLucideCustomElement(Ban));
 	customElements.define("lucide-chevron-down", createLucideCustomElement(ChevronDown));
+	customElements.define("lucide-corner-left-down", createLucideCustomElement(CornerLeftDown));
 	customElements.define("lucide-list-ordered", createLucideCustomElement(ListOrdered));
 	customElements.define("lucide-list-plus", createLucideCustomElement(ListPlus));
 	customElements.define("lucide-file-music", createLucideCustomElement(FileMusic));

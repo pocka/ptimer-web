@@ -38,7 +38,7 @@ type ParsingJob {
 
 type Scene {
   MetadataEditor
-  StepsEditor
+  StepsEditor(steps_editor.Model)
   AssetsEditor
   LogsViewer
 }
@@ -108,6 +108,8 @@ pub opaque type Msg {
   Parse(file: dynamic.Dynamic)
   ReceiveParseResult(Result(ptimer.Ptimer, ptimer.ParseError))
   NavigateTo(Scene)
+  OpenStepsEditor
+  StepsEditorMsg(steps_editor.Msg)
   OpenFilePicker
   CreateNewTimer
   UpdateTimer(ptimer.Ptimer)
@@ -183,6 +185,47 @@ pub fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
       Model(..model, scene: scene),
       effect.none(),
     )
+
+    OpenStepsEditor, _ -> {
+      case model.scene {
+        StepsEditor(_) -> #(model, effect.none())
+
+        _ -> {
+          let #(m, e) = steps_editor.init(Nil)
+
+          #(
+            Model(..model, scene: StepsEditor(m)),
+            effect.map(e, StepsEditorMsg),
+          )
+        }
+      }
+    }
+
+    StepsEditorMsg(steps_editor.UpdateSteps(steps)),
+      Model(
+        scene: StepsEditor(sub_model),
+        timer: Some(timer),
+        ..,
+      )
+    -> {
+      let #(m, e) =
+        steps_editor.update(sub_model, steps_editor.UpdateSteps(steps))
+
+      #(
+        Model(
+          ..model,
+          scene: StepsEditor(m),
+          timer: Some(ptimer.Ptimer(..timer, steps:)),
+        ),
+        effect.map(e, StepsEditorMsg),
+      )
+    }
+
+    StepsEditorMsg(sub_msg), Model(scene: StepsEditor(sub_model), ..) -> {
+      let #(m, e) = steps_editor.update(sub_model, sub_msg)
+
+      #(Model(..model, scene: StepsEditor(m)), effect.map(e, StepsEditorMsg))
+    }
 
     OpenFilePicker, _ -> #(model, select_file())
 
@@ -307,8 +350,11 @@ pub fn view(model: Model) -> element.Element(Msg) {
         menu.item(
           lucide.ListOrdered,
           [
-            menu.active(model.scene == StepsEditor),
-            event.on_click(NavigateTo(StepsEditor)),
+            menu.active(case model.scene {
+              StepsEditor(_) -> True
+              _ -> False
+            }),
+            event.on_click(OpenStepsEditor),
           ],
           [element.text("Steps")],
         ),
@@ -346,10 +392,10 @@ pub fn view(model: Model) -> element.Element(Msg) {
           metadata_editor.view(file, UpdateTimer, [])
         }
 
-        StepsEditor -> {
+        StepsEditor(sub_model) -> {
           use _, file <- with_file(model)
 
-          steps_editor.view(file, UpdateTimer, [])
+          steps_editor.view(file, sub_model, []) |> element.map(StepsEditorMsg)
         }
 
         AssetsEditor -> {

@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import gleam/dynamic
-import gleam/function
 import gleam/int
 import gleam/list
 import gleam/option.{None, Some}
@@ -11,6 +10,7 @@ import gleam/result
 import lucide
 import lustre
 import lustre/attribute.{type Attribute, class}
+import lustre/effect
 import lustre/element
 import lustre/element/html
 import ptimer
@@ -21,6 +21,47 @@ import ui/int_input
 import ui/placeholder
 import ui/selectbox
 import ui/textbox
+
+// MODEL
+
+type MoveOperation {
+  Idle
+  ByButton(from: Int, source: ptimer.Step)
+}
+
+pub opaque type Model {
+  Model(move_op: MoveOperation)
+}
+
+pub fn init(_) -> #(Model, effect.Effect(Msg)) {
+  #(Model(move_op: Idle), effect.none())
+}
+
+// UPDATE
+
+pub opaque type InternalMsg {
+  StartManualMove(from: Int, source: ptimer.Step)
+  CancelManualMove
+}
+
+pub type Msg {
+  UpdateSteps(List(ptimer.Step))
+
+  Internal(InternalMsg)
+}
+
+pub fn update(_model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
+  case msg {
+    Internal(StartManualMove(from, source)) -> #(
+      Model(move_op: ByButton(from, source)),
+      effect.none(),
+    )
+
+    Internal(CancelManualMove) -> #(Model(move_op: Idle), effect.none())
+
+    UpdateSteps(_) -> #(Model(move_op: Idle), effect.none())
+  }
+}
 
 // VIEW
 
@@ -59,70 +100,113 @@ fn remove_at(items: List(a), at at: Int) -> List(a) {
 }
 
 fn step_views(
+  model: Model,
   steps: List(ptimer.Step),
   timer: ptimer.Ptimer,
-  on_update: fn(ptimer.Ptimer) -> msg,
   index: Int,
-) -> List(element.Element(msg)) {
+) -> List(element.Element(Msg)) {
   case steps {
     [] -> [
-      button.button(
-        button.Primary,
-        button.Enabled(on_update(
-          ptimer.Ptimer(
-            ..timer,
-            steps: list.append(timer.steps, [
-              ptimer.Step(
-                title: "",
-                description: None,
-                sound: None,
-                action: ptimer.UserAction,
+      case model.move_op {
+        Idle ->
+          button.button(
+            button.Primary,
+            button.Enabled(
+              UpdateSteps(
+                list.append(timer.steps, [
+                  ptimer.Step(
+                    title: "",
+                    description: None,
+                    sound: None,
+                    action: ptimer.UserAction,
+                  ),
+                ]),
               ),
-            ]),
-          ),
-        )),
-        button.Medium,
-        Some(lucide.ListPlus),
-        [],
-        [element.text("Add step")],
-      ),
+            ),
+            button.Medium,
+            Some(lucide.ListPlus),
+            [],
+            [element.text("Add step")],
+          )
+
+        ByButton(from, source) ->
+          button.button(
+            button.Normal,
+            button.Enabled(UpdateSteps(
+              timer.steps
+              |> remove_at(from)
+              |> list.append([source]),
+            )),
+            button.Medium,
+            Some(lucide.CornerLeftDown),
+            [
+              case from == index - 1 {
+                True -> class(scoped("invisible"))
+                False -> class(scoped("move-button"))
+              },
+            ],
+            [element.text("Move to here")],
+          )
+      },
     ]
 
     [step, ..rest] -> {
       let id_prefix = "step_" <> int.to_string(index) <> "_"
 
       let update_step = fn(payload: ptimer.Step) {
-        on_update(
-          ptimer.Ptimer(
-            ..timer,
-            steps: list.index_map(timer.steps, fn(a, j) {
-              case index == j && a == step {
-                True -> payload
-                False -> a
-              }
-            }),
-          ),
+        UpdateSteps(
+          list.index_map(timer.steps, fn(a, j) {
+            case index == j && a == step {
+              True -> payload
+              False -> a
+            }
+          }),
         )
       }
 
       [
-        button.button(
-          button.Normal,
-          button.Enabled(on_update(
-            ptimer.Ptimer(
-              ..timer,
-              steps: insert_at(
-                timer.steps,
-                ptimer.Step("", None, None, ptimer.UserAction),
-                index,
+        case model.move_op {
+          Idle ->
+            button.button(
+              button.Normal,
+              button.Enabled(
+                UpdateSteps(insert_at(
+                  timer.steps,
+                  ptimer.Step("", None, None, ptimer.UserAction),
+                  index,
+                )),
               ),
-            ),
-          )),
-          button.Medium,
-          Some(lucide.ListPlus),
-          [class(scoped("insert-button"))],
-          [element.text("Insert step")],
-        ),
+              button.Medium,
+              Some(lucide.ListPlus),
+              [class(scoped("insert-button"))],
+              [element.text("Insert step")],
+            )
+
+          ByButton(from, source) ->
+            button.button(
+              button.Normal,
+              button.Enabled(UpdateSteps(
+                timer.steps
+                |> list.index_map(fn(s, i) {
+                  case i == from {
+                    True -> None
+                    False -> Some(s)
+                  }
+                })
+                |> insert_at(Some(source), index)
+                |> list.filter_map(option.to_result(_, Nil)),
+              )),
+              button.Medium,
+              Some(lucide.CornerLeftDown),
+              [
+                case from == index || from == index - 1 {
+                  True -> class(scoped("invisible"))
+                  False -> class(scoped("move-button"))
+                },
+              ],
+              [element.text("Move to here")],
+            )
+        },
         html.div([class(scoped("step"))], [
           html.div([class(scoped("step-header"))], [
             lucide.icon(lucide.GripHorizontal, [class(scoped("grip"))]),
@@ -135,9 +219,14 @@ fn step_views(
               label: [element.text("Title")],
               input: textbox.textbox(
                 step.title,
-                textbox.Enabled(fn(title) {
-                  update_step(ptimer.Step(..step, title:))
-                }),
+                case model.move_op {
+                  Idle ->
+                    textbox.Enabled(fn(title) {
+                      update_step(ptimer.Step(..step, title:))
+                    })
+
+                  _ -> textbox.Disabled
+                },
                 textbox.SingleLine,
                 _,
               ),
@@ -149,17 +238,21 @@ fn step_views(
               label: [element.text("Description")],
               input: textbox.textbox(
                 step.description |> option.unwrap(""),
-                textbox.Enabled(fn(description) {
-                  update_step(
-                    ptimer.Step(
-                      ..step,
-                      description: case description {
-                        "" -> None
-                        str -> Some(str)
-                      },
-                    ),
-                  )
-                }),
+                case model.move_op {
+                  Idle ->
+                    textbox.Enabled(fn(description) {
+                      update_step(
+                        ptimer.Step(
+                          ..step,
+                          description: case description {
+                            "" -> None
+                            str -> Some(str)
+                          },
+                        ),
+                      )
+                    })
+                  _ -> textbox.Disabled
+                },
                 textbox.MultiLine(Some(3)),
                 _,
               ),
@@ -180,9 +273,13 @@ fn step_views(
                       _ -> ptimer.Timer(3)
                     }),
                   ],
-                  selectbox.Enabled(fn(option) {
-                    update_step(ptimer.Step(..step, action: option))
-                  }),
+                  case model.move_op {
+                    Idle ->
+                      selectbox.Enabled(fn(option) {
+                        update_step(ptimer.Step(..step, action: option))
+                      })
+                    _ -> selectbox.Disabled
+                  },
                   _,
                   [],
                 ),
@@ -210,18 +307,22 @@ fn step_views(
                     label: [element.text("Duration")],
                     input: int_input.view(
                       duration,
-                      int_input.Enabled(fn(n) {
-                        update_step(
-                          ptimer.Step(
-                            ..step,
-                            action: ptimer.Timer(int.clamp(
-                              n,
-                              min: 1,
-                              max: 60 * 60 * 24,
-                            )),
-                          ),
-                        )
-                      }),
+                      case model.move_op {
+                        Idle ->
+                          int_input.Enabled(fn(n) {
+                            update_step(
+                              ptimer.Step(
+                                ..step,
+                                action: ptimer.Timer(int.clamp(
+                                  n,
+                                  min: 1,
+                                  max: 60 * 60 * 24,
+                                )),
+                              ),
+                            )
+                          })
+                        _ -> int_input.Disabled
+                      },
                       Some(element.text("secs.")),
                       _,
                       [],
@@ -234,11 +335,45 @@ fn step_views(
               },
             ]),
             html.div([class(scoped("step-actions"))], [
+              case model.move_op {
+                Idle ->
+                  button.button(
+                    button.Normal,
+                    button.Enabled(Internal(StartManualMove(index, step))),
+                    button.Small,
+                    Some(lucide.ArrowDownUp),
+                    [],
+                    [element.text("Move")],
+                  )
+
+                ByButton(from, _) if from == index ->
+                  button.button(
+                    button.Primary,
+                    button.Enabled(Internal(CancelManualMove)),
+                    button.Small,
+                    Some(lucide.Ban),
+                    [],
+                    [element.text("Cancel")],
+                  )
+
+                ByButton(_, _) ->
+                  button.button(
+                    button.Normal,
+                    button.Disabled(None),
+                    button.Small,
+                    Some(lucide.ArrowDownUp),
+                    [],
+                    [element.text("Move")],
+                  )
+              },
               button.button(
                 button.Normal,
-                button.Enabled(on_update(
-                  ptimer.Ptimer(..timer, steps: remove_at(timer.steps, index)),
-                )),
+                case model.move_op {
+                  Idle ->
+                    button.Enabled(UpdateSteps(remove_at(timer.steps, index)))
+
+                  _ -> button.Disabled(None)
+                },
                 button.Small,
                 Some(lucide.Trash2),
                 [],
@@ -247,7 +382,7 @@ fn step_views(
             ]),
           ]),
         ]),
-        ..step_views(rest, timer, on_update, index + 1)
+        ..step_views(model, rest, timer, index + 1)
       ]
     }
   }
@@ -255,9 +390,9 @@ fn step_views(
 
 pub fn view(
   timer: ptimer.Ptimer,
-  on_update: fn(ptimer.Ptimer) -> msg,
-  attrs: List(Attribute(msg)),
-) -> element.Element(msg) {
+  model: Model,
+  attrs: List(Attribute(Msg)),
+) -> element.Element(Msg) {
   case timer.steps {
     [] ->
       placeholder.view(
@@ -270,12 +405,9 @@ pub fn view(
         actions: [
           button.button(
             button.Primary,
-            button.Enabled(on_update(
-              ptimer.Ptimer(
-                ..timer,
-                steps: [ptimer.Step("", None, None, ptimer.UserAction)],
-              ),
-            )),
+            button.Enabled(
+              UpdateSteps([ptimer.Step("", None, None, ptimer.UserAction)]),
+            ),
             button.Medium,
             Some(lucide.ListPlus),
             [],
@@ -288,17 +420,41 @@ pub fn view(
     steps ->
       html.div(attrs, [
         html.div([class(scoped("container"))], [
-          html.div(
-            [class(scoped("list"))],
-            step_views(steps, timer, on_update, 0),
-          ),
+          html.div([class(scoped("list"))], step_views(model, steps, timer, 0)),
         ]),
       ])
   }
 }
 
+type StoryModel {
+  StoryModel(timer: ptimer.Ptimer, model: Model)
+}
+
 pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
   use selector, flags, action <- storybook.story(args, ctx)
+
+  let story_update = fn(model: StoryModel, msg: Msg) -> #(
+    StoryModel,
+    effect.Effect(Msg),
+  ) {
+    case msg {
+      UpdateSteps(steps) -> {
+        action("UpdateSteps", dynamic.from(steps))
+
+        let #(m, e) = update(model.model, msg)
+
+        #(StoryModel(ptimer.Ptimer(..model.timer, steps:), m), e)
+      }
+
+      Internal(internal_msg) -> {
+        action("Internal", dynamic.from(internal_msg))
+
+        let #(m, e) = update(model.model, msg)
+
+        #(StoryModel(model.timer, m), e)
+      }
+    }
+  }
 
   let steps =
     flags
@@ -306,23 +462,22 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
     |> result.unwrap([])
 
   let _ =
-    lustre.simple(
+    lustre.application(
       fn(_) {
-        ptimer.Ptimer(
-          metadata: ptimer.Metadata(
-            title: "Sample Timer",
-            description: None,
-            lang: "en-US",
+        #(
+          StoryModel(
+            ptimer.Ptimer(
+              metadata: ptimer.Metadata("Sample Story", None, "en-US"),
+              steps:,
+              assets: [],
+            ),
+            Model(move_op: Idle),
           ),
-          steps:,
-          assets: [],
+          effect.none(),
         )
       },
-      fn(_, new_timer) {
-        action("on_update", dynamic.from(new_timer))
-        new_timer
-      },
-      view(_, function.identity, []),
+      story_update,
+      fn(model) { view(model.timer, model.model, []) },
     )
     |> lustre.start(selector, Nil)
 

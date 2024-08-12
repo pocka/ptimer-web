@@ -76,4 +76,10 @@ SPDX-License-Identifier: Apache-2.0
 .step-actions {
 	display: flex;
 	justify-content: end;
+	align-items: center;
+	gap: 8px;
+}
+
+.invisible {
+	visibility: hidden;
 }
