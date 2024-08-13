@@ -65,6 +65,16 @@ jobs:
         with:
           otp-version: "27"
           gleam-version: "1.4"
-      - name: Perform type check
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: "1.1"
+      - name: Install dependencies
+        run: "bun i"
+        working-directory: web_builder
+      - name: Check TypeScript types
+        run: "bunx tsc"
+        working-directory: web_builder
+      - name: Check Gleam types
         run: "gleam check"
         working-directory: web_builder
