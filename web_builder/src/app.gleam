@@ -395,7 +395,7 @@ pub fn view(model: Model) -> element.Element(Msg) {
         StepsEditor(sub_model) -> {
           use _, file <- with_file(model)
 
-          steps_editor.view(file, sub_model, []) |> element.map(StepsEditorMsg)
+          steps_editor.view(StepsEditorMsg, file, sub_model, [])
         }
 
         AssetsEditor -> {

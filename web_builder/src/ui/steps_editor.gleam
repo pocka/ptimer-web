@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import gleam/dynamic
+import gleam/function
 import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
@@ -156,24 +157,25 @@ fn move_before(
 }
 
 fn before_step(
+  msg: fn(Msg) -> msg,
   model: Model,
   timer: ptimer.Ptimer,
   step: Option(ptimer.Step),
   step_index index: Int,
-  idle idle: element.Element(Msg),
-) -> element.Element(Msg) {
+  idle idle: element.Element(msg),
+) -> element.Element(msg) {
   let move = fn(target: ptimer.Step) {
-    Internal(
-      Animate(
-        UpdateSteps(case step {
-          Some(step) -> timer.steps |> move_before(target: target, anchor: step)
-          None ->
-            timer.steps
-            |> list.filter(fn(a) { a.id != target.id })
-            |> list.append([target])
-        }),
-      ),
+    Animate(
+      UpdateSteps(case step {
+        Some(step) -> timer.steps |> move_before(target: target, anchor: step)
+        None ->
+          timer.steps
+          |> list.filter(fn(a) { a.id != target.id })
+          |> list.append([target])
+      }),
     )
+    |> Internal
+    |> msg
   }
 
   case model.move_op {
@@ -214,12 +216,12 @@ fn before_step(
           event.on("dragenter", fn(ev) {
             event.prevent_default(ev)
 
-            Ok(Internal(DragOver(index)))
+            Ok(Internal(DragOver(index)) |> msg)
           }),
           event.on("dragleave", fn(ev) {
             event.prevent_default(ev)
 
-            Ok(Internal(DragLeave(index)))
+            Ok(Internal(DragLeave(index)) |> msg)
           }),
           event.on("drop", fn(ev) {
             event.prevent_default(ev)
@@ -241,11 +243,12 @@ fn update_step(steps: List(ptimer.Step), step: ptimer.Step) -> List(ptimer.Step)
 }
 
 fn step_views(
+  msg: fn(Msg) -> msg,
   model: Model,
   steps: List(ptimer.Step),
   timer: ptimer.Ptimer,
   index: Int,
-) -> List(#(String, element.Element(Msg))) {
+) -> List(#(String, element.Element(msg))) {
   let next_id =
     timer.steps
     |> list.fold(None, fn(max, step) {
@@ -262,18 +265,22 @@ fn step_views(
       #(
         "before_step#last",
         before_step(
+          msg,
           model,
           timer,
           None,
           index,
           button.button(
             button.Primary,
-            button.Enabled(UpdateSteps(
-              timer.steps
-              |> list.append([
-                ptimer.Step(next_id, "", None, None, ptimer.UserAction),
-              ]),
-            )),
+            button.Enabled(
+              UpdateSteps(
+                timer.steps
+                |> list.append([
+                  ptimer.Step(next_id, "", None, None, ptimer.UserAction),
+                ]),
+              )
+              |> msg,
+            ),
             button.Medium,
             Some(lucide.ListPlus),
             [class(scoped("flip-target"))],
@@ -290,6 +297,7 @@ fn step_views(
         #(
           "before_step#" <> int.to_string(index),
           before_step(
+            msg,
             model,
             timer,
             Some(step),
@@ -305,7 +313,8 @@ fn step_views(
                       index,
                     )),
                   ),
-                ),
+                )
+                |> msg,
               ),
               button.Medium,
               Some(lucide.ListPlus),
@@ -324,13 +333,13 @@ fn step_views(
                 event.on("dragend", fn(ev) {
                   event.prevent_default(ev)
 
-                  Ok(Internal(CancelDrag))
+                  Ok(Internal(CancelDrag) |> msg)
                 }),
                 event.on("dragstart", fn(ev) {
                   event.stop_propagation(ev)
                   set_drag_effect(ev, "move")
 
-                  Ok(Internal(StartDrag(index, step)))
+                  Ok(Internal(StartDrag(index, step)) |> msg)
                 }),
               ],
               [
@@ -352,6 +361,7 @@ fn step_views(
                           timer.steps,
                           ptimer.Step(..step, title:),
                         ))
+                        |> msg
                       })
 
                     _ -> textbox.Disabled
@@ -380,6 +390,7 @@ fn step_views(
                             },
                           ),
                         ))
+                        |> msg
                       })
                     _ -> textbox.Disabled
                   },
@@ -410,6 +421,7 @@ fn step_views(
                             timer.steps,
                             ptimer.Step(..step, action: option),
                           ))
+                          |> msg
                         })
                       _ -> selectbox.Disabled
                     },
@@ -454,6 +466,7 @@ fn step_views(
                                   )),
                                 ),
                               ))
+                              |> msg
                             })
                           _ -> int_input.Disabled
                         },
@@ -473,7 +486,9 @@ fn step_views(
                   Idle ->
                     button.button(
                       button.Normal,
-                      button.Enabled(Internal(StartManualMove(index, step))),
+                      button.Enabled(
+                        Internal(StartManualMove(index, step)) |> msg,
+                      ),
                       button.Small,
                       Some(lucide.ArrowDownUp),
                       [],
@@ -483,7 +498,7 @@ fn step_views(
                   ByButton(from, _) if from == index ->
                     button.button(
                       button.Primary,
-                      button.Enabled(Internal(CancelManualMove)),
+                      button.Enabled(Internal(CancelManualMove) |> msg),
                       button.Small,
                       Some(lucide.Ban),
                       [],
@@ -510,7 +525,8 @@ fn step_views(
                             timer.steps
                             |> list.filter(fn(a) { a.id != step.id }),
                           )),
-                        ),
+                        )
+                        |> msg,
                       )
 
                     _ -> button.Disabled(None)
@@ -524,17 +540,18 @@ fn step_views(
             ]),
           ]),
         ),
-        ..step_views(model, rest, timer, index + 1)
+        ..step_views(msg, model, rest, timer, index + 1)
       ]
     }
   }
 }
 
 pub fn view(
+  msg: fn(Msg) -> msg,
   timer: ptimer.Ptimer,
   model: Model,
-  attrs: List(Attribute(Msg)),
-) -> element.Element(Msg) {
+  attrs: List(Attribute(msg)),
+) -> element.Element(msg) {
   case timer.steps {
     [] ->
       placeholder.view(
@@ -548,7 +565,8 @@ pub fn view(
           button.button(
             button.Primary,
             button.Enabled(
-              UpdateSteps([ptimer.Step(0, "", None, None, ptimer.UserAction)]),
+              UpdateSteps([ptimer.Step(0, "", None, None, ptimer.UserAction)])
+              |> msg,
             ),
             button.Medium,
             Some(lucide.ListPlus),
@@ -564,7 +582,7 @@ pub fn view(
         html.div([class(scoped("container"))], [
           element.keyed(
             html.div([class(scoped("list"))], _),
-            step_views(model, steps, timer, 0),
+            step_views(msg, model, steps, timer, 0),
           ),
         ]),
       ])
@@ -622,7 +640,7 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
         )
       },
       story_update,
-      fn(model) { view(model.timer, model.model, []) },
+      fn(model) { view(function.identity, model.timer, model.model, []) },
     )
     |> lustre.start(selector, Nil)
 
