@@ -8,6 +8,8 @@
 		"noUncheckedIndexedAccess": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
+		"skipDefaultLibCheck": true,
+		"skipLibCheck": true,
 		"noEmit": true,
 		"paths": {
 			"@/*": ["./src/*"]
@@ -15,5 +17,5 @@
 		"types": ["vite/client"]
 	},
 	"include": ["./**/*.ts"],
-	"exclude": ["./build"]
+	"exclude": ["./build", "node_modules"]
 }
