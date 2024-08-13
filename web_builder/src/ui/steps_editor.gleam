@@ -170,7 +170,7 @@ fn before_step(
         [
           case from == index || from == index - 1 {
             True -> class(scoped("invisible"))
-            False -> class(scoped("move-button"))
+            False -> attribute.none()
           },
         ],
         [element.text("Move to here")],
