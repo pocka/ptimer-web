@@ -38,6 +38,7 @@ pub fn decode_metadata(
 
 pub type Step {
   Step(
+    id: Int,
     title: String,
     description: Option(String),
     sound: Option(Int),
@@ -47,8 +48,9 @@ pub type Step {
 
 pub fn decode_step(value: dynamic.Dynamic) -> Result(Step, dynamic.DecodeErrors) {
   value
-  |> dynamic.decode4(
+  |> dynamic.decode5(
     Step,
+    dynamic.field("id", dynamic.int),
     dynamic.field("title", dynamic.string),
     dynamic.field("description", dynamic.optional(dynamic.string)),
     dynamic.field("sound", dynamic.optional(dynamic.int)),

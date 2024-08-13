@@ -15,6 +15,7 @@ export interface Metadata {
 }
 
 export interface Step {
+	readonly id: number;
 	readonly title: string;
 	readonly description: string | null;
 	readonly sound: number | null;

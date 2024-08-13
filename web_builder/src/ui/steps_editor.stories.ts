@@ -18,12 +18,14 @@ export default {
 	args: {
 		steps: [
 			{
+				id: 0,
 				title: "First Step",
 				description: null,
 				sound: null,
 				duration_seconds: null,
 			},
 			{
+				id: 1,
 				title: "Second Step",
 				description: "Description",
 				sound: null,
@@ -77,12 +79,14 @@ export const Insertion: Story = {
 	args: {
 		steps: [
 			{
+				id: 0,
 				title: "#1",
 				description: null,
 				sound: null,
 				duration_seconds: null,
 			},
 			{
+				id: 1,
 				title: "#2",
 				description: null,
 				sound: null,
@@ -132,24 +136,28 @@ export const ShouldMoveCorrectly: Story = {
 	args: {
 		steps: [
 			{
+				id: 0,
 				title: "#4",
 				description: null,
 				sound: null,
 				duration_seconds: null,
 			},
 			{
+				id: 1,
 				title: "#3",
 				description: null,
 				sound: null,
 				duration_seconds: null,
 			},
 			{
+				id: 2,
 				title: "#1",
 				description: null,
 				sound: null,
 				duration_seconds: null,
 			},
 			{
+				id: 3,
 				title: "#2",
 				description: null,
 				sound: null,

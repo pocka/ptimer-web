@@ -118,41 +118,44 @@ fn insert_at(items: List(a), new_item: a, at at: Int) -> List(a) {
   insert_at_recur(items, new_item, at, 0)
 }
 
-fn remove_at_recur(items: List(a), at: Int, index: Int) -> List(a) {
-  case items, index == at {
-    [], _ -> []
-
-    [_, ..tail], True -> tail
-
-    [head, ..tail], False -> [head, ..remove_at_recur(tail, at, index + 1)]
-  }
-}
-
-fn remove_at(items: List(a), at at: Int) -> List(a) {
-  remove_at_recur(items, at, 0)
-}
-
 @external(javascript, "@/ui/steps_editor.ffi.ts", "setDragEffect")
 fn set_drag_effect(ev: dynamic.Dynamic, effect: String) -> Nil
+
+fn move_before(
+  steps: List(ptimer.Step),
+  target target: ptimer.Step,
+  anchor anchor: ptimer.Step,
+) -> List(ptimer.Step) {
+  case steps {
+    [] -> []
+    [head, ..tail] if head.id == target.id -> move_before(tail, target, anchor)
+    [head, ..tail] if head.id == anchor.id -> [
+      target,
+      head,
+      ..move_before(tail, target, anchor)
+    ]
+    [head, ..tail] -> [head, ..move_before(tail, target, anchor)]
+  }
+}
 
 fn before_step(
   model: Model,
   timer: ptimer.Ptimer,
+  step: Option(ptimer.Step),
   step_index index: Int,
   idle idle: element.Element(Msg),
 ) -> element.Element(Msg) {
-  let move = fn(from: Int, source: ptimer.Step) {
-    UpdateSteps(
-      timer.steps
-      |> list.index_map(fn(s, i) {
-        case i == from {
-          True -> None
-          False -> Some(s)
-        }
-      })
-      |> insert_at(Some(source), index)
-      |> list.filter_map(option.to_result(_, Nil)),
-    )
+  let move = fn(target: ptimer.Step) {
+    case step {
+      Some(step) ->
+        UpdateSteps(timer.steps |> move_before(target: target, anchor: step))
+      None ->
+        UpdateSteps(
+          timer.steps
+          |> list.filter(fn(a) { a.id != target.id })
+          |> list.append([target]),
+        )
+    }
   }
 
   case model.move_op {
@@ -161,7 +164,7 @@ fn before_step(
     ByButton(from, source) ->
       button.button(
         button.Normal,
-        button.Enabled(move(from, source)),
+        button.Enabled(move(source)),
         button.Medium,
         Some(lucide.CornerLeftDown),
         [
@@ -203,11 +206,19 @@ fn before_step(
           event.on("drop", fn(ev) {
             event.prevent_default(ev)
 
-            Ok(move(from, source))
+            Ok(move(source))
           }),
         ],
         [],
       )
+  }
+}
+
+fn update_step(steps: List(ptimer.Step), step: ptimer.Step) -> List(ptimer.Step) {
+  case steps {
+    [] -> []
+    [head, ..tail] if head.id == step.id -> [step, ..tail]
+    [head, ..tail] -> [head, ..update_step(tail, step)]
   }
 }
 
@@ -216,253 +227,276 @@ fn step_views(
   steps: List(ptimer.Step),
   timer: ptimer.Ptimer,
   index: Int,
-) -> List(element.Element(Msg)) {
+) -> List(#(String, element.Element(Msg))) {
+  let next_id =
+    timer.steps
+    |> list.fold(None, fn(max, step) {
+      case max {
+        Some(id) if id >= step.id -> Some(id)
+        _ -> Some(step.id)
+      }
+    })
+    |> option.map(fn(a) { a + 1 })
+    |> option.unwrap(0)
+
   case steps {
     [] -> [
-      before_step(
-        model,
-        timer,
-        index,
-        button.button(
-          button.Primary,
-          button.Enabled(UpdateSteps(
-            timer.steps
-            |> list.append([ptimer.Step("", None, None, ptimer.UserAction)]),
-          )),
-          button.Medium,
-          Some(lucide.ListPlus),
-          [],
-          [element.text("Add step")],
+      #(
+        "before_step#last",
+        before_step(
+          model,
+          timer,
+          None,
+          index,
+          button.button(
+            button.Primary,
+            button.Enabled(UpdateSteps(
+              timer.steps
+              |> list.append([
+                ptimer.Step(next_id, "", None, None, ptimer.UserAction),
+              ]),
+            )),
+            button.Medium,
+            Some(lucide.ListPlus),
+            [],
+            [element.text("Add step")],
+          ),
         ),
       ),
     ]
 
     [step, ..rest] -> {
-      let id_prefix = "step_" <> int.to_string(index) <> "_"
-
-      let update_step = fn(payload: ptimer.Step) {
-        UpdateSteps(
-          list.index_map(timer.steps, fn(a, j) {
-            case index == j && a == step {
-              True -> payload
-              False -> a
-            }
-          }),
-        )
-      }
+      let id_prefix = "step_" <> int.to_string(step.id) <> "_"
 
       [
-        before_step(
-          model,
-          timer,
-          index,
-          button.button(
-            button.Normal,
-            button.Enabled(
-              UpdateSteps(insert_at(
-                timer.steps,
-                ptimer.Step("", None, None, ptimer.UserAction),
-                index,
-              )),
+        #(
+          "before_step#" <> int.to_string(index),
+          before_step(
+            model,
+            timer,
+            Some(step),
+            index,
+            button.button(
+              button.Normal,
+              button.Enabled(
+                UpdateSteps(insert_at(
+                  timer.steps,
+                  ptimer.Step(next_id, "", None, None, ptimer.UserAction),
+                  index,
+                )),
+              ),
+              button.Medium,
+              Some(lucide.ListPlus),
+              [class(scoped("insert-button"))],
+              [element.text("Insert step")],
             ),
-            button.Medium,
-            Some(lucide.ListPlus),
-            [class(scoped("insert-button"))],
-            [element.text("Insert step")],
           ),
         ),
-        html.div([class(scoped("step"))], [
-          html.div(
-            [
-              class(scoped("step-header")),
-              attribute.attribute("draggable", "true"),
-              event.on("dragend", fn(ev) {
-                event.prevent_default(ev)
+        #(
+          "step#" <> int.to_string(step.id),
+          html.div([class(scoped("step"))], [
+            html.div(
+              [
+                class(scoped("step-header")),
+                attribute.attribute("draggable", "true"),
+                event.on("dragend", fn(ev) {
+                  event.prevent_default(ev)
 
-                Ok(Internal(CancelDrag))
-              }),
-              event.on("dragstart", fn(ev) {
-                event.stop_propagation(ev)
-                set_drag_effect(ev, "move")
+                  Ok(Internal(CancelDrag))
+                }),
+                event.on("dragstart", fn(ev) {
+                  event.stop_propagation(ev)
+                  set_drag_effect(ev, "move")
 
-                Ok(Internal(StartDrag(index, step)))
-              }),
-            ],
-            [
-              lucide.icon(lucide.GripHorizontal, [class(scoped("grip"))]),
-              html.span([], [element.text(int.to_string(index + 1))]),
-              lucide.icon(lucide.GripHorizontal, [class(scoped("grip"))]),
-            ],
-          ),
-          html.div([class(scoped("step-body"))], [
-            field.view(
-              id: id_prefix <> "title",
-              label: [element.text("Title")],
-              input: textbox.textbox(
-                step.title,
-                case model.move_op {
-                  Idle ->
-                    textbox.Enabled(fn(title) {
-                      update_step(ptimer.Step(..step, title:))
-                    })
-
-                  _ -> textbox.Disabled
-                },
-                textbox.SingleLine,
-                _,
-              ),
-              note: None,
-              attrs: [],
+                  Ok(Internal(StartDrag(index, step)))
+                }),
+              ],
+              [
+                lucide.icon(lucide.GripHorizontal, [class(scoped("grip"))]),
+                html.span([], [element.text(int.to_string(index + 1))]),
+                lucide.icon(lucide.GripHorizontal, [class(scoped("grip"))]),
+              ],
             ),
-            field.view(
-              id: id_prefix <> "description",
-              label: [element.text("Description")],
-              input: textbox.textbox(
-                step.description |> option.unwrap(""),
-                case model.move_op {
-                  Idle ->
-                    textbox.Enabled(fn(description) {
-                      update_step(
-                        ptimer.Step(
-                          ..step,
-                          description: case description {
-                            "" -> None
-                            str -> Some(str)
-                          },
-                        ),
-                      )
-                    })
-                  _ -> textbox.Disabled
-                },
-                textbox.MultiLine(Some(3)),
-                _,
-              ),
-              note: None,
-              attrs: [],
-            ),
-            html.div([class(scoped("action"))], [
+            html.div([class(scoped("step-body"))], [
               field.view(
-                id: id_prefix <> "type",
-                label: [element.text("Type")],
-                input: selectbox.selectbox(
-                  step.action,
-                  [
-                    #("UserAction", ptimer.UserAction),
-                    #("Timer", case step.action {
-                      ptimer.Timer(_) -> step.action
-
-                      _ -> ptimer.Timer(3)
-                    }),
-                  ],
+                id: id_prefix <> "title",
+                label: [element.text("Title")],
+                input: textbox.textbox(
+                  step.title,
                   case model.move_op {
                     Idle ->
-                      selectbox.Enabled(fn(option) {
-                        update_step(ptimer.Step(..step, action: option))
+                      textbox.Enabled(fn(title) {
+                        UpdateSteps(update_step(
+                          timer.steps,
+                          ptimer.Step(..step, title:),
+                        ))
                       })
-                    _ -> selectbox.Disabled
+
+                    _ -> textbox.Disabled
                   },
+                  textbox.SingleLine,
                   _,
-                  [],
                 ),
-                note: case step.action {
-                  ptimer.UserAction ->
-                    Some([
-                      element.text(
-                        "The step displays a button, which completes the step on press.",
-                      ),
-                    ])
-
-                  ptimer.Timer(_) ->
-                    Some([
-                      element.text(
-                        "The step completes when a specified duration elapsed.",
-                      ),
-                    ])
-                },
-                attrs: [class(scoped("action-field"))],
+                note: None,
+                attrs: [],
               ),
-              case step.action {
-                ptimer.Timer(duration) ->
-                  field.view(
-                    id: id_prefix <> "duration",
-                    label: [element.text("Duration")],
-                    input: int_input.view(
-                      duration,
-                      case model.move_op {
-                        Idle ->
-                          int_input.Enabled(fn(n) {
-                            update_step(
-                              ptimer.Step(
-                                ..step,
-                                action: ptimer.Timer(int.clamp(
-                                  n,
-                                  min: 1,
-                                  max: 60 * 60 * 24,
-                                )),
-                              ),
-                            )
-                          })
-                        _ -> int_input.Disabled
-                      },
-                      Some(element.text("secs.")),
-                      _,
-                      [],
-                    ),
-                    note: None,
-                    attrs: [class(scoped("action-field"))],
-                  )
+              field.view(
+                id: id_prefix <> "description",
+                label: [element.text("Description")],
+                input: textbox.textbox(
+                  step.description |> option.unwrap(""),
+                  case model.move_op {
+                    Idle ->
+                      textbox.Enabled(fn(description) {
+                        UpdateSteps(update_step(
+                          timer.steps,
+                          ptimer.Step(
+                            ..step,
+                            description: case description {
+                              "" -> None
+                              str -> Some(str)
+                            },
+                          ),
+                        ))
+                      })
+                    _ -> textbox.Disabled
+                  },
+                  textbox.MultiLine(Some(3)),
+                  _,
+                ),
+                note: None,
+                attrs: [],
+              ),
+              html.div([class(scoped("action"))], [
+                field.view(
+                  id: id_prefix <> "type",
+                  label: [element.text("Type")],
+                  input: selectbox.selectbox(
+                    step.action,
+                    [
+                      #("UserAction", ptimer.UserAction),
+                      #("Timer", case step.action {
+                        ptimer.Timer(_) -> step.action
 
-                _ -> element.none()
-              },
-            ]),
-            html.div([class(scoped("step-actions"))], [
-              case model.move_op {
-                Idle ->
-                  button.button(
-                    button.Normal,
-                    button.Enabled(Internal(StartManualMove(index, step))),
-                    button.Small,
-                    Some(lucide.ArrowDownUp),
+                        _ -> ptimer.Timer(3)
+                      }),
+                    ],
+                    case model.move_op {
+                      Idle ->
+                        selectbox.Enabled(fn(option) {
+                          UpdateSteps(update_step(
+                            timer.steps,
+                            ptimer.Step(..step, action: option),
+                          ))
+                        })
+                      _ -> selectbox.Disabled
+                    },
+                    _,
                     [],
-                    [element.text("Move")],
-                  )
+                  ),
+                  note: case step.action {
+                    ptimer.UserAction ->
+                      Some([
+                        element.text(
+                          "The step displays a button, which completes the step on press.",
+                        ),
+                      ])
 
-                ByButton(from, _) if from == index ->
-                  button.button(
-                    button.Primary,
-                    button.Enabled(Internal(CancelManualMove)),
-                    button.Small,
-                    Some(lucide.Ban),
-                    [],
-                    [element.text("Cancel")],
-                  )
+                    ptimer.Timer(_) ->
+                      Some([
+                        element.text(
+                          "The step completes when a specified duration elapsed.",
+                        ),
+                      ])
+                  },
+                  attrs: [class(scoped("action-field"))],
+                ),
+                case step.action {
+                  ptimer.Timer(duration) ->
+                    field.view(
+                      id: id_prefix <> "duration",
+                      label: [element.text("Duration")],
+                      input: int_input.view(
+                        duration,
+                        case model.move_op {
+                          Idle ->
+                            int_input.Enabled(fn(n) {
+                              UpdateSteps(update_step(
+                                timer.steps,
+                                ptimer.Step(
+                                  ..step,
+                                  action: ptimer.Timer(int.clamp(
+                                    n,
+                                    min: 1,
+                                    max: 60 * 60 * 24,
+                                  )),
+                                ),
+                              ))
+                            })
+                          _ -> int_input.Disabled
+                        },
+                        Some(element.text("secs.")),
+                        _,
+                        [],
+                      ),
+                      note: None,
+                      attrs: [class(scoped("action-field"))],
+                    )
 
-                _ ->
-                  button.button(
-                    button.Normal,
-                    button.Disabled(None),
-                    button.Small,
-                    Some(lucide.ArrowDownUp),
-                    [],
-                    [element.text("Move")],
-                  )
-              },
-              button.button(
-                button.Normal,
+                  _ -> element.none()
+                },
+              ]),
+              html.div([class(scoped("step-actions"))], [
                 case model.move_op {
                   Idle ->
-                    button.Enabled(UpdateSteps(remove_at(timer.steps, index)))
+                    button.button(
+                      button.Normal,
+                      button.Enabled(Internal(StartManualMove(index, step))),
+                      button.Small,
+                      Some(lucide.ArrowDownUp),
+                      [],
+                      [element.text("Move")],
+                    )
 
-                  _ -> button.Disabled(None)
+                  ByButton(from, _) if from == index ->
+                    button.button(
+                      button.Primary,
+                      button.Enabled(Internal(CancelManualMove)),
+                      button.Small,
+                      Some(lucide.Ban),
+                      [],
+                      [element.text("Cancel")],
+                    )
+
+                  _ ->
+                    button.button(
+                      button.Normal,
+                      button.Disabled(None),
+                      button.Small,
+                      Some(lucide.ArrowDownUp),
+                      [],
+                      [element.text("Move")],
+                    )
                 },
-                button.Small,
-                Some(lucide.Trash2),
-                [],
-                [element.text("Delete")],
-              ),
+                button.button(
+                  button.Normal,
+                  case model.move_op {
+                    Idle ->
+                      button.Enabled(UpdateSteps(
+                        timer.steps |> list.filter(fn(a) { a.id != step.id }),
+                      ))
+
+                    _ -> button.Disabled(None)
+                  },
+                  button.Small,
+                  Some(lucide.Trash2),
+                  [],
+                  [element.text("Delete")],
+                ),
+              ]),
             ]),
           ]),
-        ]),
+        ),
         ..step_views(model, rest, timer, index + 1)
       ]
     }
@@ -487,7 +521,7 @@ pub fn view(
           button.button(
             button.Primary,
             button.Enabled(
-              UpdateSteps([ptimer.Step("", None, None, ptimer.UserAction)]),
+              UpdateSteps([ptimer.Step(0, "", None, None, ptimer.UserAction)]),
             ),
             button.Medium,
             Some(lucide.ListPlus),
@@ -501,7 +535,10 @@ pub fn view(
     steps ->
       html.div(attrs, [
         html.div([class(scoped("container"))], [
-          html.div([class(scoped("list"))], step_views(model, steps, timer, 0)),
+          element.keyed(
+            html.div([class(scoped("list"))], _),
+            step_views(model, steps, timer, 0),
+          ),
         ]),
       ])
   }
