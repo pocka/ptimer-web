@@ -83,3 +83,14 @@ SPDX-License-Identifier: Apache-2.0
 .invisible {
 	visibility: hidden;
 }
+
+.drop-target {
+	height: calc(1rem + 18px);
+	border: 2px dashed oklch(var(--color-border) / var(--alpha-border-medium));
+
+	border-radius: 3px;
+}
+
+.drop-target.active {
+	border-color: oklch(var(--color-accent-bg));
+}

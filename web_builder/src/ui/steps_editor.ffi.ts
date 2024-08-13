@@ -13,3 +13,9 @@ export function className(x: string): string {
 
 	return moduleCss[x] ?? "";
 }
+
+export function setDragEffect(event: DragEvent, effect: DataTransfer["effectAllowed"]): void {
+	if (event.dataTransfer) {
+		event.dataTransfer.effectAllowed = effect;
+	}
+}
