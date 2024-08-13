@@ -48,7 +48,7 @@ pub opaque type InternalMsg {
   CancelDrag
   DragOver(index: Int)
   DragLeave(index: Int)
-  NoOp
+  Animate(msg: Msg)
 }
 
 pub type Msg {
@@ -88,10 +88,27 @@ pub fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
       if index == to
     -> #(Model(move_op: ByDrag(from, source, None)), effect.none())
 
+    Internal(Animate(msg)), _ -> {
+      #(model, flip("." <> scoped("flip-target"), msg))
+    }
+
     UpdateSteps(_), _ -> #(Model(move_op: Idle), effect.none())
 
     _, _ -> #(model, effect.none())
   }
+}
+
+// EFFECTS
+
+@external(javascript, "@/ui/steps_editor.ffi.ts", "runFLIP")
+fn run_flip(query: String, on_update: fn() -> a) -> Nil
+
+fn flip(query: String, msg: Msg) -> effect.Effect(Msg) {
+  effect.from(fn(dispatch) {
+    use <- run_flip(query)
+
+    dispatch(msg)
+  })
 }
 
 // VIEW
@@ -146,16 +163,17 @@ fn before_step(
   idle idle: element.Element(Msg),
 ) -> element.Element(Msg) {
   let move = fn(target: ptimer.Step) {
-    case step {
-      Some(step) ->
-        UpdateSteps(timer.steps |> move_before(target: target, anchor: step))
-      None ->
-        UpdateSteps(
-          timer.steps
-          |> list.filter(fn(a) { a.id != target.id })
-          |> list.append([target]),
-        )
-    }
+    Internal(
+      Animate(
+        UpdateSteps(case step {
+          Some(step) -> timer.steps |> move_before(target: target, anchor: step)
+          None ->
+            timer.steps
+            |> list.filter(fn(a) { a.id != target.id })
+            |> list.append([target])
+        }),
+      ),
+    )
   }
 
   case model.move_op {
@@ -191,7 +209,7 @@ fn before_step(
           event.on("dragover", fn(ev) {
             event.prevent_default(ev)
 
-            Ok(Internal(NoOp))
+            Error([])
           }),
           event.on("dragenter", fn(ev) {
             event.prevent_default(ev)
@@ -258,7 +276,7 @@ fn step_views(
             )),
             button.Medium,
             Some(lucide.ListPlus),
-            [],
+            [class(scoped("flip-target"))],
             [element.text("Add step")],
           ),
         ),
@@ -279,11 +297,15 @@ fn step_views(
             button.button(
               button.Normal,
               button.Enabled(
-                UpdateSteps(insert_at(
-                  timer.steps,
-                  ptimer.Step(next_id, "", None, None, ptimer.UserAction),
-                  index,
-                )),
+                Internal(
+                  Animate(
+                    UpdateSteps(insert_at(
+                      timer.steps,
+                      ptimer.Step(next_id, "", None, None, ptimer.UserAction),
+                      index,
+                    )),
+                  ),
+                ),
               ),
               button.Medium,
               Some(lucide.ListPlus),
@@ -294,7 +316,7 @@ fn step_views(
         ),
         #(
           "step#" <> int.to_string(step.id),
-          html.div([class(scoped("step"))], [
+          html.div([class(scoped("step")), class(scoped("flip-target"))], [
             html.div(
               [
                 class(scoped("step-header")),
@@ -482,9 +504,14 @@ fn step_views(
                   button.Normal,
                   case model.move_op {
                     Idle ->
-                      button.Enabled(UpdateSteps(
-                        timer.steps |> list.filter(fn(a) { a.id != step.id }),
-                      ))
+                      button.Enabled(
+                        Internal(
+                          Animate(UpdateSteps(
+                            timer.steps
+                            |> list.filter(fn(a) { a.id != step.id }),
+                          )),
+                        ),
+                      )
 
                     _ -> button.Disabled(None)
                   },

@@ -94,3 +94,12 @@ SPDX-License-Identifier: Apache-2.0
 .drop-target.active {
 	border-color: oklch(var(--color-accent-bg));
 }
+
+.flip-target {
+	will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+	.flip-target {
+		will-change: opacity;
+	}
+}

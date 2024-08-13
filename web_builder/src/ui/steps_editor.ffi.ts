@@ -19,3 +19,61 @@ export function setDragEffect(event: DragEvent, effect: DataTransfer["effectAllo
 		event.dataTransfer.effectAllowed = effect;
 	}
 }
+
+export function runFLIP<T = unknown>(query: string, onUpdate: () => T): void {
+	const snapshots = new Map<HTMLElement, DOMRectReadOnly>();
+
+	for (const element of Array.from(document.querySelectorAll(query))) {
+		if (!(element instanceof HTMLElement)) {
+			continue;
+		}
+
+		snapshots.set(element, element.getBoundingClientRect());
+	}
+
+	onUpdate();
+
+	const shouldFade = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+	for (const element of Array.from(document.querySelectorAll(query))) {
+		if (!(element instanceof HTMLElement)) {
+			continue;
+		}
+
+		const before = snapshots.get(element);
+		if (!before) {
+			// Newly created element
+			element.animate([
+				{ opacity: 0 },
+				{ opacity: 1 },
+			], {
+				easing: "ease-out",
+				duration: 200,
+				delay: 150,
+				fill: "both",
+			});
+			continue;
+		}
+
+		const after = element.getBoundingClientRect();
+		if (before.y === after.y) {
+			continue;
+		}
+
+		if (shouldFade) {
+			element.animate([{ opacity: 0 }, { opacity: 1 }], {
+				easing: "ease-in",
+				duration: 250,
+			});
+			continue;
+		}
+
+		element.animate([
+			{ transform: `translateY(${before.y - after.y}px)` },
+			{ transform: "translateY(0px)" },
+		], {
+			easing: "ease-out",
+			duration: 250,
+		});
+	}
+}
