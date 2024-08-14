@@ -16,6 +16,11 @@ SPDX-License-Identifier: Apache-2.0
 	color: oklch(var(--color-fg) / var(--_fg-alpha));
 }
 
+.textbox:focus-visible {
+	border-color: oklch(var(--color-focus));
+	box-shadow: 0 0 0 var(--length-focus-ring) oklch(var(--color-focus) / var(--alpha-focus-ring));
+}
+
 .textbox:disabled {
 	--_fg-alpha: var(--alpha-disabled);
 

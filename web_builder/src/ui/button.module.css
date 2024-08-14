@@ -21,6 +21,10 @@ SPDX-License-Identifier: Apache-2.0
 .button:disabled, .button[aria-disabled="true"] {
 	--_alpha: var(--alpha-disabled);
 }
+.button:focus-visible {
+	border-color: oklch(var(--color-focus));
+	box-shadow: 0 0 0 var(--length-focus-ring) oklch(var(--color-focus) / var(--alpha-focus-ring));
+}
 
 .icon {
 	font-size: 1.05em;

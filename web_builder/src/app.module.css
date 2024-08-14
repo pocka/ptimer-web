@@ -46,6 +46,10 @@ SPDX-License-Identifier: Apache-2.0
 	border-radius: 3px;
 	overflow-y: scroll;
 }
+.logs:focus-visible {
+	border-color: oklch(var(--color-focus));
+	box-shadow: 0 0 0 var(--length-focus-ring) oklch(var(--color-focus) / var(--alpha-focus-ring));
+}
 
 @media (orientation: landscape) {
 	.layout {

@@ -31,7 +31,8 @@ SPDX-License-Identifier: Apache-2.0
 	background-color: oklch(99% 5% var(--color-info-h) / 15%);
 }
 .item:focus-visible {
-	border-color: currentColor;
+	border-color: oklch(var(--color-focus));
+	box-shadow: 0 0 0 var(--length-focus-ring) oklch(var(--color-focus) / var(--alpha-focus-ring));
 }
 
 .item-active, .item-active:hover {
