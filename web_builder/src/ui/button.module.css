@@ -6,6 +6,8 @@ SPDX-License-Identifier: Apache-2.0
 
 .button {
 	--_alpha: 1;
+	--_tint-l: 0%;
+	--_tint-c: 0%;
 
 	display: inline-flex;
 	align-items: center;
@@ -21,6 +23,14 @@ SPDX-License-Identifier: Apache-2.0
 .button:disabled, .button[aria-disabled="true"] {
 	--_alpha: var(--alpha-disabled);
 }
+.button:enabled:hover {
+	--_tint-l: var(--tint-hover-l);
+	--_tint-c: var(--tint-hover-c);
+}
+.button:enabled:active {
+	--_tint-l: var(--tint-pressed-l);
+	--_tint-c: var(--tint-pressed-c);
+}
 .button:focus-visible {
 	border-color: oklch(var(--color-focus));
 	box-shadow: 0 0 0 var(--length-focus-ring) oklch(var(--color-focus) / var(--alpha-focus-ring));
@@ -32,14 +42,32 @@ SPDX-License-Identifier: Apache-2.0
 }
 
 .primary {
-	background-color: oklch(var(--color-accent-bg) / var(--_alpha));
+	background-color: oklch(
+		calc(var(--color-accent-bg-l) + var(--_tint-l))
+		calc(var(--color-accent-bg-c) + var(--_tint-c))
+		var(--color-accent-bg-h)
+		/
+		var(--_alpha)
+	);
 	border-color: oklch(var(--color-accent-bg));
 	color: oklch(var(--color-accent-fg) / var(--_alpha));
 }
 
 .normal {
+	--_overlay-bg-alpha: 0;
+
+	background-color: oklch(
+		calc(var(--color-bg0-l) + var(--_tint-l))
+		calc(var(--color-bg0-c) + var(--_tint-c))
+		var(--color-accent-bg-h)
+		/
+		calc(var(--_alpha) * var(--_overlay-bg-alpha))
+	);
 	border-color: oklch(var(--color-border) / var(--alpha-border-strong));
 	color: oklch(var(--color-fg) / var(--_alpha));
+}
+.normal:enabled:hover, .normal:enabled:active {
+	--_overlay-bg-alpha: 1;
 }
 
 .medium {

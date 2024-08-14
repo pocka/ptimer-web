@@ -99,6 +99,12 @@ SPDX-License-Identifier: Apache-2.0
 
 	--length-focus-ring: 4px;
 
+	--tint-hover-l: -1%;
+	--tint-hover-c: -10%;
+
+	--tint-pressed-l: -3%;
+	--tint-pressed-c: -8%;
+
 	font-display: swap;
 	font-family: var(--font-sans);
 }
@@ -127,6 +133,12 @@ SPDX-License-Identifier: Apache-2.0
 		--alpha-border-subtle: 10%;
 		--alpha-border-medium: 24%;
 		--alpha-border-strong: 40%;
+
+		--tint-hover-l: 5%;
+		--tint-hover-c: 0%;
+
+		--tint-pressed-l: 2%;
+		--tint-pressed-c: -2%;
 	}
 }
 
