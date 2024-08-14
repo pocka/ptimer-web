@@ -37,25 +37,26 @@ fn set_state_attrs(
   case state {
     Enabled(msg) -> [event.on_click(msg), ..attrs]
 
-    Disabled(_) -> [attribute.attribute("aria-disabled", "true"), ..attrs]
-
-    Loading(_) -> [
+    Disabled(Some(details)) -> [
       attribute.attribute("aria-disabled", "true"),
+      attribute.attribute("aria-details", details),
+      ..attrs
+    ]
+
+    Disabled(None) -> [attribute.disabled(True), ..attrs]
+
+    Loading(Some(details)) -> [
+      attribute.attribute("aria-disabled", "true"),
+      attribute.attribute("aria-details", details),
       class(scoped("loading")),
       ..attrs
     ]
-  }
-}
 
-fn state_text(state: State(msg)) -> element.Element(msg) {
-  case state {
-    Disabled(Some(reason)) ->
-      html.span([class(scoped("visually-hidden"))], [element.text(reason)])
-
-    Loading(Some(description)) ->
-      html.span([class(scoped("visually-hidden"))], [element.text(description)])
-
-    _ -> element.none()
+    Loading(None) -> [
+      attribute.disabled(True),
+      class(scoped("loading")),
+      ..attrs
+    ]
   }
 }
 
@@ -111,7 +112,6 @@ pub fn button(
       None -> element.none()
     },
     html.span([], children),
-    state_text(state),
   ])
 }
 
