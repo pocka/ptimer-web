@@ -4,7 +4,7 @@
 
 import gleam/dynamic
 import gleam/list
-import gleam/option.{type Option, Some}
+import gleam/option.{Some}
 import gleam/result
 import lucide
 import lustre
@@ -22,10 +22,14 @@ pub type State(option, msg) {
   Disabled
 }
 
+pub type Option(option) {
+  Option(id: String, label: String, value: option)
+}
+
 fn set_state_attrs(
   attrs: List(Attribute(msg)),
   state: State(option, msg),
-  options: List(#(String, option)),
+  options: List(Option(option)),
 ) -> List(Attribute(msg)) {
   case state {
     Enabled(on_change) -> [
@@ -35,8 +39,8 @@ fn set_state_attrs(
           dynamic.field("value", dynamic.string),
         )(ev))
 
-        case list.find(options, fn(option) { option.0 == value }) {
-          Ok(#(_, option)) -> Ok(on_change(option))
+        case list.find(options, fn(option) { option.id == value }) {
+          Ok(Option(value: value, ..)) -> Ok(on_change(value))
 
           _ -> Error([])
         }
@@ -56,7 +60,7 @@ fn scoped(x: String) -> String
 
 pub fn selectbox(
   selected: option,
-  options: List(#(String, option)),
+  options: List(Option(option)),
   state: State(option, msg),
   attrs: List(Attribute(msg)),
   wrapper_attrs: List(Attribute(msg)),
@@ -67,8 +71,11 @@ pub fn selectbox(
         |> set_state_attrs(state, options),
       list.map(options, fn(option) {
         html.option(
-          [attribute.selected(option.1 == selected), attribute.value(option.0)],
-          option.0,
+          [
+            attribute.selected(option.value == selected),
+            attribute.value(option.id),
+          ],
+          option.label,
         )
       }),
     ),
@@ -96,11 +103,17 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
   let _ =
     lustre.simple(
       fn(_) { Some(selected) },
-      fn(a, b: #(String, Option(String))) {
+      fn(a, b: #(String, option.Option(String))) {
         action(b.0, dynamic.from(b.1))
         a
       },
-      selectbox(_, options |> list.map(fn(x) { #(x, Some(x)) }), state, [], []),
+      selectbox(
+        _,
+        options |> list.map(fn(x) { Option(id: x, label: x, value: Some(x)) }),
+        state,
+        [],
+        [],
+      ),
     )
     |> lustre.start(selector, Nil)
 

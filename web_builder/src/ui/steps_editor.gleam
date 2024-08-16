@@ -406,11 +406,12 @@ fn step_views(
                 input: selectbox.selectbox(
                   step.sound,
                   [
-                    #("None", None),
+                    selectbox.Option(id: "none", label: "---", value: None),
                     ..list.map(timer.assets, fn(asset) {
-                      #(
-                        "#" <> int.to_string(asset.id) <> " " <> asset.name,
-                        Some(asset.id),
+                      selectbox.Option(
+                        id: int.to_string(asset.id),
+                        label: asset.name,
+                        value: Some(asset.id),
                       )
                     })
                   ],
@@ -438,8 +439,14 @@ fn step_views(
                   input: selectbox.selectbox(
                     step.action,
                     [
-                      #("UserAction", ptimer.UserAction),
-                      #("Timer", case step.action {
+                      selectbox.Option(
+                        id: "user_action",
+                        label: "UserAction",
+                        value: ptimer.UserAction,
+                      ),
+                      selectbox.Option(id: "timer", label: "Timer", value: case
+                        step.action
+                      {
                         ptimer.Timer(_) -> step.action
 
                         _ -> ptimer.Timer(3)
