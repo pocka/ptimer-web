@@ -400,6 +400,37 @@ fn step_views(
                 note: None,
                 attrs: [],
               ),
+              field.view(
+                id: id_prefix <> "sound",
+                label: [element.text("Sound")],
+                input: selectbox.selectbox(
+                  step.sound,
+                  [
+                    #("None", None),
+                    ..list.map(timer.assets, fn(asset) {
+                      #(
+                        "#" <> int.to_string(asset.id) <> " " <> asset.name,
+                        Some(asset.id),
+                      )
+                    })
+                  ],
+                  case model.move_op {
+                    Idle ->
+                      selectbox.Enabled(fn(sound) {
+                        update_step(timer.steps, ptimer.Step(..step, sound:))
+                        |> UpdateSteps
+                        |> msg
+                      })
+                    _ -> selectbox.Disabled
+                  },
+                  _,
+                  [],
+                ),
+                note: Some([
+                  element.text("Sound asset to play when the step starts."),
+                ]),
+                attrs: [class("action-field")],
+              ),
               html.div([class(scoped("action"))], [
                 field.view(
                   id: id_prefix <> "type",

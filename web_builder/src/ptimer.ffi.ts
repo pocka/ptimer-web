@@ -13,7 +13,7 @@ import {
 	request,
 } from "@/engine/message";
 
-import { type Ptimer } from "@/ptimer";
+import { type Asset, type Ptimer } from "@/ptimer";
 
 class Engine {
 	#worker: Worker;
@@ -169,19 +169,32 @@ export function parse(engine: Engine, file: File, callback: (ptimer: Result<Ptim
 	});
 }
 
-export function release(ptimer: Ptimer): void {
-	for (const asset of ptimer.assets) {
-		if (import.meta.env.DEV) {
-			console.groupCollapsed(`DEBUG: Releasing ${asset.name}`);
-			console.log("Asset name");
-			console.info(asset.name);
-			console.log("Asset ID");
-			console.info(asset.id);
-			console.log("URL");
-			console.info(asset.url);
-			console.groupEnd();
-		}
-
-		URL.revokeObjectURL(asset.url);
+export function assetFromFile(id: number, file: File): Asset {
+	if (import.meta.env.DEV) {
+		console.groupCollapsed("DEBUG: Creating asset from File");
+		console.log("ID");
+		console.info(id);
+		console.log("File");
+		console.info(file);
+		console.groupEnd();
 	}
+
+	return {
+		id,
+		name: file.name,
+		mime: file.type,
+		url: URL.createObjectURL(file),
+		notice: null,
+	};
+}
+
+export function revokeObjectURL(url: string): void {
+	if (import.meta.env.DEV) {
+		console.groupCollapsed("DEBUG: Releasing object URL");
+		console.log("URL");
+		console.info(url);
+		console.groupEnd();
+	}
+
+	URL.revokeObjectURL(url);
 }

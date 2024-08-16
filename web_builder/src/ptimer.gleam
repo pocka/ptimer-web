@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import gleam/dynamic
+import gleam/list
 import gleam/option.{type Option, None}
 import gleam/result
 
@@ -82,6 +83,24 @@ pub type Asset {
     notice: Option(String),
     url: String,
   )
+}
+
+@external(javascript, "@/ptimer.ffi.ts", "assetFromFile")
+fn asset_from_file(id: Int, file: dynamic.Dynamic) -> dynamic.Dynamic
+
+pub fn create_asset(
+  id: Int,
+  file: dynamic.Dynamic,
+) -> Result(Asset, dynamic.DecodeErrors) {
+  asset_from_file(id, file)
+  |> decode_asset
+}
+
+@external(javascript, "@/ptimer.ffi.ts", "revokeObjectURL")
+fn revoke_object_url(url: String) -> Nil
+
+pub fn release_asset(asset: Asset) -> Nil {
+  revoke_object_url(asset.url)
 }
 
 pub fn decode_asset(
@@ -199,8 +218,9 @@ pub fn parse(
   |> on_result
 }
 
-@external(javascript, "@/ptimer.ffi.ts", "release")
-pub fn release(ptimer: Ptimer) -> Nil
+pub fn release(ptimer: Ptimer) -> Nil {
+  ptimer.assets |> list.fold(Nil, fn(_, asset) { release_asset(asset) })
+}
 
 pub const empty: Ptimer = Ptimer(
   Metadata(title: "", description: None, lang: "en-US"),

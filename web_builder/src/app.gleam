@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import gleam/dynamic
-import gleam/list
 import gleam/option.{type Option, None, Some}
 import log
 import lucide
@@ -16,6 +15,7 @@ import lustre/event
 import platform_support/transferable_streams
 import ptimer
 import storybook
+import ui/assets_editor
 import ui/button
 import ui/menu
 import ui/metadata_editor
@@ -39,7 +39,7 @@ type ParsingJob {
 type Scene {
   MetadataEditor
   StepsEditor(steps_editor.Model)
-  AssetsEditor
+  AssetsEditor(assets_editor.Model)
   LogsViewer
 }
 
@@ -110,6 +110,8 @@ pub opaque type Msg {
   NavigateTo(Scene)
   OpenStepsEditor
   StepsEditorMsg(steps_editor.Msg)
+  OpenAssetsEditor
+  AssetsEditorMsg(assets_editor.Msg)
   OpenFilePicker
   CreateNewTimer
   UpdateTimer(ptimer.Ptimer)
@@ -225,6 +227,42 @@ pub fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
       let #(m, e) = steps_editor.update(sub_model, sub_msg)
 
       #(Model(..model, scene: StepsEditor(m)), effect.map(e, StepsEditorMsg))
+    }
+
+    OpenAssetsEditor, _ -> {
+      case model.scene {
+        AssetsEditor(_) -> #(model, effect.none())
+
+        _ -> {
+          let #(m, e) = assets_editor.init(Nil)
+
+          #(
+            Model(..model, scene: AssetsEditor(m)),
+            effect.map(e, AssetsEditorMsg),
+          )
+        }
+      }
+    }
+
+    AssetsEditorMsg(assets_editor.Update(f)),
+      Model(
+        scene: AssetsEditor(sub_model),
+        timer: Some(timer),
+        ..,
+      )
+    -> {
+      let #(m, e) = assets_editor.update(sub_model, assets_editor.Update(f))
+
+      #(
+        Model(..model, scene: AssetsEditor(m), timer: Some(f(timer))),
+        effect.map(e, AssetsEditorMsg),
+      )
+    }
+
+    AssetsEditorMsg(sub_msg), Model(scene: AssetsEditor(sub_model), ..) -> {
+      let #(m, e) = assets_editor.update(sub_model, sub_msg)
+
+      #(Model(..model, scene: AssetsEditor(m)), effect.map(e, AssetsEditorMsg))
     }
 
     OpenFilePicker, _ -> #(model, select_file())
@@ -361,8 +399,11 @@ pub fn view(model: Model) -> element.Element(Msg) {
         menu.item(
           lucide.FileMusic,
           [
-            menu.active(model.scene == AssetsEditor),
-            event.on_click(NavigateTo(AssetsEditor)),
+            menu.active(case model.scene {
+              AssetsEditor(_) -> True
+              _ -> False
+            }),
+            event.on_click(OpenAssetsEditor),
           ],
           [element.text("Assets")],
         ),
@@ -398,14 +439,10 @@ pub fn view(model: Model) -> element.Element(Msg) {
           steps_editor.view(StepsEditorMsg, file, sub_model, [])
         }
 
-        AssetsEditor -> {
+        AssetsEditor(sub_model) -> {
           use _, file <- with_file(model)
 
-          html.ol(
-            [],
-            file.assets
-              |> list.map(fn(asset) { html.li([], [element.text(asset.name)]) }),
-          )
+          assets_editor.view(AssetsEditorMsg, file, sub_model, [])
         }
 
         LogsViewer ->
