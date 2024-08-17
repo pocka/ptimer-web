@@ -242,11 +242,19 @@ pub fn view(
           ),
         ],
         actions: [
-          button.new(button.Button(msg(Internal(NoOp))))
+          button.new(
+            button.FilePicker(
+              fn(file) {
+                Append(timer.assets, file)
+                |> Internal
+                |> msg
+              },
+              ["audio/mp3", "audio/wav"],
+            ),
+          )
           |> button.variant(button.Primary)
-          |> button.state(button.Disabled(None))
           |> button.icon(lucide.ListPlus)
-          |> button.view([], [element.text("Not Implemented")]),
+          |> button.view([], [element.text("Add asset")]),
         ],
         attrs: [],
       )
@@ -258,6 +266,19 @@ pub fn view(
 
           #(int.to_string(asset.id), list_item(msg, asset))
         }),
+        button.new(
+          button.FilePicker(
+            fn(file) {
+              Append(timer.assets, file)
+              |> Internal
+              |> msg
+            },
+            ["audio/mp3", "audio/wav"],
+          ),
+        )
+          |> button.variant(button.Primary)
+          |> button.icon(lucide.ListPlus)
+          |> button.view([], [element.text("Add new asset")]),
       ])
   }
 }

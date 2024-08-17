@@ -5,6 +5,8 @@
 import { type Meta, type StoryObj } from "@storybook/html";
 import { expect, userEvent, waitFor, within } from "@storybook/test";
 
+import { sampleWav } from "./storybook_data";
+
 import { story } from "./app.gleam";
 
 interface Args {}
@@ -44,5 +46,11 @@ export const CreateFromScratch: Story = {
 		await userEvent.type(root.getByRole("textbox", { name: /description/i }), "Description for{enter}Step One");
 		await userEvent.selectOptions(root.getByRole("combobox", { name: /type$/i }), "Timer");
 		await userEvent.type(root.getByRole("textbox", { name: /duration/i }), "{backspace}120");
+
+		await userEvent.click(root.getByRole("button", { name: "Assets" }));
+		await userEvent.upload(root.getByLabelText(/add asset/i), sampleWav);
+
+		await userEvent.click(root.getByRole("button", { name: "Steps" }));
+		await userEvent.selectOptions(root.getByRole("combobox", { name: /sound/i }), "sample.wav");
 	},
 };
