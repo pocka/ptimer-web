@@ -28,29 +28,6 @@ SPDX-License-Identifier: Apache-2.0
 	font-family: var(--font-mono);
 }
 
-.logs-container {
-	position: absolute;
-	inset: 0;
-	display: flex;
-	justify-content: center;
-	padding: 12px;
-}
-
-.logs {
-	width: 100%;
-	max-width: 60rem;
-	padding: 4px 8px;
-	border: 1px solid oklch(var(--color-border) / var(--alpha-border-subtle));
-
-	background-color: oklch(var(--color-bg1));
-	border-radius: 3px;
-	overflow-y: scroll;
-}
-.logs:focus-visible {
-	border-color: oklch(var(--color-focus));
-	box-shadow: 0 0 0 var(--length-focus-ring) oklch(var(--color-focus) / var(--alpha-focus-ring));
-}
-
 @media (orientation: landscape) {
 	.layout {
 		grid-template-columns: max-content minmax(0, 1fr);

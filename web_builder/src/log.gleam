@@ -3,13 +3,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import datetime.{type DateTime}
+import gleam/dynamic
 import gleam/int
 import gleam/list
+import gleam/result
+import lustre
 import lustre/attribute.{class}
 import lustre/element.{text}
 import lustre/element/html
 import platform_support/transferable_streams
 import ptimer
+import storybook
 
 // MODEL
 
@@ -115,18 +119,65 @@ pub fn view(
   logs: List(Log),
   attrs: List(attribute.Attribute(msg)),
 ) -> element.Element(msg) {
-  element.keyed(html.ul([class(scoped("logs")), ..attrs], _), {
-    use log <- list.map(logs)
+  html.div([class(scoped("container"))], [
+    element.keyed(html.ul([class(scoped("logs")), ..attrs], _), {
+      use log <- list.map(logs)
 
-    #(
-      log.id |> int.to_string,
-      html.li([class(scoped("log"))], [
-        html.span([class(scoped("log-severity"))], [severity(log.severity)]),
-        html.span([class(scoped("log-datetime"))], [
-          log.logged_at |> datetime.locale_string |> text,
+      #(
+        log.id |> int.to_string,
+        html.li([class(scoped("log"))], [
+          html.span([class(scoped("log-severity"))], [severity(log.severity)]),
+          html.span([class(scoped("log-datetime"))], [
+            log.logged_at |> datetime.locale_string |> text,
+          ]),
+          html.span([class(scoped("log-message"))], [action(log.action)]),
         ]),
-        html.span([class(scoped("log-message"))], [action(log.action)]),
-      ]),
+      )
+    }),
+  ])
+}
+
+pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
+  use selector, flags, _action <- storybook.story(args, ctx)
+
+  let is_empty =
+    flags
+    |> dynamic.field("empty", dynamic.bool)
+    |> result.unwrap(False)
+
+  let _ =
+    lustre.element(
+      view(
+        case is_empty {
+          True -> []
+          False -> [
+            Log(0, CreateNew, datetime.now(), Info),
+            Log(1, StartLoadingEngine, datetime.now(), Debug),
+            Log(
+              2,
+              DetectedTransferableStreamNotSupported,
+              datetime.now(),
+              Warning,
+            ),
+            Log(
+              3,
+              EngineLoadingFailure(ptimer.RuntimeError("Unexpected Error")),
+              datetime.now(),
+              Danger,
+            ),
+            Log(4, CreateNew, datetime.now(), Info),
+            Log(5, CreateNew, datetime.now(), Info),
+            Log(6, CreateNew, datetime.now(), Info),
+            Log(7, CreateNew, datetime.now(), Info),
+            Log(8, CreateNew, datetime.now(), Info),
+            Log(9, CreateNew, datetime.now(), Info),
+            Log(10, CreateNew, datetime.now(), Info),
+          ]
+        },
+        [],
+      ),
     )
-  })
+    |> lustre.start(selector, Nil)
+
+  Nil
 }

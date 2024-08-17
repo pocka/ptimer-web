@@ -436,10 +436,7 @@ pub fn view(model: Model) -> element.Element(Msg) {
           assets_editor.view(AssetsEditorMsg, file, sub_model, [])
         }
 
-        LogsViewer ->
-          html.div([class(scoped("logs-container"))], [
-            log.view(model.logs, [class(scoped("logs"))]),
-          ])
+        LogsViewer -> log.view(model.logs, [class(scoped("logs"))])
       },
     ]),
   ])
