@@ -7,6 +7,8 @@ import { type Meta, type StoryObj } from "@storybook/html";
 import { story } from "./button.gleam";
 
 interface Args {
+	type: "button" | "link" | "file_picker";
+
 	variant: "primary" | "normal";
 
 	state: "disabled" | "enabled" | "loading";
@@ -19,11 +21,16 @@ export default {
 		return story(args, ctx);
 	},
 	args: {
+		type: "button",
 		variant: "primary",
 		state: "enabled",
 		size: "medium",
 	},
 	argTypes: {
+		type: {
+			control: "radio",
+			options: ["button", "link", "file_picker"],
+		},
 		variant: {
 			control: "radio",
 			options: ["primary", "normal"],
@@ -52,5 +59,17 @@ export const Normal: Story = {
 export const Small: Story = {
 	args: {
 		size: "small",
+	},
+};
+
+export const Link: Story = {
+	args: {
+		type: "link",
+	},
+};
+
+export const FilePicker: Story = {
+	args: {
+		type: "file_picker",
 	},
 };

@@ -9,6 +9,7 @@ SPDX-License-Identifier: Apache-2.0
 	--_tint-l: 0%;
 	--_tint-c: 0%;
 
+	position: relative;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -20,18 +21,18 @@ SPDX-License-Identifier: Apache-2.0
 
 	text-align: center;
 }
-.button:disabled, .button[aria-disabled="true"] {
+.disabled, .loading {
 	--_alpha: var(--alpha-disabled);
 }
-.button:enabled:hover {
+.button:not(.disabled, .loading):hover {
 	--_tint-l: var(--tint-hover-l);
 	--_tint-c: var(--tint-hover-c);
 }
-.button:enabled:active {
+.button:not(.disabled, .loading):active {
 	--_tint-l: var(--tint-pressed-l);
 	--_tint-c: var(--tint-pressed-c);
 }
-.button:focus-visible {
+.button:focus-visible, .button:has(:focus-visible) {
 	border-color: oklch(var(--color-focus));
 	box-shadow: 0 0 0 var(--length-focus-ring) oklch(var(--color-focus) / var(--alpha-focus-ring));
 }
@@ -66,7 +67,7 @@ SPDX-License-Identifier: Apache-2.0
 	border-color: oklch(var(--color-border) / var(--alpha-border-strong));
 	color: oklch(var(--color-fg) / var(--_alpha));
 }
-.normal:enabled:hover, .normal:enabled:active {
+.normal:not(.disabled, .loading):hover, .normal:not(.disabled, .loading):active {
 	--_overlay-bg-alpha: 1;
 }
 
@@ -92,4 +93,15 @@ SPDX-License-Identifier: Apache-2.0
 	.small {
 		padding: 8px 12px;
 	}
+}
+
+.visually-hidden {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	user-select: none;
+	opacity: 0;
 }

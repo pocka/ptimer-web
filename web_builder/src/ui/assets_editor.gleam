@@ -37,6 +37,7 @@ pub opaque type InternalMsg {
   Append(assets: List(ptimer.Asset), file: dynamic.Dynamic)
   Delete(asset: ptimer.Asset)
   Edit(payload: ptimer.Asset)
+  NoOp
 }
 
 pub type Msg {
@@ -109,6 +110,8 @@ pub fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
         }),
       ),
     )
+
+    Internal(NoOp) -> #(model, effect.none())
   }
 }
 
@@ -215,14 +218,10 @@ fn list_item(msg: fn(Msg) -> msg, asset: ptimer.Asset) -> element.Element(msg) {
         "audio/mp3" -> audio_player(asset)
         _ -> html.div([], [])
       },
-      button.button(
-        button.Normal,
-        button.Enabled(msg(Internal(Delete(asset)))),
-        button.Small,
-        Some(lucide.Trash2),
-        [],
-        [element.text("Delete")],
-      ),
+      button.new(button.Button(msg(Internal(Delete(asset)))))
+        |> button.size(button.Small)
+        |> button.icon(lucide.Trash2)
+        |> button.view([], [element.text("Delete")]),
     ]),
   ])
 }
@@ -243,14 +242,11 @@ pub fn view(
           ),
         ],
         actions: [
-          button.button(
-            button.Primary,
-            button.Disabled(None),
-            button.Medium,
-            Some(lucide.ListPlus),
-            [],
-            [element.text("Not implemented")],
-          ),
+          button.new(button.Button(msg(Internal(NoOp))))
+          |> button.variant(button.Primary)
+          |> button.state(button.Disabled(None))
+          |> button.icon(lucide.ListPlus)
+          |> button.view([], [element.text("Not Implemented")]),
         ],
         attrs: [],
       )

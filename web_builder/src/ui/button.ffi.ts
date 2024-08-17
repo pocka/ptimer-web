@@ -13,3 +13,13 @@ export function className(x: string): string {
 
 	return moduleCss[x] ?? "";
 }
+
+export function getFirstFile(ev: Event): File | null {
+	if (!ev.currentTarget || !(ev.currentTarget instanceof HTMLInputElement)) {
+		return null;
+	}
+
+	const file = ev.currentTarget.files?.item(0);
+
+	return file ?? null;
+}

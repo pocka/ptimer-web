@@ -343,22 +343,13 @@ fn with_file(
           element.text(" files."),
         ],
         actions: [
-          button.button(
-            button.Primary,
-            button.Enabled(OpenFilePicker),
-            button.Medium,
-            Some(lucide.FolderOpen),
-            [],
-            [element.text("Select file")],
-          ),
-          button.button(
-            button.Normal,
-            button.Enabled(CreateNewTimer),
-            button.Medium,
-            Some(lucide.FilePlus),
-            [],
-            [element.text("Create new timer")],
-          ),
+          button.new(button.FilePicker(Parse, [".ptimer"]))
+            |> button.variant(button.Primary)
+            |> button.icon(lucide.FolderOpen)
+            |> button.view([], [element.text("Select file")]),
+          button.new(button.Button(CreateNewTimer))
+            |> button.icon(lucide.FilePlus)
+            |> button.view([], [element.text("Create new timer")]),
         ],
         attrs: [],
       )

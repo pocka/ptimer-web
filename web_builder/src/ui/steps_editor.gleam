@@ -50,6 +50,7 @@ pub opaque type InternalMsg {
   DragOver(index: Int)
   DragLeave(index: Int)
   Animate(msg: Msg)
+  NoOp
 }
 
 pub type Msg {
@@ -182,11 +183,9 @@ fn before_step(
     Idle -> idle
 
     ByButton(from, source) ->
-      button.button(
-        button.Normal,
-        button.Enabled(move(source)),
-        button.Medium,
-        Some(lucide.CornerLeftDown),
+      button.new(button.Button(move(source)))
+      |> button.icon(lucide.CornerLeftDown)
+      |> button.view(
         [
           case from == index || from == index - 1 {
             True -> class(scoped("invisible"))
@@ -270,22 +269,20 @@ fn step_views(
           timer,
           None,
           index,
-          button.button(
-            button.Primary,
-            button.Enabled(
-              UpdateSteps(
-                timer.steps
-                |> list.append([
-                  ptimer.Step(next_id, "", None, None, ptimer.UserAction),
-                ]),
-              )
-              |> msg,
-            ),
-            button.Medium,
-            Some(lucide.ListPlus),
-            [class(scoped("flip-target"))],
-            [element.text("Add step")],
-          ),
+          button.new(button.Button(
+            UpdateSteps(
+              timer.steps
+              |> list.append([
+                ptimer.Step(next_id, "", None, None, ptimer.UserAction),
+              ]),
+            )
+            |> msg,
+          ))
+            |> button.variant(button.Primary)
+            |> button.icon(lucide.ListPlus)
+            |> button.view([class(scoped("flip-target"))], [
+              element.text("Add step"),
+            ]),
         ),
       ),
     ]
@@ -302,25 +299,22 @@ fn step_views(
             timer,
             Some(step),
             index,
-            button.button(
-              button.Normal,
-              button.Enabled(
-                Internal(
-                  Animate(
-                    UpdateSteps(insert_at(
-                      timer.steps,
-                      ptimer.Step(next_id, "", None, None, ptimer.UserAction),
-                      index,
-                    )),
-                  ),
-                )
-                |> msg,
-              ),
-              button.Medium,
-              Some(lucide.ListPlus),
-              [class(scoped("insert-button"))],
-              [element.text("Insert step")],
-            ),
+            button.new(button.Button(
+              Internal(
+                Animate(
+                  UpdateSteps(insert_at(
+                    timer.steps,
+                    ptimer.Step(next_id, "", None, None, ptimer.UserAction),
+                    index,
+                  )),
+                ),
+              )
+              |> msg,
+            ))
+              |> button.icon(lucide.ListPlus)
+              |> button.view([class(scoped("insert-button"))], [
+                element.text("Insert step"),
+              ]),
           ),
         ),
         #(
@@ -522,58 +516,42 @@ fn step_views(
               html.div([class(scoped("step-actions"))], [
                 case model.move_op {
                   Idle ->
-                    button.button(
-                      button.Normal,
-                      button.Enabled(
-                        Internal(StartManualMove(index, step)) |> msg,
-                      ),
-                      button.Small,
-                      Some(lucide.ArrowDownUp),
-                      [],
-                      [element.text("Move")],
-                    )
+                    button.new(button.Button(
+                      Internal(StartManualMove(index, step)) |> msg,
+                    ))
+                    |> button.size(button.Small)
+                    |> button.icon(lucide.ArrowDownUp)
+                    |> button.view([], [element.text("Move")])
 
                   ByButton(from, _) if from == index ->
-                    button.button(
-                      button.Primary,
-                      button.Enabled(Internal(CancelManualMove) |> msg),
-                      button.Small,
-                      Some(lucide.Ban),
-                      [],
-                      [element.text("Cancel")],
-                    )
+                    button.new(button.Button(Internal(CancelManualMove) |> msg))
+                    |> button.variant(button.Primary)
+                    |> button.size(button.Small)
+                    |> button.icon(lucide.Ban)
+                    |> button.view([], [element.text("Cancel")])
 
                   _ ->
-                    button.button(
-                      button.Normal,
-                      button.Disabled(None),
-                      button.Small,
-                      Some(lucide.ArrowDownUp),
-                      [],
-                      [element.text("Move")],
-                    )
+                    button.new(button.Button(NoOp |> Internal |> msg))
+                    |> button.state(button.Disabled(None))
+                    |> button.size(button.Small)
+                    |> button.icon(lucide.ArrowDownUp)
+                    |> button.view([], [element.text("Move")])
                 },
-                button.button(
-                  button.Normal,
-                  case model.move_op {
-                    Idle ->
-                      button.Enabled(
-                        Internal(
-                          Animate(UpdateSteps(
-                            timer.steps
-                            |> list.filter(fn(a) { a.id != step.id }),
-                          )),
-                        )
-                        |> msg,
-                      )
-
+                button.new(button.Button(
+                  Animate(UpdateSteps(
+                    timer.steps
+                    |> list.filter(fn(a) { a.id != step.id }),
+                  ))
+                  |> Internal
+                  |> msg,
+                ))
+                  |> button.size(button.Small)
+                  |> button.state(case model.move_op {
+                    Idle -> button.Enabled
                     _ -> button.Disabled(None)
-                  },
-                  button.Small,
-                  Some(lucide.Trash2),
-                  [],
-                  [element.text("Delete")],
-                ),
+                  })
+                  |> button.icon(lucide.Trash2)
+                  |> button.view([], [element.text("Delete")]),
               ]),
             ]),
           ]),
@@ -600,17 +578,13 @@ pub fn view(
           ),
         ],
         actions: [
-          button.button(
-            button.Primary,
-            button.Enabled(
-              UpdateSteps([ptimer.Step(0, "", None, None, ptimer.UserAction)])
-              |> msg,
-            ),
-            button.Medium,
-            Some(lucide.ListPlus),
-            [],
-            [element.text("Add step")],
-          ),
+          button.new(button.Button(
+            UpdateSteps([ptimer.Step(0, "", None, None, ptimer.UserAction)])
+            |> msg,
+          ))
+          |> button.variant(button.Primary)
+          |> button.icon(lucide.ListPlus)
+          |> button.view([], [element.text("Add step")]),
         ],
         attrs: [],
       )

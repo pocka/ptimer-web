@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import gleam/dynamic
-import gleam/option.{Some}
 import lucide
 import lustre
 import lustre/attribute.{type Attribute, class}
@@ -49,22 +48,13 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
         title,
         description,
         actions: [
-          button.button(
-            button.Primary,
-            button.Enabled(Nil),
-            button.Medium,
-            Some(lucide.FolderOpen),
-            [],
-            [text("Open")],
-          ),
-          button.button(
-            button.Normal,
-            button.Enabled(Nil),
-            button.Medium,
-            Some(lucide.ClipboardList),
-            [],
-            [text("Paste")],
-          ),
+          button.new(button.Button(Nil))
+            |> button.variant(button.Primary)
+            |> button.icon(lucide.FolderOpen)
+            |> button.view([], [text("Open")]),
+          button.new(button.Button(Nil))
+            |> button.icon(lucide.ClipboardList)
+            |> button.view([], [text("Paste")]),
         ],
         attrs: [],
       )
