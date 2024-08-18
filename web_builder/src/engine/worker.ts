@@ -6,7 +6,12 @@ import initSqlite3, { type Database, type Sqlite3Static, type WasmPointer } from
 
 import type { Asset, Metadata, Ptimer, Step } from "../ptimer";
 
+import initSQL from "../../../sql/init.sql?raw";
+
 import {
+	COMPILE,
+	type CompileRequest,
+	type CompileResponse,
 	HEARTBEAT,
 	type HeartbeatRequest,
 	type HeartbeatResponse,
@@ -98,6 +103,94 @@ async function parse(
 	}
 }
 
+async function compile(sqlite: Sqlite3Static, timer: Ptimer): Promise<Uint8Array> {
+	let db: Database | null = null;
+	try {
+		db = new sqlite.oo1.DB({
+			filename: ":memory:",
+		});
+
+		db.exec(initSQL);
+
+		db.exec({
+			sql: `
+  			INSERT OR ABORT INTO metadata (
+  				title,
+  				description,
+  				lang
+  			) VALUES (
+  				?, ?, ?
+  			);
+			`,
+			bind: [timer.metadata.title, timer.metadata.description, timer.metadata.lang],
+		});
+
+		const insertAsset = db.prepare(`
+			INSERT OR ABORT INTO asset (
+				id,
+				name,
+				mime,
+				data,
+				notice
+			) VALUES (
+				?, ?, ?, ?, ?
+			);
+		`);
+
+		try {
+			for (const asset of timer.assets) {
+				const binary = await fetch(asset.url).then(r => r.arrayBuffer());
+
+				insertAsset.bind([asset.id, asset.name, asset.mime, binary, asset.notice]);
+				insertAsset.stepReset();
+			}
+		} finally {
+			insertAsset.finalize();
+		}
+
+		const insertStep = db.prepare(`
+			INSERT OR ABORT INTO step (
+				id,
+				title,
+				description,
+				sound,
+				duration_seconds,
+				'index'
+			) VALUES (
+				?, ?, ?, ?, ?, ?
+			);
+		`);
+
+		try {
+			for (let i = 0, l = timer.steps.length; i < l; i++) {
+				const step = timer.steps[i];
+				if (!step) {
+					continue;
+				}
+
+				insertStep.bind([
+					step.id,
+					step.title,
+					step.description,
+					step.sound,
+					step.duration_seconds,
+					i,
+				]);
+				insertStep.stepReset();
+			}
+		} finally {
+			insertStep.finalize();
+		}
+
+		// <https://sqlite.org/wasm/doc/trunk/cookbook.md#impexp>
+		return sqlite.capi.sqlite3_js_db_export(db);
+	} finally {
+		if (db) {
+			db.close();
+		}
+	}
+}
+
 async function main() {
 	// SQLite WASM incorrectly emits OPFS warning regardless of OPFS storage usage.
 	// There is no "official" API and this is the only available option (hack).
@@ -144,6 +237,29 @@ async function main() {
 					}));
 				} catch (error) {
 					self.postMessage(response<ParseResponse>(req, {
+						ok: false,
+						error,
+					}));
+				}
+				return;
+			}
+			case COMPILE: {
+				const req = ev.data as CompileRequest;
+
+				try {
+					const bytes = await compile(sqlite3, req.payload.timer);
+
+					self.postMessage(
+						response<CompileResponse>(req, {
+							ok: true,
+							data: bytes,
+						}),
+						{
+							transfer: [bytes.buffer],
+						},
+					);
+				} catch (error) {
+					self.postMessage(response<CompileResponse>(req, {
 						ok: false,
 						error,
 					}));

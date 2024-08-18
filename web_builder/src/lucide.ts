@@ -9,6 +9,7 @@ import {
 	ClipboardList,
 	CornerLeftDown,
 	createElement,
+	Download,
 	FileMusic,
 	FilePlus,
 	FolderOpen,
@@ -17,6 +18,7 @@ import {
 	ListOrdered,
 	ListPlus,
 	Menu,
+	OctagonX,
 	ScrollText,
 	Trash2,
 } from "lucide";
@@ -44,6 +46,7 @@ export function register() {
 	customElements.define("lucide-ban", createLucideCustomElement(Ban));
 	customElements.define("lucide-chevron-down", createLucideCustomElement(ChevronDown));
 	customElements.define("lucide-corner-left-down", createLucideCustomElement(CornerLeftDown));
+	customElements.define("lucide-download", createLucideCustomElement(Download));
 	customElements.define("lucide-list-ordered", createLucideCustomElement(ListOrdered));
 	customElements.define("lucide-list-plus", createLucideCustomElement(ListPlus));
 	customElements.define("lucide-file-music", createLucideCustomElement(FileMusic));
@@ -53,5 +56,6 @@ export function register() {
 	customElements.define("lucide-menu", createLucideCustomElement(Menu));
 	customElements.define("lucide-folder-open", createLucideCustomElement(FolderOpen));
 	customElements.define("lucide-clipboard-list", createLucideCustomElement(ClipboardList));
+	customElements.define("lucide-octagon-x", createLucideCustomElement(OctagonX));
 	customElements.define("lucide-trash2", createLucideCustomElement(Trash2));
 }

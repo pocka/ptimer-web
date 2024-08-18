@@ -52,5 +52,14 @@ export const CreateFromScratch: Story = {
 
 		await userEvent.click(root.getByRole("button", { name: "Steps" }));
 		await userEvent.selectOptions(root.getByRole("combobox", { name: /sound/i }), "sample.wav");
+
+		// Go to "Export" scene
+		await userEvent.click(root.getByRole("button", { name: "Export" }));
+
+		// Compile then download a generated file
+		await userEvent.click(root.getByRole("button", { name: /compile/i }));
+		await waitFor(() =>
+			expect(root.getByRole("link", { name: /download/i })).toHaveAttribute("download", "New Timer.ptimer")
+		);
 	},
 };

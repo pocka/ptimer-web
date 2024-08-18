@@ -11,6 +11,7 @@ pub type IconType {
   ChevronDown
   ClipboardList
   CornerLeftDown
+  Download
   FileMusic
   FilePlus
   FolderOpen
@@ -18,6 +19,7 @@ pub type IconType {
   ListOrdered
   ListPlus
   Menu
+  OctagonX
   ScrollText
   Trash2
 }
@@ -29,6 +31,7 @@ fn icon_type_to_string(icon_type: IconType) -> String {
     ChevronDown -> "chevron-down"
     ClipboardList -> "clipboard-list"
     CornerLeftDown -> "corner-left-down"
+    Download -> "download"
     FileMusic -> "file-music"
     FilePlus -> "file-plus"
     FolderOpen -> "folder-open"
@@ -37,6 +40,7 @@ fn icon_type_to_string(icon_type: IconType) -> String {
     ListPlus -> "list-plus"
     Menu -> "menu"
     ScrollText -> "scroll-text"
+    OctagonX -> "octagon-x"
     Trash2 -> "trash2"
   }
 }

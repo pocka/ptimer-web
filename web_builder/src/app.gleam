@@ -17,6 +17,7 @@ import ptimer
 import storybook
 import ui/assets_editor
 import ui/button
+import ui/export_scene
 import ui/menu
 import ui/metadata_editor
 import ui/placeholder
@@ -40,6 +41,7 @@ type Scene {
   MetadataEditor
   StepsEditor(steps_editor.Model)
   AssetsEditor(assets_editor.Model)
+  ExportScene
   LogsViewer
 }
 
@@ -50,12 +52,14 @@ pub opaque type Model {
     parsing: ParsingJob,
     logs: List(log.Log),
     scene: Scene,
+    export: export_scene.Model,
     transferable_streams: transferable_streams.SupportStatus,
   )
 }
 
 pub fn init(_flags) -> #(Model, effect.Effect(Msg)) {
   let transferable_streams_support = transferable_streams.support_status()
+  let export = export_scene.init(Nil)
 
   #(
     Model(
@@ -94,9 +98,10 @@ pub fn init(_flags) -> #(Model, effect.Effect(Msg)) {
           }
         },
       scene: MetadataEditor,
+      export: export.0,
       transferable_streams: transferable_streams_support,
     ),
-    prepare_engine(),
+    effect.batch([prepare_engine(), effect.map(export.1, ExportSceneMsg)]),
   )
 }
 
@@ -115,6 +120,7 @@ pub opaque type Msg {
   OpenFilePicker
   CreateNewTimer
   UpdateTimer(ptimer.Ptimer)
+  ExportSceneMsg(export_scene.Msg)
 }
 
 pub fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
@@ -167,11 +173,14 @@ pub fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
         parsing: Idle,
         logs: model.logs |> log.append(log.ParseSuccess, log.Info),
       ),
-      case prev {
-        Some(file) -> release(file)
+      effect.batch([
+        case prev {
+          Some(file) -> release(file)
 
-        _ -> effect.none()
-      },
+          _ -> effect.none()
+        },
+        encode_timer(timer),
+      ]),
     )
 
     ReceiveParseResult(Error(err)), Model(parsing: Parsing, logs: logs, ..) -> #(
@@ -213,13 +222,11 @@ pub fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
       let #(m, e) =
         steps_editor.update(sub_model, steps_editor.UpdateSteps(steps))
 
+      let new_timer = ptimer.Ptimer(..timer, steps:)
+
       #(
-        Model(
-          ..model,
-          scene: StepsEditor(m),
-          timer: Some(ptimer.Ptimer(..timer, steps:)),
-        ),
-        effect.map(e, StepsEditorMsg),
+        Model(..model, scene: StepsEditor(m), timer: Some(new_timer)),
+        effect.batch([effect.map(e, StepsEditorMsg), encode_timer(new_timer)]),
       )
     }
 
@@ -253,9 +260,11 @@ pub fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
     -> {
       let #(m, e) = assets_editor.update(sub_model, assets_editor.Update(f))
 
+      let new_timer = f(timer)
+
       #(
-        Model(..model, scene: AssetsEditor(m), timer: Some(f(timer))),
-        effect.map(e, AssetsEditorMsg),
+        Model(..model, scene: AssetsEditor(m), timer: Some(new_timer)),
+        effect.batch([effect.map(e, AssetsEditorMsg), encode_timer(new_timer)]),
       )
     }
 
@@ -274,13 +283,19 @@ pub fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
         timer: Some(ptimer.empty),
         logs: model.logs |> log.append(log.CreateNew, log.Debug),
       ),
-      effect.none(),
+      encode_timer(ptimer.empty),
     )
 
     UpdateTimer(timer), _ -> #(
       Model(..model, timer: Some(timer)),
-      effect.none(),
+      encode_timer(timer),
     )
+
+    ExportSceneMsg(sub_msg), Model(export: sub_model, ..) -> {
+      let #(m, e) = export_scene.update(sub_model, sub_msg)
+
+      #(Model(..model, export: m), effect.map(e, ExportSceneMsg))
+    }
 
     _, _ -> #(model, effect.none())
   }
@@ -320,6 +335,12 @@ fn parse(engine: ptimer.Engine, file: dynamic.Dynamic) -> effect.Effect(Msg) {
 
 fn release(file: ptimer.Ptimer) -> effect.Effect(Msg) {
   effect.from(fn(_) { ptimer.release(file) })
+}
+
+fn encode_timer(timer: ptimer.Ptimer) -> effect.Effect(Msg) {
+  effect.from(fn(dispatch) {
+    dispatch(ExportSceneMsg(export_scene.Encode(timer)))
+  })
 }
 
 // VIEW
@@ -398,6 +419,14 @@ pub fn view(model: Model) -> element.Element(Msg) {
           ],
           [element.text("Assets")],
         ),
+        menu.item(
+          lucide.Download,
+          [
+            menu.active(model.scene == ExportScene),
+            event.on_click(NavigateTo(ExportScene)),
+          ],
+          [element.text("Export")],
+        ),
         case model.transferable_streams {
           transferable_streams.NotSupported -> element.none()
 
@@ -434,6 +463,12 @@ pub fn view(model: Model) -> element.Element(Msg) {
           use _, file <- with_file(model)
 
           assets_editor.view(AssetsEditorMsg, file, sub_model, [])
+        }
+
+        ExportScene -> {
+          use engine, _ <- with_file(model)
+
+          export_scene.view(ExportSceneMsg, engine, model.export, [])
         }
 
         LogsViewer -> log.view(model.logs, [class(scoped("logs"))])

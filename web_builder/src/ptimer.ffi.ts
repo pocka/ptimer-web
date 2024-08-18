@@ -3,6 +3,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
+	COMPILE,
+	type CompileRequest,
+	type CompileResponse,
 	HEARTBEAT,
 	type HeartbeatRequest,
 	type HeartbeatResponse,
@@ -11,6 +14,8 @@ import {
 	type ParseRequest,
 	type ParseResponse,
 	request,
+	type RequestMessage,
+	type ResponseMessage,
 } from "@/engine/message";
 
 import { type Asset, type Ptimer } from "@/ptimer";
@@ -22,7 +27,35 @@ class Engine {
 		this.#worker = worker;
 	}
 
-	parse(file: File): Promise<Ptimer> {
+	#send<Request extends RequestMessage<string, any>, Response extends ResponseMessage<string, any>>(
+		req: Request,
+		options?: StructuredSerializeOptions,
+	): Promise<Response> {
+		return new Promise((resolve) => {
+			const onMessage = (ev: MessageEvent) => {
+				if (!isResponseMessage(ev.data)) {
+					console.warn("Illegal response message sent from engine worker.", {
+						message: ev.data,
+					});
+					return;
+				}
+
+				if (ev.data.id !== req.id) {
+					return;
+				}
+
+				resolve(ev.data as Response);
+
+				this.#worker.removeEventListener("message", onMessage);
+			};
+
+			this.#worker.addEventListener("message", onMessage);
+
+			this.#worker.postMessage(req, options);
+		});
+	}
+
+	async parse(file: File): Promise<Ptimer> {
 		const stream = file.stream();
 
 		const req = request<ParseRequest>(PARSE, { data: stream });
@@ -42,53 +75,76 @@ class Engine {
 			console.groupEnd();
 		}
 
-		return new Promise((resolve, reject) => {
-			const onMessage = (ev: MessageEvent) => {
-				if (!isResponseMessage(ev.data)) {
-					console.warn("Illegal response message sent from engine worker.", {
-						message: ev.data,
-					});
-					return;
-				}
+		const res = await this.#send<ParseRequest, ParseResponse>(req, { transfer: [stream] });
 
-				if (ev.data.id !== req.id) {
-					return;
-				}
+		if (!res.payload.ok) {
+			if (import.meta.env.DEV) {
+				console.groupCollapsed("%cDEBUG: Failed to parse file", "background: #900; color: #fff");
+				console.error(res.payload.error);
+				console.log("Request");
+				console.info(req);
+				console.log("Response");
+				console.info(res);
+				console.groupEnd();
+			}
 
-				const resp = ev.data as ParseResponse;
+			throw res.payload.error;
+		}
 
-				if (!resp.payload.ok) {
-					reject(resp.payload.error);
+		if (import.meta.env.DEV) {
+			console.groupCollapsed("DEBUG: File parsed");
+			console.info(res.payload.data);
+			console.log("Request");
+			console.info(req);
+			console.log("Response");
+			console.info(res);
+			console.groupEnd();
+		}
 
-					if (import.meta.env.DEV) {
-						console.groupCollapsed("%cDEBUG: Failed to parse file", "background: #900; color: #fff");
-						console.error(resp.payload.error);
-						console.log("Request");
-						console.info(req);
-						console.log("Response");
-						console.info(resp);
-						console.groupEnd();
-					}
-					return;
-				}
+		return res.payload.data;
+	}
 
-				resolve(resp.payload.data);
-				if (import.meta.env.DEV) {
-					console.groupCollapsed("DEBUG: File parsed");
-					console.info(resp.payload.data);
-					console.log("Request");
-					console.info(req);
-					console.log("Response");
-					console.info(resp);
-					console.groupEnd();
-				}
+	async compile(timer: Ptimer): Promise<File> {
+		const req = request<CompileRequest>(COMPILE, { timer });
 
-				this.#worker.removeEventListener("message", onMessage);
-			};
+		if (import.meta.env.DEV) {
+			console.groupCollapsed("DEBUG: Requested compilation");
+			console.log("Timer");
+			console.info(timer);
+			console.log("Request");
+			console.info(req);
+			console.groupEnd();
+		}
 
-			this.#worker.addEventListener("message", onMessage);
+		const res = await this.#send<CompileRequest, CompileResponse>(req);
 
-			this.#worker.postMessage(req, { transfer: [stream] });
+		if (!res.payload.ok) {
+			if (import.meta.env.DEV) {
+				console.groupCollapsed("%cDEBUG: Failed to compile timer", "background: #900; color: #fff");
+				console.error(res.payload.error);
+				console.log("Request");
+				console.info(req);
+				console.log("Response");
+				console.info(res);
+				console.groupEnd();
+			}
+
+			throw res.payload.error;
+		}
+
+		if (import.meta.env.DEV) {
+			console.groupCollapsed("DEBUG: File parsed");
+			console.log("Byte size");
+			console.info(res.payload.data.byteLength);
+			console.log("Request");
+			console.info(req);
+			console.log("Response");
+			console.info(res);
+			console.groupEnd();
+		}
+
+		return new File([res.payload.data], `${timer.metadata.title}.ptimer`, {
+			type: "application/x-ptimer",
 		});
 	}
 }
@@ -161,6 +217,22 @@ export function parse(engine: Engine, file: File, callback: (ptimer: Result<Ptim
 	engine.parse(file).then(data => {
 		callback({
 			value: data,
+		});
+	}).catch(err => {
+		callback({
+			error: err instanceof Error ? err.message : String(err),
+		});
+	});
+}
+
+type CompileError = string;
+
+export function compile(engine: Engine, timer: Ptimer, callback: (url: Result<string, CompileError>) => void): void {
+	engine.compile(timer).then(file => {
+		const url = URL.createObjectURL(file);
+
+		callback({
+			value: url,
 		});
 	}).catch(err => {
 		callback({

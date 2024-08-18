@@ -129,3 +129,18 @@ export type ParseResponse = ResponseMessage<
 	typeof PARSE,
 	{ ok: true; data: Ptimer } | { ok: false; error: unknown }
 >;
+
+export const COMPILE = "compile";
+export type CompileRequest = RequestMessage<typeof COMPILE, {
+	timer: Ptimer;
+}>;
+export type CompileResponse = ResponseMessage<
+	typeof COMPILE,
+	{
+		ok: true;
+		data: Uint8Array;
+	} | {
+		ok: false;
+		error: unknown;
+	}
+>;

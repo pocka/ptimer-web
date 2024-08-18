@@ -38,7 +38,9 @@ pub fn menu(
   attrs: List(attribute.Attribute(msg)),
   children: List(element.Element(msg)),
 ) -> element.Element(msg) {
-  html.nav([class(scoped("menu")), ..attrs], children)
+  html.nav([class(scoped("menu")), ..attrs], [
+    html.div([class(scoped("list"))], children),
+  ])
 }
 
 pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
