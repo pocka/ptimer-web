@@ -9,8 +9,7 @@
 		"typescript": "^5.5.2"
 	},
 	"source": [
-		"src/index.html",
-		"src/builder/index.html"
+		"src/index.html"
 	],
 	"scripts": {
 		"dev": "parcel --no-autoinstall --no-cache",

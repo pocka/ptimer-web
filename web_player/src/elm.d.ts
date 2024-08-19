@@ -21,19 +21,6 @@ declare module "*.elm" {
 		ptimerParserReceiveParseError: JsToElmPort<string>;
 	}
 
-	interface BuilderBuilderPorts {
-		builderBuilderRequestFileUrl: ElmToJsPort<File>;
-		builderBuilderReceiveFileUrl: JsToElmPort<{
-			url: string;
-			mime: string;
-			name: string;
-		}>;
-		builderBuilderRequestReleaseObjectUrl: ElmToJsPort<string>;
-		builderBuilderRequestCompile: ElmToJsPort<unknown>;
-		builderBuilderReceiveCompiledFile: JsToElmPort<string>;
-		builderBuilderReceiveCompileError: JsToElmPort<string>;
-	}
-
 	interface ElmApp<Ports> {
 		ports: Ports;
 	}
@@ -62,19 +49,6 @@ declare module "*.elm" {
 			& UIDropZonePorts
 			& PtimerParserPorts
 		>;
-
-		BuilderApp: {
-			Main: ElmDocumentProgram<
-				& {
-					builderRequestInitializingFileLoader: ElmToJsPort<void>;
-					builderReceiveFileLoader: JsToElmPort<null>;
-					builderReceiveFileLoaderInitializeError: JsToElmPort<string>;
-				}
-				& UIDropZonePorts
-				& PtimerParserPorts
-				& BuilderBuilderPorts
-			>;
-		};
 	}
 
 	export const Elm: CompiledElmNamespaces;

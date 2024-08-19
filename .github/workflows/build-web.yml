@@ -50,12 +50,12 @@ jobs:
         run: "bun i"
         working-directory: web_builder
       - name: Build the app
-        run: "bun run build --base '/${{ github.event.repository.name }}/builder-v2/'"
+        run: "bun run build --base '/${{ github.event.repository.name }}/builder/'"
         working-directory: web_builder
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: builder-v2
+          name: builder
           path: web_builder/dist
 
   build-builder-storybook:
