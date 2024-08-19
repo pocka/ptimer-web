@@ -471,7 +471,7 @@ pub fn view(model: Model) -> element.Element(Msg) {
           export_scene.view(ExportSceneMsg, engine, model.export, [])
         }
 
-        LogsViewer -> log.view(model.logs, [class(scoped("logs"))])
+        LogsViewer -> log.view(model.logs, [])
       },
     ]),
   ])
