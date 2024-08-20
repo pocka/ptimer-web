@@ -126,6 +126,7 @@ export const CreateFromScratchUsingErrorListJump = {
 		await expect(root.getByLabelText(/lang.* code/i)).toBeInTheDocument();
 
 		// Fill metadata title (field should have focus)
+		await waitFor(() => expect(root.getByRole("textbox", { name: /title/i })).toHaveFocus());
 		await userEvent.keyboard("New Timer");
 
 		// Go back to "Export" scene
@@ -141,6 +142,7 @@ export const CreateFromScratchUsingErrorListJump = {
 		await expect(root.getByRole("button", { name: /add step/i })).toBeInTheDocument();
 
 		// Fill step title (field should have focus)
+		await waitFor(() => expect(root.getByRole("textbox", { name: /title/i })).toHaveFocus());
 		await userEvent.keyboard("Step One");
 
 		// Go back to "Export" scene
