@@ -23,3 +23,15 @@ SPDX-License-Identifier: Apache-2.0
 
 	color: oklch(var(--color-fg) / var(--alpha-dimmed));
 }
+
+.invalid {
+	color: oklch(var(--color-danger));
+}
+
+@media (prefers-contrast: more) {
+	.invalid {
+		color: oklch(var(--color-fg));
+		text-decoration: underline;
+		text-decoration-color: oklch(var(--color-danger) / var(--alpha-dimmed));
+	}
+}

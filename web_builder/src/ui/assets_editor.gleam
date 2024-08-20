@@ -147,95 +147,89 @@ fn list_item(
   let id = fn(x: String) -> String { int.to_string(asset.id) <> "_" <> x }
 
   html.li([class(scoped("item"))], [
-    field.view(
-      id: id("name"),
-      label: [element.text("Name")],
-      input: fn(attrs) {
-        textbox.textbox(
-          asset.name,
-          textbox.Enabled(fn(str) {
-            msg(Internal(Edit(asset.Asset(..asset, name: str))))
-          }),
-          textbox.SingleLine,
-          attrs,
-        )
-      },
-      note: Some(case err {
-        Some(asset.EncodeError(name: Some(asset.EmptyName), ..)) -> [
-          element.text("Asset name can't be empty."),
-        ]
-        _ -> [
-          element.text(
-            "Name of the asset. Give an asset an unique name to dinstinguish easily.",
-          ),
-        ]
-      }),
-      attrs: [],
-    ),
-    field.view(
-      id: id("mime"),
-      label: [element.text("MIME")],
-      input: fn(attrs) {
-        textbox.textbox(
-          asset.mime,
-          textbox.Enabled(fn(str) {
-            msg(Internal(Edit(asset.Asset(..asset, mime: str))))
-          }),
-          textbox.SingleLine,
-          attrs,
-        )
-      },
-      note: Some(case err {
-        Some(asset.EncodeError(mime: Some(asset.EmptyMime), ..)) -> [
-          element.text(
-            "File type (MIME) can't be empty. It helps player application to determine which codec to use for media playback.",
-          ),
-        ]
-        Some(asset.EncodeError(mime: Some(asset.MimeNotIncludingSlash), ..)) -> [
-          element.text(
-            "This is not a valid MIME type string. It must contain a \"/\" (slash) character.",
-          ),
-        ]
-        _ -> [
-          element.text(
-            "File type (MIME) of the asset. Edit only when browser guessed incorrect MIME.",
-          ),
-        ]
-      }),
-      attrs: [],
-    ),
-    field.view(
-      id: id("notice"),
-      label: [element.text("Notice")],
-      input: fn(attrs) {
-        textbox.textbox(
-          asset.notice |> option.unwrap(""),
-          textbox.Enabled(fn(str) {
-            msg(
-              Internal(Edit(
-                asset.Asset(
-                  ..asset,
-                  notice: case str {
-                    "" -> None
-                    str -> Some(str)
-                  },
-                ),
-              )),
-            )
-          }),
-          textbox.MultiLine(Some(3)),
-          attrs,
-        )
-      },
-      note: Some([
+    field.new(id("name"), {
+      textbox.textbox(
+        asset.name,
+        textbox.Enabled(fn(str) {
+          msg(Internal(Edit(asset.Asset(..asset, name: str))))
+        }),
+        textbox.SingleLine,
+        _,
+      )
+    })
+      |> field.label([element.text("Name")])
+      |> field.note([
+        element.text(
+          "Name of the asset. Give an asset an unique name to dinstinguish easily.",
+        ),
+      ])
+      |> field.validity(case err {
+        Some(asset.EncodeError(name: Some(asset.EmptyName), ..)) ->
+          field.Invalid([element.text("Asset name can't be empty.")])
+        _ -> field.Valid
+      })
+      |> field.view(attrs: []),
+    field.new(id("mime"), {
+      textbox.textbox(
+        asset.mime,
+        textbox.Enabled(fn(str) {
+          msg(Internal(Edit(asset.Asset(..asset, mime: str))))
+        }),
+        textbox.SingleLine,
+        _,
+      )
+    })
+      |> field.label([element.text("MIME")])
+      |> field.note([
+        element.text(
+          "File type (MIME) of the asset. Edit only when browser guessed incorrect MIME.",
+        ),
+      ])
+      |> field.validity(case err {
+        Some(asset.EncodeError(mime: Some(asset.EmptyMime), ..)) ->
+          field.Invalid([
+            element.text(
+              "File type (MIME) can't be empty. It helps player application to determine which codec to use for media playback.",
+            ),
+          ])
+        Some(asset.EncodeError(mime: Some(asset.MimeNotIncludingSlash), ..)) ->
+          field.Invalid([
+            element.text(
+              "This is not a valid MIME type string. It must contain a \"/\" (slash) character.",
+            ),
+          ])
+        _ -> field.Valid
+      })
+      |> field.view(attrs: []),
+    field.new(id("notice"), {
+      textbox.textbox(
+        asset.notice |> option.unwrap(""),
+        textbox.Enabled(fn(str) {
+          msg(
+            Internal(Edit(
+              asset.Asset(
+                ..asset,
+                notice: case str {
+                  "" -> None
+                  str -> Some(str)
+                },
+              ),
+            )),
+          )
+        }),
+        textbox.MultiLine(Some(3)),
+        _,
+      )
+    })
+      |> field.label([element.text("Notice")])
+      |> field.note([
         element.text(
           "Piece of text you want to attach to the asset."
           <> " If the asset is a copyright material and you have to include a license text,"
           <> " paste the license text here.",
         ),
-      ]),
-      attrs: [],
-    ),
+      ])
+      |> field.view(attrs: []),
     html.div([class(scoped("item-footer"))], [
       case asset.mime {
         "audio/wav" -> audio_player(asset)

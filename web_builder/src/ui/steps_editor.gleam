@@ -348,10 +348,8 @@ fn step_views(
               ],
             ),
             html.div([class(scoped("step-body"))], [
-              field.view(
-                id: id_prefix <> "title",
-                label: [element.text("Title")],
-                input: textbox.textbox(
+              field.new(id_prefix <> "title", {
+                textbox.textbox(
                   step.title,
                   case model.move_op {
                     Idle ->
@@ -367,29 +365,28 @@ fn step_views(
                   },
                   textbox.SingleLine,
                   _,
-                ),
-                note: case step_err {
+                )
+              })
+                |> field.label([element.text("Title")])
+                |> field.validity(case step_err {
                   Some(step.EncodeError(title: Some(step.EmptyTitle), ..)) ->
-                    Some([element.text("Step title can't be empty.")])
+                    field.Invalid([element.text("Step title can't be empty.")])
                   Some(step.EncodeError(
                     title: Some(step.TooLongTitle(max)),
                     ..,
                   )) ->
-                    Some([
+                    field.Invalid([
                       element.text(
                         "This step title is too long. Shorten to "
                         <> int.to_string(max)
                         <> " characters at most.",
                       ),
                     ])
-                  _ -> None
-                },
-                attrs: [],
-              ),
-              field.view(
-                id: id_prefix <> "description",
-                label: [element.text("Description")],
-                input: textbox.textbox(
+                  _ -> field.Valid
+                })
+                |> field.view(attrs: []),
+              field.new(id_prefix <> "description", {
+                textbox.textbox(
                   step.description |> option.unwrap(""),
                   case model.move_op {
                     Idle ->
@@ -410,14 +407,12 @@ fn step_views(
                   },
                   textbox.MultiLine(Some(3)),
                   _,
-                ),
-                note: None,
-                attrs: [],
-              ),
-              field.view(
-                id: id_prefix <> "sound",
-                label: [element.text("Sound")],
-                input: selectbox.selectbox(
+                )
+              })
+                |> field.label([element.text("Description")])
+                |> field.view(attrs: []),
+              field.new(id_prefix <> "sound", {
+                selectbox.selectbox(
                   step.sound,
                   [
                     selectbox.Option(id: "none", label: "---", value: None),
@@ -440,17 +435,16 @@ fn step_views(
                   },
                   _,
                   [],
-                ),
-                note: Some([
+                )
+              })
+                |> field.label([element.text("Sound")])
+                |> field.note([
                   element.text("Sound asset to play when the step starts."),
-                ]),
-                attrs: [class("action-field")],
-              ),
+                ])
+                |> field.view(attrs: [class("action-field")]),
               html.div([class(scoped("action"))], [
-                field.view(
-                  id: id_prefix <> "type",
-                  label: [element.text("Type")],
-                  input: selectbox.selectbox(
+                field.new(id_prefix <> "type", {
+                  selectbox.selectbox(
                     step.action,
                     [
                       selectbox.Option(
@@ -479,30 +473,27 @@ fn step_views(
                     },
                     _,
                     [],
-                  ),
-                  note: case step.action {
-                    step.UserAction ->
-                      Some([
-                        element.text(
-                          "The step displays a button, which completes the step on press.",
-                        ),
-                      ])
+                  )
+                })
+                  |> field.label([element.text("Type")])
+                  |> field.note(case step.action {
+                    step.UserAction -> [
+                      element.text(
+                        "The step displays a button, which completes the step on press.",
+                      ),
+                    ]
 
-                    step.Timer(_) ->
-                      Some([
-                        element.text(
-                          "The step completes when a specified duration elapsed.",
-                        ),
-                      ])
-                  },
-                  attrs: [class(scoped("action-field"))],
-                ),
+                    step.Timer(_) -> [
+                      element.text(
+                        "The step completes when a specified duration elapsed.",
+                      ),
+                    ]
+                  })
+                  |> field.view(attrs: [class(scoped("action-field"))]),
                 case step.action {
                   step.Timer(duration) ->
-                    field.view(
-                      id: id_prefix <> "duration",
-                      label: [element.text("Duration")],
-                      input: int_input.view(
+                    field.new(id_prefix <> "duration", {
+                      int_input.view(
                         duration,
                         case model.move_op {
                           Idle ->
@@ -525,21 +516,20 @@ fn step_views(
                         Some(element.text("secs.")),
                         _,
                         [],
-                      ),
-                      note: case step_err {
-                        Some(step.EncodeError(
-                          action: Some(step.NegativeTimerDuration),
-                          ..,
-                        )) ->
-                          Some([
-                            element.text(
-                              "Timer duration must be greater than 0.",
-                            ),
-                          ])
-                        _ -> None
-                      },
-                      attrs: [class(scoped("action-field"))],
-                    )
+                      )
+                    })
+                    |> field.label([element.text("Duration")])
+                    |> field.validity(case step_err {
+                      Some(step.EncodeError(
+                        action: Some(step.NegativeTimerDuration),
+                        ..,
+                      )) ->
+                        field.Invalid([
+                          element.text("Timer duration must be greater than 0."),
+                        ])
+                      _ -> field.Valid
+                    })
+                    |> field.view(attrs: [class(scoped("action-field"))])
 
                   _ -> element.none()
                 },

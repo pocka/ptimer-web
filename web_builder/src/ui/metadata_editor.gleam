@@ -32,10 +32,8 @@ pub fn view(
 
   html.div([], [
     html.div([class(scoped("form")), ..attrs], [
-      field.view(
-        id: "metadata_title",
-        label: [element.text("Title")],
-        input: textbox.textbox(
+      field.new("metadata_title", {
+        textbox.textbox(
           metadata.title,
           textbox.Enabled(fn(value) {
             on_update(
@@ -47,29 +45,35 @@ pub fn view(
           }),
           textbox.SingleLine,
           _,
-        ),
-        note: Some([
-          case option.then(err, fn(err) { err.title }) {
-            Some(metadata.EmptyTitle) ->
-              element.text("Timer title can't be empty. Give the timer a name.")
-            Some(metadata.TooLongTitle(max)) ->
+        )
+      })
+        |> field.label([element.text("Title")])
+        |> field.note([
+          element.text(
+            "Title text shown when a user open the .ptimer file. This will also be a generated filename.",
+          ),
+        ])
+        |> field.validity(case err {
+          Some(metadata.EncodeError(title: Some(metadata.EmptyTitle), ..)) ->
+            field.Invalid([
+              element.text("Timer title can't be empty. Give the timer a name."),
+            ])
+          Some(metadata.EncodeError(
+            title: Some(metadata.TooLongTitle(max)),
+            ..,
+          )) ->
+            field.Invalid([
               element.text(
                 "This timer title is too long. Shorten to "
                 <> int.to_string(max)
                 <> " characters at most.",
-              )
-            _ ->
-              element.text(
-                "Title text shown when a user open the .ptimer file. This will also be a generated filename.",
-              )
-          },
-        ]),
-        attrs: [],
-      ),
-      field.view(
-        id: "metadata_description",
-        label: [element.text("Description")],
-        input: textbox.textbox(
+              ),
+            ])
+          _ -> field.Valid
+        })
+        |> field.view(attrs: []),
+      field.new("metadata_description", {
+        textbox.textbox(
           metadata.description |> option.unwrap(""),
           textbox.Enabled(fn(value) {
             on_update(
@@ -88,14 +92,12 @@ pub fn view(
           }),
           textbox.MultiLine(Some(4)),
           _,
-        ),
-        note: None,
-        attrs: [],
-      ),
-      field.view(
-        id: "metadata_lang",
-        label: [element.text("Language Code")],
-        input: textbox.textbox(
+        )
+      })
+        |> field.label([element.text("Description")])
+        |> field.view(attrs: []),
+      field.new("metadata_lang", {
+        textbox.textbox(
           metadata.lang,
           textbox.Enabled(fn(value) {
             on_update(
@@ -107,33 +109,34 @@ pub fn view(
           }),
           textbox.SingleLine,
           _,
-        ),
-        note: Some(case option.then(err, fn(err) { err.lang }) {
-          Some(metadata.EmptyLang) -> [
-            element.text(
-              "Language Code can't be empty. "
-              <> " Language Code helps assistive applications such as screen readers.",
-            ),
-          ]
-          None -> [
-            html.a(
-              [
-                class(scoped("link")),
-                attribute.href(
-                  "https://en.wikipedia.org/wiki/IETF_language_tag",
-                ),
-                attribute.target("_blank"),
-                attribute.rel("noopener"),
-              ],
-              [element.text("Language Code (IETF BCP 47 language tag)")],
-            ),
-            element.text(
-              " of this timer file. For example, if you write titles and descriptions in English (US), type \"en-US\".",
-            ),
-          ]
-        }),
-        attrs: [],
-      ),
+        )
+      })
+        |> field.label([element.text("Language Code")])
+        |> field.note([
+          html.a(
+            [
+              class(scoped("link")),
+              attribute.href("https://en.wikipedia.org/wiki/IETF_language_tag"),
+              attribute.target("_blank"),
+              attribute.rel("noopener"),
+            ],
+            [element.text("Language Code (IETF BCP 47 language tag)")],
+          ),
+          element.text(
+            " of this timer file. For example, if you write titles and descriptions in English (US), type \"en-US\".",
+          ),
+        ])
+        |> field.validity(case err {
+          Some(metadata.EncodeError(lang: Some(metadata.EmptyLang), ..)) ->
+            field.Invalid([
+              element.text(
+                "Language Code can't be empty. "
+                <> " Language Code helps assistive applications such as screen readers.",
+              ),
+            ])
+          _ -> field.Valid
+        })
+        |> field.view(attrs: []),
     ]),
   ])
 }

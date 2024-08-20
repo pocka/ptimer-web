@@ -10,6 +10,8 @@ interface Args {
 	label: string;
 
 	note: string;
+
+	invalid: string;
 }
 
 export default {
@@ -17,6 +19,7 @@ export default {
 	args: {
 		label: "Field Label",
 		note: "",
+		invalid: "",
 	},
 } satisfies Meta<Args>;
 
@@ -27,5 +30,12 @@ export const WithoutNote: Story = {};
 export const WithNote: Story = {
 	args: {
 		note: "This is a description or note of the field.",
+	},
+};
+
+export const Invalid: Story = {
+	args: {
+		note: "This is note.",
+		invalid: "This is text explaining why the field is invalid.",
 	},
 };
