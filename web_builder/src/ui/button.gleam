@@ -333,8 +333,8 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
 
   let button_type = case flags |> dynamic.field("type", dynamic.string) {
     Ok("link") -> Link("https://example.com", Some("_blank"))
-    Ok("file_picker") -> FilePicker(action("on_pick", _), [])
-    _ -> Button(action("on_click", dynamic.from(Nil)))
+    Ok("file_picker") -> FilePicker(fn(file) { #("on_pick", file) }, [])
+    _ -> Button(#("on_click", dynamic.from(Nil)))
   }
 
   let variant_flag = case flags |> dynamic.field("variant", dynamic.string) {
