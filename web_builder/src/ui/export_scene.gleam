@@ -206,7 +206,8 @@ pub fn view(
     html.div([class(scoped("actions"))], [
       button.new(button.Button(msg(Compile(engine))))
         |> button.variant(case model.job {
-          Compiled(_, _) -> button.Normal
+          Compiled(encoded, _) if model.data == Some(Ok(encoded)) ->
+            button.Normal
           _ -> button.Primary
         })
         |> button.state(case model {
@@ -216,7 +217,7 @@ pub fn view(
         })
         |> button.view([], [element.text("Compile")]),
       case model.job {
-        Compiled(encoded, url) ->
+        Compiled(encoded, url) if model.data == Some(Ok(encoded)) ->
           button.new(button.Link(url, None))
           |> button.variant(button.Primary)
           |> button.view([attribute.download(ptimer.filename(encoded))], [

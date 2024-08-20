@@ -19,7 +19,7 @@ type Story = StoryObj<Args>;
 
 export const Demo: Story = {};
 
-export const CreateFromScratch: Story = {
+export const CreateFromScratch = {
 	async play({ canvasElement }) {
 		const root = within(canvasElement);
 
@@ -62,4 +62,28 @@ export const CreateFromScratch: Story = {
 			expect(root.getByRole("link", { name: /download/i })).toHaveAttribute("download", "New Timer.ptimer")
 		);
 	},
-};
+} satisfies Story;
+
+export const ChangeInvalidatesDownloadLink = {
+	async play(ctx) {
+		await CreateFromScratch.play(ctx);
+
+		const root = within(ctx.canvasElement);
+
+		// Change timer name
+		await userEvent.click(root.getByRole("button", { name: "Metadata" }));
+		await userEvent.type(root.getByRole("textbox", { name: /title/i }), "{backspace}R");
+
+		// Go to "Export" scene
+		await userEvent.click(root.getByRole("button", { name: "Export" }));
+
+		// Make sure the Download link is not active
+		await expect(root.getByRole("button", { name: /download/i })).toBeDisabled();
+
+		// Compile again
+		await userEvent.click(root.getByRole("button", { name: /compile/i }));
+		await waitFor(() =>
+			expect(root.getByRole("link", { name: /download/i })).toHaveAttribute("download", "New TimeR.ptimer")
+		);
+	},
+} satisfies Story;
