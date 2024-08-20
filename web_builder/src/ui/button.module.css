@@ -24,6 +24,12 @@ SPDX-License-Identifier: Apache-2.0
 .disabled, .loading {
 	--_alpha: var(--alpha-disabled);
 }
+.disabled {
+	cursor: not-allowed;
+}
+.loading {
+	cursor: wait;
+}
 .button:not(.disabled, .loading):hover {
 	--_tint-l: var(--tint-hover-l);
 	--_tint-c: var(--tint-hover-c);
