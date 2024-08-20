@@ -16,6 +16,8 @@ import lustre/element
 import lustre/element/html
 import lustre/event
 import ptimer
+import ptimer/metadata
+import ptimer/step
 import storybook
 import ui/button
 import ui/field
@@ -28,8 +30,8 @@ import ui/textbox
 
 type MoveOperation {
   Idle
-  ByButton(from: Int, source: ptimer.Step)
-  ByDrag(from: Int, source: ptimer.Step, to: Option(Int))
+  ByButton(from: Int, source: step.Step)
+  ByDrag(from: Int, source: step.Step, to: Option(Int))
 }
 
 pub opaque type Model {
@@ -43,9 +45,9 @@ pub fn init(_) -> #(Model, effect.Effect(Msg)) {
 // UPDATE
 
 pub opaque type InternalMsg {
-  StartManualMove(from: Int, source: ptimer.Step)
+  StartManualMove(from: Int, source: step.Step)
   CancelManualMove
-  StartDrag(from: Int, source: ptimer.Step)
+  StartDrag(from: Int, source: step.Step)
   CancelDrag
   DragOver(index: Int)
   DragLeave(index: Int)
@@ -54,7 +56,7 @@ pub opaque type InternalMsg {
 }
 
 pub type Msg {
-  UpdateSteps(List(ptimer.Step))
+  UpdateSteps(List(step.Step))
 
   Internal(InternalMsg)
 }
@@ -141,10 +143,10 @@ fn insert_at(items: List(a), new_item: a, at at: Int) -> List(a) {
 fn set_drag_effect(ev: dynamic.Dynamic, effect: String) -> Nil
 
 fn move_before(
-  steps: List(ptimer.Step),
-  target target: ptimer.Step,
-  anchor anchor: ptimer.Step,
-) -> List(ptimer.Step) {
+  steps: List(step.Step),
+  target target: step.Step,
+  anchor anchor: step.Step,
+) -> List(step.Step) {
   case steps {
     [] -> []
     [head, ..tail] if head.id == target.id -> move_before(tail, target, anchor)
@@ -161,11 +163,11 @@ fn before_step(
   msg: fn(Msg) -> msg,
   model: Model,
   timer: ptimer.Ptimer,
-  step: Option(ptimer.Step),
+  step: Option(step.Step),
   step_index index: Int,
   idle idle: element.Element(msg),
 ) -> element.Element(msg) {
-  let move = fn(target: ptimer.Step) {
+  let move = fn(target: step.Step) {
     Animate(
       UpdateSteps(case step {
         Some(step) -> timer.steps |> move_before(target: target, anchor: step)
@@ -233,7 +235,7 @@ fn before_step(
   }
 }
 
-fn update_step(steps: List(ptimer.Step), step: ptimer.Step) -> List(ptimer.Step) {
+fn update_step(steps: List(step.Step), step: step.Step) -> List(step.Step) {
   case steps {
     [] -> []
     [head, ..tail] if head.id == step.id -> [step, ..tail]
@@ -244,7 +246,7 @@ fn update_step(steps: List(ptimer.Step), step: ptimer.Step) -> List(ptimer.Step)
 fn step_views(
   msg: fn(Msg) -> msg,
   model: Model,
-  steps: List(ptimer.Step),
+  steps: List(step.Step),
   timer: ptimer.Ptimer,
   index: Int,
 ) -> List(#(String, element.Element(msg))) {
@@ -273,7 +275,7 @@ fn step_views(
             UpdateSteps(
               timer.steps
               |> list.append([
-                ptimer.Step(next_id, "", None, None, ptimer.UserAction),
+                step.Step(next_id, "", None, None, step.UserAction),
               ]),
             )
             |> msg,
@@ -304,7 +306,7 @@ fn step_views(
                 Animate(
                   UpdateSteps(insert_at(
                     timer.steps,
-                    ptimer.Step(next_id, "", None, None, ptimer.UserAction),
+                    step.Step(next_id, "", None, None, step.UserAction),
                     index,
                   )),
                 ),
@@ -353,7 +355,7 @@ fn step_views(
                       textbox.Enabled(fn(title) {
                         UpdateSteps(update_step(
                           timer.steps,
-                          ptimer.Step(..step, title:),
+                          step.Step(..step, title:),
                         ))
                         |> msg
                       })
@@ -376,7 +378,7 @@ fn step_views(
                       textbox.Enabled(fn(description) {
                         UpdateSteps(update_step(
                           timer.steps,
-                          ptimer.Step(
+                          step.Step(
                             ..step,
                             description: case description {
                               "" -> None
@@ -412,7 +414,7 @@ fn step_views(
                   case model.move_op {
                     Idle ->
                       selectbox.Enabled(fn(sound) {
-                        update_step(timer.steps, ptimer.Step(..step, sound:))
+                        update_step(timer.steps, step.Step(..step, sound:))
                         |> UpdateSteps
                         |> msg
                       })
@@ -436,14 +438,14 @@ fn step_views(
                       selectbox.Option(
                         id: "user_action",
                         label: "UserAction",
-                        value: ptimer.UserAction,
+                        value: step.UserAction,
                       ),
                       selectbox.Option(id: "timer", label: "Timer", value: case
                         step.action
                       {
-                        ptimer.Timer(_) -> step.action
+                        step.Timer(_) -> step.action
 
-                        _ -> ptimer.Timer(3)
+                        _ -> step.Timer(3)
                       }),
                     ],
                     case model.move_op {
@@ -451,7 +453,7 @@ fn step_views(
                         selectbox.Enabled(fn(option) {
                           UpdateSteps(update_step(
                             timer.steps,
-                            ptimer.Step(..step, action: option),
+                            step.Step(..step, action: option),
                           ))
                           |> msg
                         })
@@ -461,14 +463,14 @@ fn step_views(
                     [],
                   ),
                   note: case step.action {
-                    ptimer.UserAction ->
+                    step.UserAction ->
                       Some([
                         element.text(
                           "The step displays a button, which completes the step on press.",
                         ),
                       ])
 
-                    ptimer.Timer(_) ->
+                    step.Timer(_) ->
                       Some([
                         element.text(
                           "The step completes when a specified duration elapsed.",
@@ -478,7 +480,7 @@ fn step_views(
                   attrs: [class(scoped("action-field"))],
                 ),
                 case step.action {
-                  ptimer.Timer(duration) ->
+                  step.Timer(duration) ->
                     field.view(
                       id: id_prefix <> "duration",
                       label: [element.text("Duration")],
@@ -489,9 +491,9 @@ fn step_views(
                             int_input.Enabled(fn(n) {
                               UpdateSteps(update_step(
                                 timer.steps,
-                                ptimer.Step(
+                                step.Step(
                                   ..step,
-                                  action: ptimer.Timer(int.clamp(
+                                  action: step.Timer(int.clamp(
                                     n,
                                     min: 1,
                                     max: 60 * 60 * 24,
@@ -579,7 +581,7 @@ pub fn view(
         ],
         actions: [
           button.new(button.Button(
-            UpdateSteps([ptimer.Step(0, "", None, None, ptimer.UserAction)])
+            UpdateSteps([step.Step(0, "", None, None, step.UserAction)])
             |> msg,
           ))
           |> button.variant(button.Primary)
@@ -633,7 +635,7 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
 
   let steps =
     flags
-    |> dynamic.field("steps", dynamic.list(ptimer.decode_step))
+    |> dynamic.field("steps", dynamic.list(step.decode))
     |> result.unwrap([])
 
   let _ =
@@ -642,7 +644,7 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
         #(
           StoryModel(
             ptimer.Ptimer(
-              metadata: ptimer.Metadata("Sample Story", None, "en-US"),
+              metadata: metadata.Metadata("Sample Story", None, "en-US"),
               steps:,
               assets: [],
             ),

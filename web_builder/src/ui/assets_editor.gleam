@@ -15,6 +15,8 @@ import lustre/effect
 import lustre/element
 import lustre/element/html
 import ptimer
+import ptimer/asset
+import ptimer/step
 import storybook
 import ui/button
 import ui/field
@@ -34,9 +36,9 @@ pub fn init(_) -> #(Model, effect.Effect(Msg)) {
 // UPDATE
 
 pub opaque type InternalMsg {
-  Append(assets: List(ptimer.Asset), file: dynamic.Dynamic)
-  Delete(asset: ptimer.Asset)
-  Edit(payload: ptimer.Asset)
+  Append(assets: List(asset.Asset), file: dynamic.Dynamic)
+  Delete(asset: asset.Asset)
+  Edit(payload: asset.Asset)
   NoOp
 }
 
@@ -54,7 +56,7 @@ pub fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
         assets
         |> list.fold(-1, fn(max, asset) { int.max(max, asset.id) })
 
-      case ptimer.create_asset(max_id + 1, file) {
+      case asset.create(max_id + 1, file) {
         Ok(asset) -> #(
           model,
           chain(
@@ -77,7 +79,7 @@ pub fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
               ..prev,
               steps: prev.steps
                 |> list.map(fn(step) {
-                  ptimer.Step(
+                  step.Step(
                     ..step,
                     sound: case step.sound {
                       Some(sound_id) if sound_id == asset.id -> None
@@ -121,8 +123,8 @@ fn chain(msg: Msg) -> effect.Effect(Msg) {
   effect.from(fn(dispatch) { dispatch(msg) })
 }
 
-fn release(asset: ptimer.Asset) -> effect.Effect(msg) {
-  effect.from(fn(_) { ptimer.release_asset(asset) })
+fn release(asset: asset.Asset) -> effect.Effect(msg) {
+  effect.from(fn(_) { asset.release(asset) })
 }
 
 // VIEW
@@ -130,13 +132,13 @@ fn release(asset: ptimer.Asset) -> effect.Effect(msg) {
 @external(javascript, "@/ui/assets_editor.ffi.ts", "className")
 fn scoped(x: String) -> String
 
-fn audio_player(asset: ptimer.Asset) -> element.Element(msg) {
+fn audio_player(asset: asset.Asset) -> element.Element(msg) {
   html.audio([class(scoped("audio-preview")), attribute.controls(True)], [
     html.source([attribute.type_(asset.mime), attribute.src(asset.url)]),
   ])
 }
 
-fn list_item(msg: fn(Msg) -> msg, asset: ptimer.Asset) -> element.Element(msg) {
+fn list_item(msg: fn(Msg) -> msg, asset: asset.Asset) -> element.Element(msg) {
   let id = fn(x: String) -> String { int.to_string(asset.id) <> "_" <> x }
 
   html.li([class(scoped("item"))], [
@@ -147,7 +149,7 @@ fn list_item(msg: fn(Msg) -> msg, asset: ptimer.Asset) -> element.Element(msg) {
         textbox.textbox(
           asset.name,
           textbox.Enabled(fn(str) {
-            msg(Internal(Edit(ptimer.Asset(..asset, name: str))))
+            msg(Internal(Edit(asset.Asset(..asset, name: str))))
           }),
           textbox.SingleLine,
           attrs,
@@ -167,7 +169,7 @@ fn list_item(msg: fn(Msg) -> msg, asset: ptimer.Asset) -> element.Element(msg) {
         textbox.textbox(
           asset.mime,
           textbox.Enabled(fn(str) {
-            msg(Internal(Edit(ptimer.Asset(..asset, mime: str))))
+            msg(Internal(Edit(asset.Asset(..asset, mime: str))))
           }),
           textbox.SingleLine,
           attrs,
@@ -189,7 +191,7 @@ fn list_item(msg: fn(Msg) -> msg, asset: ptimer.Asset) -> element.Element(msg) {
           textbox.Enabled(fn(str) {
             msg(
               Internal(Edit(
-                ptimer.Asset(
+                asset.Asset(
                   ..asset,
                   notice: case str {
                     "" -> None
@@ -314,12 +316,12 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
     }
   }
 
-  let assets: List(ptimer.Asset) =
+  let assets: List(asset.Asset) =
     flags
     |> dynamic.field("assets", dynamic.list(dynamic.dynamic))
     |> result.map(fn(values) {
       values
-      |> list.index_map(fn(value, i) { ptimer.create_asset(i, value) })
+      |> list.index_map(fn(value, i) { asset.create(i, value) })
       |> list.filter_map(function.identity)
     })
     |> result.unwrap([])

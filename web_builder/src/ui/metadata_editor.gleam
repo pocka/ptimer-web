@@ -11,6 +11,7 @@ import lustre/attribute.{type Attribute, class}
 import lustre/element
 import lustre/element/html
 import ptimer
+import ptimer/metadata
 import storybook
 import ui/field
 import ui/textbox
@@ -38,7 +39,7 @@ pub fn view(
             on_update(
               ptimer.Ptimer(
                 ..timer,
-                metadata: ptimer.Metadata(..metadata, title: value),
+                metadata: metadata.Metadata(..metadata, title: value),
               ),
             )
           }),
@@ -61,7 +62,7 @@ pub fn view(
             on_update(
               ptimer.Ptimer(
                 ..timer,
-                metadata: ptimer.Metadata(
+                metadata: metadata.Metadata(
                   ..metadata,
                   description: case value {
                     "" -> None
@@ -87,7 +88,7 @@ pub fn view(
             on_update(
               ptimer.Ptimer(
                 ..timer,
-                metadata: ptimer.Metadata(..metadata, lang: value),
+                metadata: metadata.Metadata(..metadata, lang: value),
               ),
             )
           }),
@@ -130,7 +131,7 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
 
           False ->
             ptimer.Ptimer(
-              metadata: ptimer.Metadata(
+              metadata: metadata.Metadata(
                 title: "Sample timer",
                 description: Some("Description"),
                 lang: "en-GB",

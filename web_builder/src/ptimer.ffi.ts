@@ -18,7 +18,7 @@ import {
 	type ResponseMessage,
 } from "@/engine/message";
 
-import { type Asset, type Ptimer } from "@/ptimer";
+import { type Ptimer } from "@/ptimer";
 
 class Engine {
 	#worker: Worker;
@@ -239,34 +239,4 @@ export function compile(engine: Engine, timer: Ptimer, callback: (url: Result<st
 			error: err instanceof Error ? err.message : String(err),
 		});
 	});
-}
-
-export function assetFromFile(id: number, file: File): Asset {
-	if (import.meta.env.DEV) {
-		console.groupCollapsed("DEBUG: Creating asset from File");
-		console.log("ID");
-		console.info(id);
-		console.log("File");
-		console.info(file);
-		console.groupEnd();
-	}
-
-	return {
-		id,
-		name: file.name,
-		mime: file.type,
-		url: URL.createObjectURL(file),
-		notice: null,
-	};
-}
-
-export function revokeObjectURL(url: string): void {
-	if (import.meta.env.DEV) {
-		console.groupCollapsed("DEBUG: Releasing object URL");
-		console.log("URL");
-		console.info(url);
-		console.groupEnd();
-	}
-
-	URL.revokeObjectURL(url);
 }

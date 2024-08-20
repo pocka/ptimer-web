@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+import gleam/dict
 import gleam/dynamic
 import gleam/function
 import gleam/int
@@ -15,6 +16,9 @@ import lustre/effect
 import lustre/element
 import lustre/element/html
 import ptimer
+import ptimer/asset
+import ptimer/metadata
+import ptimer/step
 import storybook
 import ui/button
 
@@ -29,7 +33,7 @@ type CompileJob {
 
 pub opaque type Model {
   Model(
-    data: Option(Result(ptimer.Encoded, List(ptimer.EncodeError))),
+    data: Option(Result(ptimer.Encoded, ptimer.EncodeError)),
     job: CompileJob,
   )
 }
@@ -94,6 +98,97 @@ fn compile(engine: ptimer.Engine, data: ptimer.Encoded) -> effect.Effect(Msg) {
 @external(javascript, "@/ui/export_scene.ffi.ts", "className")
 fn scoped(x: String) -> String
 
+fn input_error(text: String) -> element.Element(msg) {
+  html.li([class(scoped("input-error"))], [
+    lucide.icon(lucide.OctagonX, [class(scoped("input-error-icon"))]),
+    html.span([], [element.text(text)]),
+  ])
+}
+
+fn metadata_errors(
+  elements: List(element.Element(msg)),
+  err: ptimer.EncodeError,
+) -> List(element.Element(msg)) {
+  case err.metadata {
+    Some(err) -> [
+      case err.title {
+        Some(metadata.EmptyTitle) -> input_error("Timer title can't be empty.")
+        Some(metadata.TooLongTitle(max)) ->
+          input_error(
+            "Timer title must be less than or equal to "
+            <> int.to_string(max)
+            <> " characters.",
+          )
+        None -> element.none()
+      },
+      case err.lang {
+        Some(metadata.EmptyLang) ->
+          input_error("Timer language can't be empty.")
+        None -> element.none()
+      },
+      ..elements
+    ]
+    None -> elements
+  }
+}
+
+fn steps_errors(
+  elements: List(element.Element(msg)),
+  err: ptimer.EncodeError,
+) -> List(element.Element(msg)) {
+  err.steps
+  |> dict.to_list
+  |> list.fold(elements, fn(elements, pair) {
+    let #(_id, err) = pair
+
+    [
+      case err.title {
+        Some(step.EmptyTitle) -> input_error("Step title can't be empty.")
+        Some(step.TooLongTitle(max)) ->
+          input_error(
+            "Step title must be less than or equal to "
+            <> int.to_string(max)
+            <> " characters.",
+          )
+        None -> element.none()
+      },
+      case err.action {
+        Some(step.NegativeTimerDuration) ->
+          input_error("Timer duration can't be negative.")
+        None -> element.none()
+      },
+      ..elements
+    ]
+  })
+}
+
+fn assets_errors(
+  elements: List(element.Element(msg)),
+  err: ptimer.EncodeError,
+) -> List(element.Element(msg)) {
+  err.assets
+  |> dict.to_list
+  |> list.fold(elements, fn(elements, pair) {
+    let #(_id, err) = pair
+
+    [
+      case err.name {
+        Some(asset.EmptyName) -> input_error("Asset name can't be empty.")
+        None -> element.none()
+      },
+      case err.mime {
+        Some(asset.EmptyMime) -> input_error("Asset MIME type can't be empty.")
+        Some(asset.MimeNotIncludingSlash) ->
+          input_error(
+            "Asset MIME type string must include \"/\" (slash character).",
+          )
+        None -> element.none()
+      },
+      ..elements
+    ]
+  })
+}
+
 pub fn view(
   msg: fn(Msg) -> msg,
   engine: ptimer.Engine,
@@ -138,45 +233,20 @@ pub fn view(
       _ -> element.none()
     },
     case model.data {
-      Some(Error(errors)) ->
-        html.ul([class(scoped("input-errors"))], {
-          use err <- list.map(errors)
-
-          let text = case err {
-            ptimer.MetadataEncodeError(err) ->
-              case err {
-                ptimer.EmptyMetadataTitle -> "Timer title can't be empty."
-                ptimer.TooLongMetadataTitle(limit) ->
-                  "Timer title must be less than or equal to "
-                  <> int.to_string(limit)
-                  <> " characters."
-                ptimer.EmptyMetadataLang -> "Timer language can't be empty."
-              }
-            ptimer.StepEncodeError(err, _step) ->
-              case err {
-                ptimer.EmptyStepTitle -> "Step title can't be empty."
-                ptimer.TooLongStepTitle(limit) ->
-                  "Step title must be less than or equal to "
-                  <> int.to_string(limit)
-                  <> " characters."
-                ptimer.NegativeTimerDuration ->
-                  "Timer duration can't be negative."
-              }
-            ptimer.AssetEncodeError(err, _asset) ->
-              case err {
-                ptimer.EmptyAssetName -> "Asset name can't be empty."
-                ptimer.EmptyAssetMime -> "Asset MIME type can't be empty."
-                ptimer.AssetMimeNotIncludingSlash ->
-                  "Asset MIME type string must include \"/\" (slash character)."
-              }
-            ptimer.ZeroStepsError -> "Timer must have at least one step."
-          }
-
-          html.li([class(scoped("input-error"))], [
-            lucide.icon(lucide.OctagonX, [class(scoped("input-error-icon"))]),
-            html.span([], [element.text(text)]),
-          ])
-        })
+      Some(Error(err)) ->
+        html.ul(
+          [class(scoped("input-errors"))],
+          [
+            case err.timer {
+              Some(ptimer.ZeroStepsError) ->
+                input_error("Timer must have at least one step.")
+              None -> element.none()
+            },
+          ]
+            |> assets_errors(err)
+            |> steps_errors(err)
+            |> metadata_errors(err),
+        )
       _ -> element.none()
     },
   ])
