@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+import gleam/dict
 import gleam/dynamic
 import gleam/option.{type Option, None, Some}
 import log
@@ -386,6 +387,8 @@ fn with_file(
 }
 
 pub fn view(model: Model) -> element.Element(Msg) {
+  let encode_error = export_scene.get_encode_error(model.export)
+
   html.div([class(scoped("layout"))], [
     menu.menu([class(scoped("menu"))], {
       [
@@ -450,19 +453,40 @@ pub fn view(model: Model) -> element.Element(Msg) {
         MetadataEditor -> {
           use _, file <- with_file(model)
 
-          metadata_editor.view(file, UpdateTimer, [])
+          metadata_editor.view(
+            file,
+            UpdateTimer,
+            encode_error |> option.then(fn(err) { err.metadata }),
+            [],
+          )
         }
 
         StepsEditor(sub_model) -> {
           use _, file <- with_file(model)
 
-          steps_editor.view(StepsEditorMsg, file, sub_model, [])
+          steps_editor.view(
+            StepsEditorMsg,
+            file,
+            sub_model,
+            encode_error
+              |> option.map(fn(err) { err.steps })
+              |> option.unwrap(dict.new()),
+            [],
+          )
         }
 
         AssetsEditor(sub_model) -> {
           use _, file <- with_file(model)
 
-          assets_editor.view(AssetsEditorMsg, file, sub_model, [])
+          assets_editor.view(
+            AssetsEditorMsg,
+            file,
+            sub_model,
+            encode_error
+              |> option.map(fn(err) { err.assets })
+              |> option.unwrap(dict.new()),
+            [],
+          )
         }
 
         ExportScene -> {

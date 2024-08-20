@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+import gleam/dict
 import gleam/dynamic
 import gleam/function
 import gleam/int
@@ -248,6 +249,7 @@ fn step_views(
   model: Model,
   steps: List(step.Step),
   timer: ptimer.Ptimer,
+  err: dict.Dict(Int, step.EncodeError),
   index: Int,
 ) -> List(#(String, element.Element(msg))) {
   let next_id =
@@ -291,6 +293,7 @@ fn step_views(
 
     [step, ..rest] -> {
       let id_prefix = "step_" <> int.to_string(step.id) <> "_"
+      let step_err = err |> dict.get(step.id) |> option.from_result
 
       [
         #(
@@ -365,7 +368,22 @@ fn step_views(
                   textbox.SingleLine,
                   _,
                 ),
-                note: None,
+                note: case step_err {
+                  Some(step.EncodeError(title: Some(step.EmptyTitle), ..)) ->
+                    Some([element.text("Step title can't be empty.")])
+                  Some(step.EncodeError(
+                    title: Some(step.TooLongTitle(max)),
+                    ..,
+                  )) ->
+                    Some([
+                      element.text(
+                        "This step title is too long. Shorten to "
+                        <> int.to_string(max)
+                        <> " characters at most.",
+                      ),
+                    ])
+                  _ -> None
+                },
                 attrs: [],
               ),
               field.view(
@@ -508,7 +526,18 @@ fn step_views(
                         _,
                         [],
                       ),
-                      note: None,
+                      note: case step_err {
+                        Some(step.EncodeError(
+                          action: Some(step.NegativeTimerDuration),
+                          ..,
+                        )) ->
+                          Some([
+                            element.text(
+                              "Timer duration must be greater than 0.",
+                            ),
+                          ])
+                        _ -> None
+                      },
                       attrs: [class(scoped("action-field"))],
                     )
 
@@ -558,7 +587,7 @@ fn step_views(
             ]),
           ]),
         ),
-        ..step_views(msg, model, rest, timer, index + 1)
+        ..step_views(msg, model, rest, timer, err, index + 1)
       ]
     }
   }
@@ -568,6 +597,7 @@ pub fn view(
   msg: fn(Msg) -> msg,
   timer: ptimer.Ptimer,
   model: Model,
+  err: dict.Dict(Int, step.EncodeError),
   attrs: List(Attribute(msg)),
 ) -> element.Element(msg) {
   case timer.steps {
@@ -596,7 +626,7 @@ pub fn view(
         html.div([class(scoped("container"))], [
           element.keyed(
             html.div([class(scoped("list"))], _),
-            step_views(msg, model, steps, timer, 0),
+            step_views(msg, model, steps, timer, err, 0),
           ),
         ]),
       ])
@@ -604,7 +634,11 @@ pub fn view(
 }
 
 type StoryModel {
-  StoryModel(timer: ptimer.Ptimer, model: Model)
+  StoryModel(
+    timer: ptimer.Ptimer,
+    model: Model,
+    encoded: Result(ptimer.Encoded, ptimer.EncodeError),
+  )
 }
 
 pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
@@ -619,8 +653,9 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
         action("UpdateSteps", dynamic.from(steps))
 
         let #(m, e) = update(model.model, msg)
+        let timer = ptimer.Ptimer(..model.timer, steps:)
 
-        #(StoryModel(ptimer.Ptimer(..model.timer, steps:), m), e)
+        #(StoryModel(timer, m, ptimer.encode(timer)), e)
       }
 
       Internal(internal_msg) -> {
@@ -628,7 +663,7 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
 
         let #(m, e) = update(model.model, msg)
 
-        #(StoryModel(model.timer, m), e)
+        #(StoryModel(model.timer, m, ptimer.encode(model.timer)), e)
       }
     }
   }
@@ -641,20 +676,29 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
   let _ =
     lustre.application(
       fn(_) {
+        let timer =
+          ptimer.Ptimer(
+            metadata: metadata.Metadata("Sample Story", None, "en-US"),
+            steps:,
+            assets: [],
+          )
         #(
-          StoryModel(
-            ptimer.Ptimer(
-              metadata: metadata.Metadata("Sample Story", None, "en-US"),
-              steps:,
-              assets: [],
-            ),
-            Model(move_op: Idle),
-          ),
+          StoryModel(timer, Model(move_op: Idle), ptimer.encode(timer)),
           effect.none(),
         )
       },
       story_update,
-      fn(model) { view(function.identity, model.timer, model.model, []) },
+      fn(model) {
+        view(
+          function.identity,
+          model.timer,
+          model.model,
+          model.encoded
+            |> result.map_error(fn(err) { err.steps })
+            |> result.unwrap_error(dict.new()),
+          [],
+        )
+      },
     )
     |> lustre.start(selector, Nil)
 

@@ -2,11 +2,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+import gleam/dict
 import gleam/dynamic
 import gleam/function
 import gleam/int
 import gleam/list
-import gleam/option.{None, Some}
+import gleam/option.{type Option, None, Some}
 import gleam/result
 import lucide
 import lustre
@@ -138,7 +139,11 @@ fn audio_player(asset: asset.Asset) -> element.Element(msg) {
   ])
 }
 
-fn list_item(msg: fn(Msg) -> msg, asset: asset.Asset) -> element.Element(msg) {
+fn list_item(
+  msg: fn(Msg) -> msg,
+  asset: asset.Asset,
+  err: Option(asset.EncodeError),
+) -> element.Element(msg) {
   let id = fn(x: String) -> String { int.to_string(asset.id) <> "_" <> x }
 
   html.li([class(scoped("item"))], [
@@ -155,11 +160,16 @@ fn list_item(msg: fn(Msg) -> msg, asset: asset.Asset) -> element.Element(msg) {
           attrs,
         )
       },
-      note: Some([
-        element.text(
-          "Name of the asset. Give an asset an unique name to dinstinguish easily.",
-        ),
-      ]),
+      note: Some(case err {
+        Some(asset.EncodeError(name: Some(asset.EmptyName), ..)) -> [
+          element.text("Asset name can't be empty."),
+        ]
+        _ -> [
+          element.text(
+            "Name of the asset. Give an asset an unique name to dinstinguish easily.",
+          ),
+        ]
+      }),
       attrs: [],
     ),
     field.view(
@@ -175,11 +185,23 @@ fn list_item(msg: fn(Msg) -> msg, asset: asset.Asset) -> element.Element(msg) {
           attrs,
         )
       },
-      note: Some([
-        element.text(
-          "File type (MIME) of the asset. Edit only when browser guessed incorrect MIME.",
-        ),
-      ]),
+      note: Some(case err {
+        Some(asset.EncodeError(mime: Some(asset.EmptyMime), ..)) -> [
+          element.text(
+            "File type (MIME) can't be empty. It helps player application to determine which codec to use for media playback.",
+          ),
+        ]
+        Some(asset.EncodeError(mime: Some(asset.MimeNotIncludingSlash), ..)) -> [
+          element.text(
+            "This is not a valid MIME type string. It must contain a \"/\" (slash) character.",
+          ),
+        ]
+        _ -> [
+          element.text(
+            "File type (MIME) of the asset. Edit only when browser guessed incorrect MIME.",
+          ),
+        ]
+      }),
       attrs: [],
     ),
     field.view(
@@ -232,6 +254,7 @@ pub fn view(
   msg: fn(Msg) -> msg,
   timer: ptimer.Ptimer,
   _model: Model,
+  err: dict.Dict(Int, asset.EncodeError),
   attrs: List(Attribute(msg)),
 ) -> element.Element(msg) {
   case timer.assets {
@@ -266,7 +289,14 @@ pub fn view(
         element.keyed(html.ol([class(scoped("list"))], _), {
           use asset <- list.map(assets)
 
-          #(int.to_string(asset.id), list_item(msg, asset))
+          #(
+            int.to_string(asset.id),
+            list_item(
+              msg,
+              asset,
+              err |> dict.get(asset.id) |> option.from_result,
+            ),
+          )
         }),
         button.new(
           button.FilePicker(
@@ -286,7 +316,11 @@ pub fn view(
 }
 
 type StoryModel {
-  StoryModel(timer: ptimer.Ptimer, model: Model)
+  StoryModel(
+    timer: ptimer.Ptimer,
+    model: Model,
+    encoded: Result(ptimer.Encoded, ptimer.EncodeError),
+  )
 }
 
 pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
@@ -303,7 +337,7 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
 
         action("Update", dynamic.from(after))
 
-        #(StoryModel(after, m), e)
+        #(StoryModel(after, m, ptimer.encode(after)), e)
       }
 
       Internal(internal_msg) -> {
@@ -329,11 +363,22 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
   let _ =
     lustre.application(
       fn(_) {
+        let timer = ptimer.Ptimer(..ptimer.empty, assets:)
         let #(m, e) = init(Nil)
-        #(StoryModel(ptimer.Ptimer(..ptimer.empty, assets:), m), e)
+        #(StoryModel(timer, m, ptimer.encode(timer)), e)
       },
       story_update,
-      fn(model) { view(function.identity, model.timer, model.model, []) },
+      fn(model) {
+        view(
+          function.identity,
+          model.timer,
+          model.model,
+          model.encoded
+            |> result.map_error(fn(err) { err.assets })
+            |> result.unwrap_error(dict.new()),
+          [],
+        )
+      },
     )
     |> lustre.start(selector, Nil)
 

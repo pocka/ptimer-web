@@ -38,6 +38,13 @@ pub opaque type Model {
   )
 }
 
+pub fn get_encode_error(model: Model) -> Option(ptimer.EncodeError) {
+  case model {
+    Model(data: Some(Error(err)), ..) -> Some(err)
+    _ -> None
+  }
+}
+
 pub fn init(_flags) -> #(Model, effect.Effect(Msg)) {
   #(Model(data: None, job: Idle), effect.none())
 }
