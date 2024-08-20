@@ -133,7 +133,7 @@ class Engine {
 		}
 
 		if (import.meta.env.DEV) {
-			console.groupCollapsed("DEBUG: File parsed");
+			console.groupCollapsed("DEBUG: File compiled");
 			console.log("Byte size");
 			console.info(res.payload.data.byteLength);
 			console.log("Request");
