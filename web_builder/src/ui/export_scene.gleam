@@ -59,6 +59,7 @@ pub opaque type InternalMsg {
 pub type Msg {
   Encode(timer: ptimer.Ptimer)
   Compile(engine: ptimer.Engine)
+  JumpTo(field: ptimer.Field)
   Internal(InternalMsg)
 }
 
@@ -105,32 +106,52 @@ fn compile(engine: ptimer.Engine, data: ptimer.Encoded) -> effect.Effect(Msg) {
 @external(javascript, "@/ui/export_scene.ffi.ts", "className")
 fn scoped(x: String) -> String
 
-fn input_error(text: String) -> element.Element(msg) {
+fn input_error(
+  text: String,
+  field: Option(ptimer.Field),
+) -> element.Element(Msg) {
   html.li([class(scoped("input-error"))], [
     lucide.icon(lucide.OctagonX, [class(scoped("input-error-icon"))]),
-    html.span([], [element.text(text)]),
+    html.span([class(scoped("input-error-text"))], [element.text(text)]),
+    field
+      |> option.map(fn(field) {
+        button.new(button.Button(JumpTo(field)))
+        |> button.size(button.Small)
+        |> button.view([class(scoped("input-error-jump"))], [
+          element.text("Jump"),
+        ])
+      })
+      |> option.unwrap(element.none()),
   ])
 }
 
 fn metadata_errors(
-  elements: List(element.Element(msg)),
+  elements: List(element.Element(Msg)),
   err: ptimer.EncodeError,
-) -> List(element.Element(msg)) {
+) -> List(element.Element(Msg)) {
   case err.metadata {
     Some(err) -> [
       case err.title {
-        Some(metadata.EmptyTitle) -> input_error("Timer title can't be empty.")
+        Some(metadata.EmptyTitle) ->
+          input_error(
+            "Timer title can't be empty.",
+            Some(ptimer.Metadata(metadata.Title)),
+          )
         Some(metadata.TooLongTitle(max)) ->
           input_error(
             "Timer title must be less than or equal to "
-            <> int.to_string(max)
-            <> " characters.",
+              <> int.to_string(max)
+              <> " characters.",
+            Some(ptimer.Metadata(metadata.Title)),
           )
         None -> element.none()
       },
       case err.lang {
         Some(metadata.EmptyLang) ->
-          input_error("Timer language can't be empty.")
+          input_error(
+            "Timer language can't be empty.",
+            Some(ptimer.Metadata(metadata.Lang)),
+          )
         None -> element.none()
       },
       ..elements
@@ -140,28 +161,36 @@ fn metadata_errors(
 }
 
 fn steps_errors(
-  elements: List(element.Element(msg)),
+  elements: List(element.Element(Msg)),
   err: ptimer.EncodeError,
-) -> List(element.Element(msg)) {
+) -> List(element.Element(Msg)) {
   err.steps
   |> dict.to_list
   |> list.fold(elements, fn(elements, pair) {
-    let #(_id, err) = pair
+    let #(id, err) = pair
 
     [
       case err.title {
-        Some(step.EmptyTitle) -> input_error("Step title can't be empty.")
+        Some(step.EmptyTitle) ->
+          input_error(
+            "Step title can't be empty.",
+            Some(ptimer.Step(id, step.Title)),
+          )
         Some(step.TooLongTitle(max)) ->
           input_error(
             "Step title must be less than or equal to "
-            <> int.to_string(max)
-            <> " characters.",
+              <> int.to_string(max)
+              <> " characters.",
+            Some(ptimer.Step(id, step.Title)),
           )
         None -> element.none()
       },
       case err.action {
         Some(step.NegativeTimerDuration) ->
-          input_error("Timer duration can't be negative.")
+          input_error(
+            "Timer duration can't be negative.",
+            Some(ptimer.Step(id, step.TimerDuration)),
+          )
         None -> element.none()
       },
       ..elements
@@ -170,24 +199,33 @@ fn steps_errors(
 }
 
 fn assets_errors(
-  elements: List(element.Element(msg)),
+  elements: List(element.Element(Msg)),
   err: ptimer.EncodeError,
-) -> List(element.Element(msg)) {
+) -> List(element.Element(Msg)) {
   err.assets
   |> dict.to_list
   |> list.fold(elements, fn(elements, pair) {
-    let #(_id, err) = pair
+    let #(id, err) = pair
 
     [
       case err.name {
-        Some(asset.EmptyName) -> input_error("Asset name can't be empty.")
+        Some(asset.EmptyName) ->
+          input_error(
+            "Asset name can't be empty.",
+            Some(ptimer.Asset(id, asset.Name)),
+          )
         None -> element.none()
       },
       case err.mime {
-        Some(asset.EmptyMime) -> input_error("Asset MIME type can't be empty.")
+        Some(asset.EmptyMime) ->
+          input_error(
+            "Asset MIME type can't be empty.",
+            Some(ptimer.Asset(id, asset.MIME)),
+          )
         Some(asset.MimeNotIncludingSlash) ->
           input_error(
             "Asset MIME type string must include \"/\" (slash character).",
+            Some(ptimer.Asset(id, asset.MIME)),
           )
         None -> element.none()
       },
@@ -247,7 +285,7 @@ pub fn view(
           [
             case err.timer {
               Some(ptimer.ZeroStepsError) ->
-                input_error("Timer must have at least one step.")
+                input_error("Timer must have at least one step.", None)
               None -> element.none()
             },
           ]
@@ -255,13 +293,14 @@ pub fn view(
             |> steps_errors(err)
             |> metadata_errors(err),
         )
+        |> element.map(msg)
       _ -> element.none()
     },
   ])
 }
 
 pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
-  use selector, flags, _action <- storybook.story(args, ctx)
+  use selector, flags, action <- storybook.story(args, ctx)
 
   use engine <- ptimer.new_engine()
 
@@ -278,7 +317,11 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
 
         #(m2, effect.batch([e1, e2]))
       },
-      update,
+      fn(model, msg) {
+        action("update", dynamic.from(msg))
+
+        update(model, msg)
+      },
       fn(model) {
         case engine {
           Ok(engine) -> view(function.identity, engine, model, [])

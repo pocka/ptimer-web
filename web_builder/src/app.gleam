@@ -292,6 +292,27 @@ pub fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
       encode_timer(timer),
     )
 
+    ExportSceneMsg(export_scene.JumpTo(field)), Model(export: sub_model, ..) -> {
+      let #(export_model, export_effect) =
+        export_scene.update(sub_model, export_scene.JumpTo(field))
+
+      let #(m, e) =
+        update(Model(..model, export: export_model), case field {
+          ptimer.Metadata(_) -> NavigateTo(MetadataEditor)
+          ptimer.Step(_, _) -> OpenStepsEditor
+          ptimer.Asset(_, _) -> OpenAssetsEditor
+        })
+
+      #(
+        m,
+        effect.batch([
+          effect.map(export_effect, ExportSceneMsg),
+          e,
+          focus_element(ptimer.field_to_id(field)),
+        ]),
+      )
+    }
+
     ExportSceneMsg(sub_msg), Model(export: sub_model, ..) -> {
       let #(m, e) = export_scene.update(sub_model, sub_msg)
 
@@ -341,6 +362,20 @@ fn release(file: ptimer.Ptimer) -> effect.Effect(Msg) {
 fn encode_timer(timer: ptimer.Ptimer) -> effect.Effect(Msg) {
   effect.from(fn(dispatch) {
     dispatch(ExportSceneMsg(export_scene.Encode(timer)))
+  })
+}
+
+@external(javascript, "@/app.ffi.ts", "raf")
+fn request_animation_frame(callback: fn() -> Nil) -> Nil
+
+@external(javascript, "@/app.ffi.ts", "tryFocus")
+fn focus(id: String) -> Nil
+
+fn focus_element(id: String) -> effect.Effect(Msg) {
+  effect.from(fn(_dispatch) {
+    use <- request_animation_frame()
+
+    focus(id)
   })
 }
 

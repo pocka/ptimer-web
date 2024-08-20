@@ -87,3 +87,69 @@ export const ChangeInvalidatesDownloadLink = {
 		);
 	},
 } satisfies Story;
+
+export const CreateFromScratchUsingErrorListJump = {
+	async play({ canvasElement }) {
+		const root = within(canvasElement);
+
+		// Wait for engine to be ready
+		await waitFor(() => userEvent.click(root.getByRole("button", { name: "Logs" })));
+		await waitFor(() => expect(root.getByText(/Loaded Ptimer engine/)).toBeInTheDocument(), {
+			timeout: 3000,
+		});
+
+		// Checks Transferable Streams support because it changes whether the app opens
+		// welcome page or not.
+		const shouldPressCreateButton = !root.queryByText(/This browser does not implement Transferable Streams/);
+
+		await userEvent.click(root.getByRole("button", { name: "Metadata" }));
+
+		if (shouldPressCreateButton) {
+			await userEvent.click(root.getByRole("button", { name: /Create new/i }));
+		}
+
+		// Create empty step
+		await userEvent.click(root.getByRole("button", { name: "Steps" }));
+		await userEvent.click(root.getByRole("button", { name: /add step/i }));
+
+		// Go to "Export" scene
+		await userEvent.click(root.getByRole("button", { name: "Export" }));
+		await expect(root.getAllByRole("listitem")).toHaveLength(2);
+
+		// Jump to metadata title
+		// NOTE: Due to `listitem` does not expose its text content as name, and testing-library
+		//       does not provide a way to query by text AND role, this test has to rely on
+		//       order, which is fragile and bad practice.
+		await userEvent.click(within(root.getAllByRole("listitem")[0]!).getByRole("button"));
+
+		// Check Metadata scene is active
+		await expect(root.getByLabelText(/lang.* code/i)).toBeInTheDocument();
+
+		// Fill metadata title (field should have focus)
+		await userEvent.keyboard("New Timer");
+
+		// Go back to "Export" scene
+		await userEvent.click(root.getByRole("button", { name: "Export" }));
+
+		// Make sure the metadata title error has gone
+		await expect(root.getAllByRole("listitem")).toHaveLength(1);
+
+		// Jump to step title
+		await userEvent.click(within(root.getByRole("listitem")).getByRole("button"));
+
+		// Check Step scene is active
+		await expect(root.getByRole("button", { name: /add step/i })).toBeInTheDocument();
+
+		// Fill step title (field should have focus)
+		await userEvent.keyboard("Step One");
+
+		// Go back to "Export" scene
+		await userEvent.click(root.getByRole("button", { name: "Export" }));
+
+		// Compile
+		await userEvent.click(root.getByRole("button", { name: /compile/i }));
+		await waitFor(() =>
+			expect(root.getByRole("link", { name: /download/i })).toHaveAttribute("download", "New Timer.ptimer")
+		);
+	},
+} satisfies Story;

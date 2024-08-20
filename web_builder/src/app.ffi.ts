@@ -38,3 +38,25 @@ export function openFilePicker(accept: string, onSelect: (file: File) => void): 
 
 	input.click();
 }
+
+export function raf(callback: () => void): void {
+	requestAnimationFrame(() => {
+		callback();
+	});
+}
+
+export function tryFocus(id: string): void {
+	try {
+		const element = document.getElementById(id);
+		if (!element) {
+			throw new Error(`Element with ID(${id}) does not exist on the document`);
+		}
+
+		element.focus();
+	} catch (error) {
+		if (import.meta.env.DEV) {
+			console.warn("[tryFocus] Failed to focus on an element.");
+			console.error(error);
+		}
+	}
+}

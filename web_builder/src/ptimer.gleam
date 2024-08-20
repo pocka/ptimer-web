@@ -5,6 +5,7 @@
 import gleam/dict.{type Dict}
 import gleam/dynamic
 import gleam/function
+import gleam/int
 import gleam/json
 import gleam/list
 import gleam/option.{type Option, None, Some}
@@ -19,6 +20,50 @@ pub type Ptimer {
     steps: List(step.Step),
     assets: List(asset.Asset),
   )
+}
+
+pub type Field {
+  Metadata(field: metadata.Field)
+  Step(id: Int, field: step.Field)
+  Asset(id: Int, field: asset.Field)
+}
+
+pub fn field_to_id(field: Field) -> String {
+  case field {
+    Metadata(field) ->
+      "metadata_"
+      <> {
+        case field {
+          metadata.Title -> "title"
+          metadata.Description -> "description"
+          metadata.Lang -> "lang"
+        }
+      }
+    Step(id, field) ->
+      "step_"
+      <> int.to_string(id)
+      <> "_"
+      <> {
+        case field {
+          step.Title -> "title"
+          step.Description -> "description"
+          step.Sound -> "sound"
+          step.ActionType -> "action_type"
+          step.TimerDuration -> "timer_duration"
+        }
+      }
+    Asset(id, field) ->
+      "asset_"
+      <> int.to_string(id)
+      <> "_"
+      <> {
+        case field {
+          asset.Name -> "name"
+          asset.MIME -> "mime"
+          asset.Notice -> "notice"
+        }
+      }
+  }
 }
 
 pub opaque type Encoded {

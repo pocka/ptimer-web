@@ -28,6 +28,14 @@ pub type StepAction {
   Timer(duration: Int)
 }
 
+pub type Field {
+  Title
+  Description
+  Sound
+  ActionType
+  TimerDuration
+}
+
 // DECODE
 
 pub fn decode(value: dynamic.Dynamic) -> Result(Step, dynamic.DecodeErrors) {

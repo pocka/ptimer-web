@@ -32,7 +32,7 @@ pub fn view(
 
   html.div([], [
     html.div([class(scoped("form")), ..attrs], [
-      field.new("metadata_title", {
+      field.new(ptimer.field_to_id(ptimer.Metadata(metadata.Title)), {
         textbox.textbox(
           metadata.title,
           textbox.Enabled(fn(value) {
@@ -72,7 +72,7 @@ pub fn view(
           _ -> field.Valid
         })
         |> field.view(attrs: []),
-      field.new("metadata_description", {
+      field.new(ptimer.field_to_id(ptimer.Metadata(metadata.Description)), {
         textbox.textbox(
           metadata.description |> option.unwrap(""),
           textbox.Enabled(fn(value) {
@@ -96,7 +96,7 @@ pub fn view(
       })
         |> field.label([element.text("Description")])
         |> field.view(attrs: []),
-      field.new("metadata_lang", {
+      field.new(ptimer.field_to_id(ptimer.Metadata(metadata.Lang)), {
         textbox.textbox(
           metadata.lang,
           textbox.Enabled(fn(value) {

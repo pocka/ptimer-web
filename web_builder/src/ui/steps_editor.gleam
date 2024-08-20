@@ -292,7 +292,6 @@ fn step_views(
     ]
 
     [step, ..rest] -> {
-      let id_prefix = "step_" <> int.to_string(step.id) <> "_"
       let step_err = err |> dict.get(step.id) |> option.from_result
 
       [
@@ -348,7 +347,7 @@ fn step_views(
               ],
             ),
             html.div([class(scoped("step-body"))], [
-              field.new(id_prefix <> "title", {
+              field.new(ptimer.field_to_id(ptimer.Step(step.id, step.Title)), {
                 textbox.textbox(
                   step.title,
                   case model.move_op {
@@ -385,33 +384,36 @@ fn step_views(
                   _ -> field.Valid
                 })
                 |> field.view(attrs: []),
-              field.new(id_prefix <> "description", {
-                textbox.textbox(
-                  step.description |> option.unwrap(""),
-                  case model.move_op {
-                    Idle ->
-                      textbox.Enabled(fn(description) {
-                        UpdateSteps(update_step(
-                          timer.steps,
-                          step.Step(
-                            ..step,
-                            description: case description {
-                              "" -> None
-                              str -> Some(str)
-                            },
-                          ),
-                        ))
-                        |> msg
-                      })
-                    _ -> textbox.Disabled
-                  },
-                  textbox.MultiLine(Some(3)),
-                  _,
-                )
-              })
+              field.new(
+                ptimer.field_to_id(ptimer.Step(step.id, step.Description)),
+                {
+                  textbox.textbox(
+                    step.description |> option.unwrap(""),
+                    case model.move_op {
+                      Idle ->
+                        textbox.Enabled(fn(description) {
+                          UpdateSteps(update_step(
+                            timer.steps,
+                            step.Step(
+                              ..step,
+                              description: case description {
+                                "" -> None
+                                str -> Some(str)
+                              },
+                            ),
+                          ))
+                          |> msg
+                        })
+                      _ -> textbox.Disabled
+                    },
+                    textbox.MultiLine(Some(3)),
+                    _,
+                  )
+                },
+              )
                 |> field.label([element.text("Description")])
                 |> field.view(attrs: []),
-              field.new(id_prefix <> "sound", {
+              field.new(ptimer.field_to_id(ptimer.Step(step.id, step.Sound)), {
                 selectbox.selectbox(
                   step.sound,
                   [
@@ -443,38 +445,41 @@ fn step_views(
                 ])
                 |> field.view(attrs: [class("action-field")]),
               html.div([class(scoped("action"))], [
-                field.new(id_prefix <> "type", {
-                  selectbox.selectbox(
-                    step.action,
-                    [
-                      selectbox.Option(
-                        id: "user_action",
-                        label: "UserAction",
-                        value: step.UserAction,
-                      ),
-                      selectbox.Option(id: "timer", label: "Timer", value: case
-                        step.action
-                      {
-                        step.Timer(_) -> step.action
+                field.new(
+                  ptimer.field_to_id(ptimer.Step(step.id, step.ActionType)),
+                  {
+                    selectbox.selectbox(
+                      step.action,
+                      [
+                        selectbox.Option(
+                          id: "user_action",
+                          label: "UserAction",
+                          value: step.UserAction,
+                        ),
+                        selectbox.Option(id: "timer", label: "Timer", value: case
+                          step.action
+                        {
+                          step.Timer(_) -> step.action
 
-                        _ -> step.Timer(3)
-                      }),
-                    ],
-                    case model.move_op {
-                      Idle ->
-                        selectbox.Enabled(fn(option) {
-                          UpdateSteps(update_step(
-                            timer.steps,
-                            step.Step(..step, action: option),
-                          ))
-                          |> msg
-                        })
-                      _ -> selectbox.Disabled
-                    },
-                    _,
-                    [],
-                  )
-                })
+                          _ -> step.Timer(3)
+                        }),
+                      ],
+                      case model.move_op {
+                        Idle ->
+                          selectbox.Enabled(fn(option) {
+                            UpdateSteps(update_step(
+                              timer.steps,
+                              step.Step(..step, action: option),
+                            ))
+                            |> msg
+                          })
+                        _ -> selectbox.Disabled
+                      },
+                      _,
+                      [],
+                    )
+                  },
+                )
                   |> field.label([element.text("Type")])
                   |> field.note(case step.action {
                     step.UserAction -> [
@@ -492,32 +497,38 @@ fn step_views(
                   |> field.view(attrs: [class(scoped("action-field"))]),
                 case step.action {
                   step.Timer(duration) ->
-                    field.new(id_prefix <> "duration", {
-                      int_input.view(
-                        duration,
-                        case model.move_op {
-                          Idle ->
-                            int_input.Enabled(fn(n) {
-                              UpdateSteps(update_step(
-                                timer.steps,
-                                step.Step(
-                                  ..step,
-                                  action: step.Timer(int.clamp(
-                                    n,
-                                    min: 1,
-                                    max: 60 * 60 * 24,
-                                  )),
-                                ),
-                              ))
-                              |> msg
-                            })
-                          _ -> int_input.Disabled
-                        },
-                        Some(element.text("secs.")),
-                        _,
-                        [],
-                      )
-                    })
+                    field.new(
+                      ptimer.field_to_id(ptimer.Step(
+                        step.id,
+                        step.TimerDuration,
+                      )),
+                      {
+                        int_input.view(
+                          duration,
+                          case model.move_op {
+                            Idle ->
+                              int_input.Enabled(fn(n) {
+                                UpdateSteps(update_step(
+                                  timer.steps,
+                                  step.Step(
+                                    ..step,
+                                    action: step.Timer(int.clamp(
+                                      n,
+                                      min: 1,
+                                      max: 60 * 60 * 24,
+                                    )),
+                                  ),
+                                ))
+                                |> msg
+                              })
+                            _ -> int_input.Disabled
+                          },
+                          Some(element.text("secs.")),
+                          _,
+                          [],
+                        )
+                      },
+                    )
                     |> field.label([element.text("Duration")])
                     |> field.validity(case step_err {
                       Some(step.EncodeError(

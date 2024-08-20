@@ -144,10 +144,8 @@ fn list_item(
   asset: asset.Asset,
   err: Option(asset.EncodeError),
 ) -> element.Element(msg) {
-  let id = fn(x: String) -> String { int.to_string(asset.id) <> "_" <> x }
-
   html.li([class(scoped("item"))], [
-    field.new(id("name"), {
+    field.new(ptimer.field_to_id(ptimer.Asset(asset.id, asset.Name)), {
       textbox.textbox(
         asset.name,
         textbox.Enabled(fn(str) {
@@ -169,7 +167,7 @@ fn list_item(
         _ -> field.Valid
       })
       |> field.view(attrs: []),
-    field.new(id("mime"), {
+    field.new(ptimer.field_to_id(ptimer.Asset(asset.id, asset.MIME)), {
       textbox.textbox(
         asset.mime,
         textbox.Enabled(fn(str) {
@@ -201,7 +199,7 @@ fn list_item(
         _ -> field.Valid
       })
       |> field.view(attrs: []),
-    field.new(id("notice"), {
+    field.new(ptimer.field_to_id(ptimer.Asset(asset.id, asset.Notice)), {
       textbox.textbox(
         asset.notice |> option.unwrap(""),
         textbox.Enabled(fn(str) {

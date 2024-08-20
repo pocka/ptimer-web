@@ -20,6 +20,12 @@ pub type Asset {
   )
 }
 
+pub type Field {
+  Name
+  MIME
+  Notice
+}
+
 // DECODE
 
 pub fn decode(value: dynamic.Dynamic) -> Result(Asset, dynamic.DecodeErrors) {

@@ -14,6 +14,12 @@ pub type Metadata {
   Metadata(title: String, description: Option(String), lang: String)
 }
 
+pub type Field {
+  Title
+  Description
+  Lang
+}
+
 // DECODE
 
 pub fn decode(value: dynamic.Dynamic) -> Result(Metadata, dynamic.DecodeErrors) {
