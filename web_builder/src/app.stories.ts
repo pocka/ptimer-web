@@ -155,3 +155,118 @@ export const CreateFromScratchUsingErrorListJump = {
 		);
 	},
 } satisfies Story;
+
+class ElementNotReachableViaTabError extends Error {
+	element: Element;
+
+	constructor(msg: string, element: Element) {
+		super(msg);
+		this.element = element;
+	}
+}
+
+export const CreateFromScratchOnlyWithKeyboard = {
+	async play({ canvasElement, step }) {
+		const root = within(canvasElement);
+
+		async function tabTo(element: HTMLElement): Promise<void> {
+			await step("Focus an element using Tab key", async () => {
+				for (let i = 0; i < 100; i++) {
+					if (element === document.activeElement) {
+						return;
+					}
+
+					await userEvent.tab();
+				}
+
+				throw new ElementNotReachableViaTabError("Cannot reach the element", element);
+			});
+		}
+
+		// Wait for initial loading
+		await waitFor(() => root.getByRole("button", { name: "Logs" }));
+
+		await step("Check logs for engine load message", async () => {
+			await tabTo(root.getByRole("button", { name: "Logs" }));
+			await userEvent.keyboard("{enter}");
+			await waitFor(() => expect(root.getByText(/Loaded Ptimer engine/)).toBeInTheDocument(), {
+				timeout: 3000,
+			});
+		});
+
+		await step("Create new timer", async () => {
+			const shouldPressCreateButton = !root.queryByText(/This browser does not implement Transferable Streams/);
+
+			await tabTo(root.getByRole("button", { name: "Metadata" }));
+			await userEvent.keyboard("{enter}");
+
+			if (shouldPressCreateButton) {
+				await tabTo(root.getByRole("button", { name: /Create new/i }));
+				await userEvent.keyboard("{enter}");
+			}
+		});
+
+		await step("Fill metadata", async () => {
+			await tabTo(root.getByRole("textbox", { name: /title/i }));
+			await userEvent.keyboard("New Timer");
+			await userEvent.tab();
+			await userEvent.keyboard("Description text,\nSecond line.");
+			await userEvent.tab();
+			await userEvent.keyboard("{backspace}{backspace}GB");
+		});
+
+		await step("Create a step", async () => {
+			await tabTo(root.getByRole("button", { name: "Steps" }));
+			await userEvent.keyboard("{enter}");
+
+			await tabTo(root.getByRole("button", { name: /add step/i }));
+			await userEvent.keyboard("{enter}");
+			await tabTo(root.getByRole("textbox", { name: /title/i }));
+			await userEvent.keyboard("Step One");
+			await userEvent.tab();
+			await userEvent.keyboard("Description for{enter}Step One");
+			await userEvent.tab();
+			// Asset is not registered yet, so skipping sound field
+			await userEvent.tab();
+
+			const typeCombobox = root.getByRole("combobox", { name: /type$/i });
+			await expect(typeCombobox).toHaveFocus();
+			await userEvent.selectOptions(typeCombobox, "Timer");
+
+			await userEvent.tab();
+			await userEvent.keyboard("{backspace}120");
+		});
+
+		await step("Register an asset", async () => {
+			await tabTo(root.getByRole("button", { name: "Assets" }));
+			await userEvent.keyboard("{enter}");
+
+			const addAssetButton = root.getByLabelText(/add asset/i);
+			await tabTo(addAssetButton);
+			await userEvent.upload(addAssetButton, sampleWav);
+		});
+
+		await step("Use the registered asset in a step", async () => {
+			await tabTo(root.getByRole("button", { name: "Steps" }));
+			await userEvent.keyboard("{enter}");
+
+			const soundCombobox = root.getByRole("combobox", { name: /sound/i });
+			await tabTo(soundCombobox);
+			await userEvent.selectOptions(soundCombobox, "sample.wav");
+		});
+
+		await step("Compile the timer and check it generates a link", async () => {
+			await tabTo(root.getByRole("button", { name: "Export" }));
+			await userEvent.keyboard("{enter}");
+
+			await tabTo(root.getByRole("button", { name: /compile/i }));
+			await userEvent.keyboard("{enter}");
+
+			await waitFor(() =>
+				expect(root.getByRole("link", { name: /download/i })).toHaveAttribute("download", "New Timer.ptimer")
+			);
+
+			await tabTo(root.getByRole("link", { name: /download/i }));
+		});
+	},
+} satisfies Story;
