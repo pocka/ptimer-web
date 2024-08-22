@@ -140,8 +140,8 @@ fn insert_at(items: List(a), new_item: a, at at: Int) -> List(a) {
   insert_at_recur(items, new_item, at, 0)
 }
 
-@external(javascript, "@/ui/steps_editor.ffi.ts", "setDragEffect")
-fn set_drag_effect(ev: dynamic.Dynamic, effect: String) -> Nil
+@external(javascript, "@/ui/steps_editor.ffi.ts", "configureDataTransfer")
+fn configure_dragstart_event(ev: dynamic.Dynamic, effect: String) -> Nil
 
 fn move_before(
   steps: List(step.Step),
@@ -335,7 +335,7 @@ fn step_views(
                 }),
                 event.on("dragstart", fn(ev) {
                   event.stop_propagation(ev)
-                  set_drag_effect(ev, "move")
+                  configure_dragstart_event(ev, "move")
 
                   Ok(Internal(StartDrag(index, step)) |> msg)
                 }),
