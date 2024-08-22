@@ -47,6 +47,12 @@ SPDX-License-Identifier: Apache-2.0
 	border-radius: 3px;
 	cursor: pointer;
 }
+@media (pointer: coarse) {
+	.item {
+		--_item-padding-x: 6px;
+		--_item-padding-y: 6px;
+	}
+}
 .item:hover {
 	background-color: oklch(99% 5% var(--color-info-h) / 15%);
 }
