@@ -46,6 +46,8 @@ SPDX-License-Identifier: Apache-2.0
 	border-radius: 3px;
 	color: oklch(var(--color-fg) / var(--alpha-dimmed));
 	cursor: grab;
+	-webkit-user-drag: element;
+	user-select: none;
 }
 .step-header:hover {
 	box-shadow: 0 0 0 var(--length-focus-ring) oklch(
