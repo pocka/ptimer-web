@@ -264,6 +264,13 @@ pub type CompileError {
   CompileResultDecodeError(dynamic.DecodeErrors)
 }
 
+pub fn compile_error_to_string(err: CompileError) -> String {
+  case err {
+    UnexpectedCompileError(text) -> "Unexpected compile error: " <> text
+    CompileResultDecodeError(_) -> "Received unexpected message payload"
+  }
+}
+
 fn decode_compile_error(
   value: dynamic.Dynamic,
 ) -> Result(CompileError, dynamic.DecodeErrors) {

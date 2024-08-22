@@ -9,6 +9,7 @@ import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/result
+import log
 import lucide
 import lustre
 import lustre/attribute.{type Attribute, class}
@@ -56,11 +57,16 @@ pub opaque type InternalMsg {
   NoOp
 }
 
+pub type ExternalMsg {
+  Log(log.Action, log.Severity)
+}
+
 pub type Msg {
   Encode(timer: ptimer.Ptimer)
   Compile(engine: ptimer.Engine)
   JumpTo(field: ptimer.Field)
   Internal(InternalMsg)
+  External(ExternalMsg)
 }
 
 pub fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
@@ -79,12 +85,12 @@ pub fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
 
     Internal(GotCompileResult(Ok(url))), Model(job: Compiling(data), ..) -> #(
       Model(..model, job: Compiled(data, url)),
-      effect.none(),
+      send_msg(Log(log.CompileSuccess(data), log.Info)),
     )
 
     Internal(GotCompileResult(Error(err))), Model(job: Compiling(data), ..) -> #(
       Model(..model, job: FailedToCompile(data, err)),
-      effect.none(),
+      send_msg(Log(log.CompileFailure(data, err), log.Danger)),
     )
 
     _, _ -> #(model, effect.none())
@@ -99,6 +105,10 @@ fn compile(engine: ptimer.Engine, data: ptimer.Encoded) -> effect.Effect(Msg) {
 
     dispatch(Internal(GotCompileResult(result)))
   })
+}
+
+fn send_msg(msg: ExternalMsg) -> effect.Effect(Msg) {
+  effect.from(fn(dispatch) { dispatch(External(msg)) })
 }
 
 // VIEW

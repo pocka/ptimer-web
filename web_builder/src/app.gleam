@@ -313,6 +313,14 @@ pub fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
       )
     }
 
+    ExportSceneMsg(export_scene.External(export_scene.Log(action, severity))), _
+    -> {
+      #(
+        Model(..model, logs: log.append(model.logs, action, severity)),
+        effect.none(),
+      )
+    }
+
     ExportSceneMsg(sub_msg), Model(export: sub_model, ..) -> {
       let #(m, e) = export_scene.update(sub_model, sub_msg)
 

@@ -25,6 +25,8 @@ pub type Severity {
 }
 
 pub type Action {
+  CompileSuccess(ptimer.Encoded)
+  CompileFailure(ptimer.Encoded, ptimer.CompileError)
   CreateNew
   StartLoadingEngine
   EngineLoaded
@@ -97,6 +99,15 @@ fn action(action: Action) -> element.Element(msg) {
       text(
         "Failed to detect Transferable Streams platform support: "
         <> transferable_streams.detection_error_to_string(err),
+      )
+    CompileSuccess(timer) ->
+      text("Successfully compiled \"" <> ptimer.filename(timer) <> "\".")
+    CompileFailure(timer, err) ->
+      text(
+        "Failed to compile \""
+        <> ptimer.filename(timer)
+        <> "\": "
+        <> ptimer.compile_error_to_string(err),
       )
   }
 }
