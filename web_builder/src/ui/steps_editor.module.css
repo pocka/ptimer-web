@@ -25,11 +25,13 @@ SPDX-License-Identifier: Apache-2.0
 	gap: 16px;
 }
 
-.insert-button {
-	opacity: 0;
-}
-.insert-button:hover, .insert-button:focus-visible {
-	opacity: 1;
+@media (hover: hover) {
+	.insert-button {
+		opacity: 0;
+	}
+	.insert-button:hover, .insert-button:focus-visible {
+		opacity: 1;
+	}
 }
 
 .step-header {
