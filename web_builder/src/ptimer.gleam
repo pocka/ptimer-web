@@ -12,6 +12,7 @@ import gleam/option.{type Option, None, Some}
 import gleam/result
 import ptimer/asset
 import ptimer/metadata
+import ptimer/object_url
 import ptimer/step
 
 pub type Ptimer {
@@ -296,12 +297,13 @@ fn compile_internal(
 pub fn compile(
   engine: Engine,
   timer: Encoded,
-  on_result: fn(Result(String, CompileError)) -> Nil,
+  on_result: fn(Result(object_url.ObjectUrl, CompileError)) -> Nil,
 ) -> Nil {
   use result <- compile_internal(engine.ref, dynamic.from(timer.value))
 
   result
   |> decode_compile_result
+  |> result.map(object_url.from_string)
   |> on_result
 }
 

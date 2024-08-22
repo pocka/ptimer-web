@@ -27,6 +27,7 @@ pub type Severity {
 pub type Action {
   CompileSuccess(ptimer.Encoded)
   CompileFailure(ptimer.Encoded, ptimer.CompileError)
+  InvalidateDownloadUrl(String)
   CreateNew
   StartLoadingEngine
   EngineLoaded
@@ -109,6 +110,8 @@ fn action(action: Action) -> element.Element(msg) {
         <> "\": "
         <> ptimer.compile_error_to_string(err),
       )
+    InvalidateDownloadUrl(url) ->
+      text("Invalidated an obsolete download URL to free resource: " <> url)
   }
 }
 

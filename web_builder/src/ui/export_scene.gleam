@@ -19,6 +19,7 @@ import lustre/element/html
 import ptimer
 import ptimer/asset
 import ptimer/metadata
+import ptimer/object_url
 import ptimer/step
 import storybook
 import ui/button
@@ -28,7 +29,7 @@ import ui/button
 type CompileJob {
   Idle
   Compiling(data: ptimer.Encoded)
-  Compiled(data: ptimer.Encoded, url: String)
+  Compiled(data: ptimer.Encoded, url: object_url.ObjectUrl)
   FailedToCompile(data: ptimer.Encoded, reason: ptimer.CompileError)
 }
 
@@ -53,7 +54,7 @@ pub fn init(_flags) -> #(Model, effect.Effect(Msg)) {
 // UPDATE
 
 pub opaque type InternalMsg {
-  GotCompileResult(Result(String, ptimer.CompileError))
+  GotCompileResult(Result(object_url.ObjectUrl, ptimer.CompileError))
   NoOp
 }
 
@@ -78,9 +79,15 @@ pub fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
 
     Compile(_), Model(job: Compiling(_), ..) -> #(model, effect.none())
 
-    Compile(engine), Model(data: Some(Ok(data)), ..) -> #(
+    Compile(engine), Model(data: Some(Ok(data)), job: job) -> #(
       Model(..model, job: Compiling(data)),
-      compile(engine, data),
+      effect.batch([
+        compile(engine, data),
+        case job {
+          Compiled(_, prev_url) -> revoke_compiled_url(prev_url)
+          _ -> effect.none()
+        },
+      ]),
     )
 
     Internal(GotCompileResult(Ok(url))), Model(job: Compiling(data), ..) -> #(
@@ -104,6 +111,19 @@ fn compile(engine: ptimer.Engine, data: ptimer.Encoded) -> effect.Effect(Msg) {
     use result <- ptimer.compile(engine, data)
 
     dispatch(Internal(GotCompileResult(result)))
+  })
+}
+
+fn revoke_compiled_url(url: object_url.ObjectUrl) -> effect.Effect(Msg) {
+  effect.from(fn(dispatch) {
+    object_url.revoke(url)
+
+    dispatch(
+      External(Log(
+        log.InvalidateDownloadUrl(object_url.to_string(url)),
+        log.Debug,
+      )),
+    )
   })
 }
 
@@ -266,7 +286,7 @@ pub fn view(
         |> button.view([], [element.text("Compile")]),
       case model.job {
         Compiled(encoded, url) if model.data == Some(Ok(encoded)) ->
-          button.new(button.Link(url, None))
+          button.new(button.Link(object_url.to_string(url), None))
           |> button.variant(button.Primary)
           |> button.view([attribute.download(ptimer.filename(encoded))], [
             element.text("Download"),

@@ -85,6 +85,11 @@ export const ChangeInvalidatesDownloadLink = {
 		await waitFor(() =>
 			expect(root.getByRole("link", { name: /download/i })).toHaveAttribute("download", "New TimeR.ptimer")
 		);
+
+		await ctx.step("Make sure the old file binary is released", async () => {
+			await userEvent.click(root.getByRole("button", { name: "Logs" }));
+			await waitFor(() => expect(root.getByText(/invalidate.*url/i)).toBeInTheDocument());
+		});
 	},
 } satisfies Story;
 
