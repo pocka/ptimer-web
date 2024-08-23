@@ -20,7 +20,9 @@ pub type IconType {
   ListPlus
   Menu
   OctagonX
+  Play
   ScrollText
+  Square
   Trash2
 }
 
@@ -41,6 +43,8 @@ fn icon_type_to_string(icon_type: IconType) -> String {
     Menu -> "menu"
     ScrollText -> "scroll-text"
     OctagonX -> "octagon-x"
+    Play -> "play"
+    Square -> "square"
     Trash2 -> "trash2"
   }
 }

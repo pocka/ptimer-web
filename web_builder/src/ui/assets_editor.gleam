@@ -27,19 +27,25 @@ import ui/textbox
 // MODEL
 
 pub opaque type Model {
-  Model
+  Model(now_playing: Option(asset.Asset))
 }
 
 pub fn init(_) -> #(Model, effect.Effect(Msg)) {
-  #(Model, effect.none())
+  #(Model(None), effect.none())
 }
 
 // UPDATE
+
+fn asset_to_playback_id(asset: asset.Asset) -> String {
+  "playback__" <> int.to_string(asset.id)
+}
 
 pub opaque type InternalMsg {
   Append(assets: List(asset.Asset), file: dynamic.Dynamic)
   Delete(asset: asset.Asset)
   Edit(payload: asset.Asset)
+  Play(asset: asset.Asset)
+  StopPlayback(asset: asset.Asset)
   NoOp
 }
 
@@ -114,6 +120,14 @@ pub fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
       ),
     )
 
+    Internal(Play(asset)) -> #(Model(now_playing: Some(asset)), do_play(asset))
+
+    Internal(StopPlayback(asset)) ->
+      case model.now_playing == Some(asset) {
+        True -> #(Model(now_playing: None), do_stop(asset))
+        False -> #(model, effect.none())
+      }
+
     Internal(NoOp) -> #(model, effect.none())
   }
 }
@@ -128,19 +142,57 @@ fn release(asset: asset.Asset) -> effect.Effect(msg) {
   effect.from(fn(_) { asset.release(asset) })
 }
 
+@external(javascript, "@/ui/assets_editor.ffi.ts", "playAudioEl")
+fn play_audio_el(id: String, on_completed: fn() -> Nil) -> Nil
+
+fn do_play(asset: asset.Asset) -> effect.Effect(Msg) {
+  effect.from(fn(dispatch) {
+    use <- play_audio_el(asset_to_playback_id(asset))
+
+    dispatch(Internal(StopPlayback(asset)))
+  })
+}
+
+@external(javascript, "@/ui/assets_editor.ffi.ts", "stopAudioEl")
+fn stop_audio_el(id: String) -> Nil
+
+fn do_stop(asset: asset.Asset) -> effect.Effect(Msg) {
+  effect.from(fn(_dispatch) { stop_audio_el(asset_to_playback_id(asset)) })
+}
+
 // VIEW
 
 @external(javascript, "@/ui/assets_editor.ffi.ts", "className")
 fn scoped(x: String) -> String
 
-fn audio_player(asset: asset.Asset) -> element.Element(msg) {
-  html.audio([class(scoped("audio-preview")), attribute.controls(True)], [
-    html.source([attribute.type_(asset.mime), attribute.src(asset.url)]),
+fn audio_player(model: Model, asset: asset.Asset) -> element.Element(Msg) {
+  element.fragment([
+    html.audio(
+      [
+        attribute.id(asset_to_playback_id(asset)),
+        class(scoped("audio-preview")),
+        attribute.controls(False),
+      ],
+      [html.source([attribute.type_(asset.mime), attribute.src(asset.url)])],
+    ),
+    case model.now_playing == Some(asset) {
+      True ->
+        button.new(button.Button(Internal(StopPlayback(asset))))
+        |> button.size(button.Small)
+        |> button.icon(lucide.Square)
+        |> button.view([], [element.text("Stop")])
+      False ->
+        button.new(button.Button(Internal(Play(asset))))
+        |> button.size(button.Small)
+        |> button.icon(lucide.Play)
+        |> button.view([], [element.text("Play")])
+    },
   ])
 }
 
 fn list_item(
   msg: fn(Msg) -> msg,
+  model: Model,
   asset: asset.Asset,
   err: Option(asset.EncodeError),
 ) -> element.Element(msg) {
@@ -230,8 +282,8 @@ fn list_item(
       |> field.view(attrs: []),
     html.div([class(scoped("item-footer"))], [
       case asset.mime {
-        "audio/wav" -> audio_player(asset)
-        "audio/mp3" -> audio_player(asset)
+        "audio/wav" -> audio_player(model, asset) |> element.map(msg)
+        "audio/mp3" -> audio_player(model, asset) |> element.map(msg)
         _ -> html.div([], [])
       },
       button.new(button.Button(msg(Internal(Delete(asset)))))
@@ -245,7 +297,7 @@ fn list_item(
 pub fn view(
   msg: fn(Msg) -> msg,
   timer: ptimer.Ptimer,
-  _model: Model,
+  model: Model,
   err: dict.Dict(Int, asset.EncodeError),
   attrs: List(Attribute(msg)),
 ) -> element.Element(msg) {
@@ -285,6 +337,7 @@ pub fn view(
             int.to_string(asset.id),
             list_item(
               msg,
+              model,
               asset,
               err |> dict.get(asset.id) |> option.from_result,
             ),

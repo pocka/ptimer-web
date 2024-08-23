@@ -19,7 +19,9 @@ import {
 	ListPlus,
 	Menu,
 	OctagonX,
+	Play,
 	ScrollText,
+	Square,
 	Trash2,
 } from "lucide";
 
@@ -57,5 +59,7 @@ export function register() {
 	customElements.define("lucide-folder-open", createLucideCustomElement(FolderOpen));
 	customElements.define("lucide-clipboard-list", createLucideCustomElement(ClipboardList));
 	customElements.define("lucide-octagon-x", createLucideCustomElement(OctagonX));
+	customElements.define("lucide-play", createLucideCustomElement(Play));
+	customElements.define("lucide-square", createLucideCustomElement(Square));
 	customElements.define("lucide-trash2", createLucideCustomElement(Trash2));
 }
