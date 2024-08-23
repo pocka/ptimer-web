@@ -4,6 +4,8 @@
 
 import gleam/dict
 import gleam/dynamic
+import gleam/int
+import gleam/list
 import gleam/option.{type Option, None, Some}
 import log
 import lucide
@@ -23,6 +25,7 @@ import ui/menu
 import ui/metadata_editor
 import ui/placeholder
 import ui/steps_editor
+import ui/tts_scene
 
 // MODEL
 
@@ -43,6 +46,7 @@ type Scene {
   StepsEditor(steps_editor.Model)
   AssetsEditor(assets_editor.Model)
   ExportScene
+  TTSScene
   LogsViewer
 }
 
@@ -54,6 +58,7 @@ pub opaque type Model {
     logs: List(log.Log),
     scene: Scene,
     export: export_scene.Model,
+    tts: tts_scene.Model,
     transferable_streams: transferable_streams.SupportStatus,
   )
 }
@@ -61,6 +66,7 @@ pub opaque type Model {
 pub fn init(_flags) -> #(Model, effect.Effect(Msg)) {
   let transferable_streams_support = transferable_streams.support_status()
   let export = export_scene.init(Nil)
+  let tts = tts_scene.init(Nil)
 
   #(
     Model(
@@ -100,9 +106,14 @@ pub fn init(_flags) -> #(Model, effect.Effect(Msg)) {
         },
       scene: MetadataEditor,
       export: export.0,
+      tts: tts.0,
       transferable_streams: transferable_streams_support,
     ),
-    effect.batch([prepare_engine(), effect.map(export.1, ExportSceneMsg)]),
+    effect.batch([
+      prepare_engine(),
+      effect.map(export.1, ExportSceneMsg),
+      effect.map(tts.1, TTSSceneMsg),
+    ]),
   )
 }
 
@@ -122,6 +133,7 @@ pub opaque type Msg {
   CreateNewTimer
   UpdateTimer(ptimer.Ptimer)
   ExportSceneMsg(export_scene.Msg)
+  TTSSceneMsg(tts_scene.Msg)
 }
 
 pub fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
@@ -327,6 +339,51 @@ pub fn update(model: Model, msg: Msg) -> #(Model, effect.Effect(Msg)) {
       #(Model(..model, export: m), effect.map(e, ExportSceneMsg))
     }
 
+    TTSSceneMsg(tts_scene.Log(action, severity)), Model(tts: sub_model, ..) -> {
+      let #(m, e) = tts_scene.update(sub_model, tts_scene.Log(action, severity))
+
+      #(
+        Model(..model, tts: m, logs: log.append(model.logs, action, severity)),
+        effect.map(e, TTSSceneMsg),
+      )
+    }
+
+    TTSSceneMsg(tts_scene.AddAsset(f)),
+      Model(
+        tts: sub_model,
+        timer: Some(timer),
+        ..,
+      )
+    -> {
+      let max_id =
+        timer.assets
+        |> list.fold(-1, fn(max, asset) { int.max(max, asset.id) })
+
+      let new_asset = f(max_id + 1)
+
+      let #(m, e) = tts_scene.update(sub_model, tts_scene.AddAsset(f))
+
+      #(
+        Model(
+          ..model,
+          tts: m,
+          timer: Some(
+            ptimer.Ptimer(
+              ..timer,
+              assets: timer.assets |> list.append([new_asset]),
+            ),
+          ),
+        ),
+        effect.map(e, TTSSceneMsg),
+      )
+    }
+
+    TTSSceneMsg(sub_msg), Model(tts: sub_model, ..) -> {
+      let #(m, e) = tts_scene.update(sub_model, sub_msg)
+
+      #(Model(..model, tts: m), effect.map(e, TTSSceneMsg))
+    }
+
     _, _ -> #(model, effect.none())
   }
 }
@@ -466,6 +523,14 @@ pub fn view(model: Model) -> element.Element(Msg) {
           [element.text("Assets")],
         ),
         menu.item(
+          lucide.Speech,
+          [
+            menu.active(model.scene == TTSScene),
+            event.on_click(NavigateTo(TTSScene)),
+          ],
+          [element.text("TTS")],
+        ),
+        menu.item(
           lucide.Download,
           [
             menu.active(model.scene == ExportScene),
@@ -536,6 +601,12 @@ pub fn view(model: Model) -> element.Element(Msg) {
           use engine, _ <- with_file(model)
 
           export_scene.view(ExportSceneMsg, engine, model.export, [])
+        }
+
+        TTSScene -> {
+          use _, _ <- with_file(model)
+
+          tts_scene.view(TTSSceneMsg, model.tts, [])
         }
 
         LogsViewer -> log.view(model.logs, [])

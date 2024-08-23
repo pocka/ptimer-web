@@ -15,6 +15,7 @@ pub type IconType {
   FileMusic
   FilePlus
   FolderOpen
+  Globe
   GripHorizontal
   ListOrdered
   ListPlus
@@ -22,6 +23,7 @@ pub type IconType {
   OctagonX
   Play
   ScrollText
+  Speech
   Square
   Trash2
 }
@@ -37,6 +39,7 @@ fn icon_type_to_string(icon_type: IconType) -> String {
     FileMusic -> "file-music"
     FilePlus -> "file-plus"
     FolderOpen -> "folder-open"
+    Globe -> "globe"
     GripHorizontal -> "grip-horizontal"
     ListOrdered -> "list-ordered"
     ListPlus -> "list-plus"
@@ -44,6 +47,7 @@ fn icon_type_to_string(icon_type: IconType) -> String {
     ScrollText -> "scroll-text"
     OctagonX -> "octagon-x"
     Play -> "play"
+    Speech -> "speech"
     Square -> "square"
     Trash2 -> "trash2"
   }

@@ -14,6 +14,7 @@ import lustre/element/html
 import platform_support/transferable_streams
 import ptimer
 import storybook
+import tts
 
 // MODEL
 
@@ -40,6 +41,12 @@ pub type Action {
   TransferableStreamDetectionFailure(
     transferable_streams.SupportStatusDetectionError,
   )
+  TTSLoadStart
+  TTSLoaded
+  TTSLoadingFailure(tts.TTSLoadError)
+  TTSRequestedVoiceList
+  TTSGotVoiceList(count: Int)
+  TTSListVoiceFailure(tts.ListVoiceError)
 }
 
 pub opaque type Log {
@@ -112,6 +119,17 @@ fn action(action: Action) -> element.Element(msg) {
       )
     InvalidateDownloadUrl(url) ->
       text("Invalidated an obsolete download URL to free resource: " <> url)
+    TTSLoadStart -> text("Loading TTS engine...")
+    TTSLoaded -> text("Loaded TTS engine.")
+    TTSLoadingFailure(err) ->
+      text("Failed to load TTS engine" <> tts.tts_load_error_to_string(err))
+    TTSRequestedVoiceList -> text("Loading TTS voice list...")
+    TTSGotVoiceList(count) ->
+      text("Loaded TTS voice list (" <> int.to_string(count) <> " items).")
+    TTSListVoiceFailure(err) ->
+      text(
+        "Failed to load TTS voice list: " <> tts.list_voice_error_to_string(err),
+      )
   }
 }
 

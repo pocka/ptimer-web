@@ -2,10 +2,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Ptimer } from "../ptimer";
-
-// --- Base types
-
 const enum MessageType {
 	Request = 0,
 	Response,
@@ -24,8 +20,6 @@ export interface ResponseMessage<Kind extends string, Payload = undefined> {
 	kind: Kind;
 	payload: Payload;
 }
-
-// --- Utilities
 
 type KindOf<Message extends RequestMessage<string, any> | ResponseMessage<string, any>> = Message extends
 	RequestMessage<infer Kind, any> ? Kind
@@ -113,34 +107,38 @@ export function isResponseMessage(x: unknown): x is ResponseMessage<string, unkn
 	return true;
 }
 
-// --- Messages
+export abstract class AsyncWorkerMessanger {
+	#worker: Worker;
 
-export const HEARTBEAT = "heartbeat";
-export type HeartbeatRequest = RequestMessage<typeof HEARTBEAT>;
-export type HeartbeatResponse = ResponseMessage<typeof HEARTBEAT, {
-	sqliteVersion: string;
-}>;
-
-export const PARSE = "parse";
-export type ParseRequest = RequestMessage<typeof PARSE, {
-	data: ReadableStream<Uint8Array>;
-}>;
-export type ParseResponse = ResponseMessage<
-	typeof PARSE,
-	{ ok: true; data: Ptimer } | { ok: false; error: unknown }
->;
-
-export const COMPILE = "compile";
-export type CompileRequest = RequestMessage<typeof COMPILE, {
-	timer: Ptimer;
-}>;
-export type CompileResponse = ResponseMessage<
-	typeof COMPILE,
-	{
-		ok: true;
-		data: Uint8Array;
-	} | {
-		ok: false;
-		error: unknown;
+	constructor(worker: Worker) {
+		this.#worker = worker;
 	}
->;
+
+	protected send<Request extends RequestMessage<string, any>, Response extends ResponseMessage<string, any>>(
+		req: Request,
+		options?: StructuredSerializeOptions,
+	): Promise<Response> {
+		return new Promise((resolve) => {
+			const onMessage = (ev: MessageEvent) => {
+				if (!isResponseMessage(ev.data)) {
+					console.warn("Illegal response message sent from engine worker.", {
+						message: ev.data,
+					});
+					return;
+				}
+
+				if (ev.data.id !== req.id) {
+					return;
+				}
+
+				resolve(ev.data as Response);
+
+				this.#worker.removeEventListener("message", onMessage);
+			};
+
+			this.#worker.addEventListener("message", onMessage);
+
+			this.#worker.postMessage(req, options);
+		});
+	}
+}

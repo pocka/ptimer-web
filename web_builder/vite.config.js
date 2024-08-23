@@ -7,13 +7,20 @@ import gleam from "vite-gleam";
 
 export default defineConfig({
 	optimizeDeps: {
-		// Without this, Vite can't load WASM file
-		exclude: ["@sqlite.org/sqlite-wasm"],
+		exclude: [
+			// Without this, Vite can't load WASM file
+			"@sqlite.org/sqlite-wasm",
+			"@diffusionstudio/vits-web",
+		],
 	},
 	resolve: {
 		alias: {
 			"@": new URL("./src", import.meta.url).pathname,
 		},
+	},
+	worker: {
+		// onnxruntime-web is not compatible with "iife" format (default value)
+		format: "es",
 	},
 	plugins: [gleam()],
 });

@@ -9,50 +9,17 @@ import {
 	HEARTBEAT,
 	type HeartbeatRequest,
 	type HeartbeatResponse,
-	isResponseMessage,
 	PARSE,
 	type ParseRequest,
 	type ParseResponse,
-	request,
-	type RequestMessage,
-	type ResponseMessage,
-} from "@/engine/message";
+} from "@/workers/engine/message";
+import { AsyncWorkerMessanger, isResponseMessage, request } from "@/workers/helpers";
 
 import { type Ptimer } from "@/ptimer";
 
-class Engine {
-	#worker: Worker;
-
+class Engine extends AsyncWorkerMessanger {
 	constructor(worker: Worker) {
-		this.#worker = worker;
-	}
-
-	#send<Request extends RequestMessage<string, any>, Response extends ResponseMessage<string, any>>(
-		req: Request,
-		options?: StructuredSerializeOptions,
-	): Promise<Response> {
-		return new Promise((resolve) => {
-			const onMessage = (ev: MessageEvent) => {
-				if (!isResponseMessage(ev.data)) {
-					console.warn("Illegal response message sent from engine worker.", {
-						message: ev.data,
-					});
-					return;
-				}
-
-				if (ev.data.id !== req.id) {
-					return;
-				}
-
-				resolve(ev.data as Response);
-
-				this.#worker.removeEventListener("message", onMessage);
-			};
-
-			this.#worker.addEventListener("message", onMessage);
-
-			this.#worker.postMessage(req, options);
-		});
+		super(worker);
 	}
 
 	async parse(file: File): Promise<Ptimer> {
@@ -75,7 +42,7 @@ class Engine {
 			console.groupEnd();
 		}
 
-		const res = await this.#send<ParseRequest, ParseResponse>(req, { transfer: [stream] });
+		const res = await this.send<ParseRequest, ParseResponse>(req, { transfer: [stream] });
 
 		if (!res.payload.ok) {
 			if (import.meta.env.DEV) {
@@ -116,7 +83,7 @@ class Engine {
 			console.groupEnd();
 		}
 
-		const res = await this.#send<CompileRequest, CompileResponse>(req);
+		const res = await this.send<CompileRequest, CompileResponse>(req);
 
 		if (!res.payload.ok) {
 			if (import.meta.env.DEV) {
@@ -152,7 +119,7 @@ class Engine {
 type Result<T, E = string> = { value: T } | { error: E };
 
 export function newEngine(callback: (engine: Result<Engine>) => void) {
-	const worker = new Worker(new URL("@/engine/worker.ts", import.meta.url), {
+	const worker = new Worker(new URL("@/workers/engine/worker.ts", import.meta.url), {
 		type: "module",
 	});
 

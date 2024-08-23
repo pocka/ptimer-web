@@ -13,6 +13,7 @@ import {
 	FileMusic,
 	FilePlus,
 	FolderOpen,
+	Globe,
 	GripHorizontal,
 	type IconNode,
 	ListOrdered,
@@ -21,6 +22,7 @@ import {
 	OctagonX,
 	Play,
 	ScrollText,
+	Speech,
 	Square,
 	Trash2,
 } from "lucide";
@@ -53,6 +55,7 @@ export function register() {
 	customElements.define("lucide-list-plus", createLucideCustomElement(ListPlus));
 	customElements.define("lucide-file-music", createLucideCustomElement(FileMusic));
 	customElements.define("lucide-file-plus", createLucideCustomElement(FilePlus));
+	customElements.define("lucide-globe", createLucideCustomElement(Globe));
 	customElements.define("lucide-grip-horizontal", createLucideCustomElement(GripHorizontal));
 	customElements.define("lucide-scroll-text", createLucideCustomElement(ScrollText));
 	customElements.define("lucide-menu", createLucideCustomElement(Menu));
@@ -60,6 +63,7 @@ export function register() {
 	customElements.define("lucide-clipboard-list", createLucideCustomElement(ClipboardList));
 	customElements.define("lucide-octagon-x", createLucideCustomElement(OctagonX));
 	customElements.define("lucide-play", createLucideCustomElement(Play));
+	customElements.define("lucide-speech", createLucideCustomElement(Speech));
 	customElements.define("lucide-square", createLucideCustomElement(Square));
 	customElements.define("lucide-trash2", createLucideCustomElement(Trash2));
 }

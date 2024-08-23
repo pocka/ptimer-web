@@ -32,6 +32,10 @@ pub type Button(msg) {
   Button(on_click: msg)
   Link(href: String, target: Option(String))
   FilePicker(on_pick: fn(dynamic.Dynamic) -> msg, accepts: List(String))
+
+  /// Renders a button but pressing it does nothing.
+  /// Useful for disabled/loading buttons.
+  NoOp
 }
 
 pub opaque type Config(msg, state, variant, size, icon) {
@@ -208,34 +212,6 @@ pub fn view(
   ]
 
   case config.button {
-    Button(on_click) -> {
-      let attrs = case config.state {
-        Enabled -> [event.on_click(on_click), ..common_attrs]
-
-        Disabled(Some(details)) -> [
-          attribute.attribute("aria-disabled", "true"),
-          attribute.attribute("aria-details", details),
-          ..attrs
-        ]
-
-        Disabled(None) -> [attribute.disabled(True), ..common_attrs]
-
-        Loading(Some(details)) -> [
-          attribute.attribute("aria-disabled", "true"),
-          attribute.attribute("aria-details", details),
-          class(scoped("loading")),
-          ..common_attrs
-        ]
-
-        Loading(None) -> [
-          attribute.disabled(True),
-          class(scoped("loading")),
-          ..common_attrs
-        ]
-      }
-
-      html.button([attribute.type_("button"), ..attrs], common_children)
-    }
     Link(href, target) -> {
       let attrs = case config.state {
         Enabled -> common_attrs
@@ -324,6 +300,40 @@ pub fn view(
         ]),
         ..common_children
       ])
+    }
+    _ -> {
+      let attrs = case config.state {
+        Enabled -> [
+          case config.button {
+            Button(on_click) -> event.on_click(on_click)
+            _ -> attribute.none()
+          },
+          ..common_attrs
+        ]
+
+        Disabled(Some(details)) -> [
+          attribute.attribute("aria-disabled", "true"),
+          attribute.attribute("aria-details", details),
+          ..common_attrs
+        ]
+
+        Disabled(None) -> [attribute.disabled(True), ..common_attrs]
+
+        Loading(Some(details)) -> [
+          attribute.attribute("aria-disabled", "true"),
+          attribute.attribute("aria-details", details),
+          class(scoped("loading")),
+          ..common_attrs
+        ]
+
+        Loading(None) -> [
+          attribute.disabled(True),
+          class(scoped("loading")),
+          ..common_attrs
+        ]
+      }
+
+      html.button([attribute.type_("button"), ..attrs], common_children)
     }
   }
 }

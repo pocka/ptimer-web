@@ -4,9 +4,11 @@
 
 import initSqlite3, { type Database, type Sqlite3Static, type WasmPointer } from "@sqlite.org/sqlite-wasm";
 
-import type { Asset, Metadata, Ptimer, Step } from "../ptimer";
+import type { Asset, Metadata, Ptimer, Step } from "../../ptimer";
 
-import initSQL from "../../../sql/init.sql?raw";
+import initSQL from "../../../../sql/init.sql?raw";
+
+import { isRequestMessage, response } from "../helpers";
 
 import {
 	COMPILE,
@@ -15,11 +17,9 @@ import {
 	HEARTBEAT,
 	type HeartbeatRequest,
 	type HeartbeatResponse,
-	isRequestMessage,
 	PARSE,
 	type ParseRequest,
 	type ParseResponse,
-	response,
 } from "./message";
 
 async function parse(

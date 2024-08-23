@@ -3,5 +3,5 @@
 	"compilerOptions": {
 		"lib": ["ES2020", "WebWorker"]
 	},
-	"include": ["./*.ts"]
+	"include": ["./**/*.ts"]
 }

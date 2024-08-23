@@ -23,9 +23,11 @@ pub fn view(
   attrs attrs: List(Attribute(msg)),
 ) -> Element(msg) {
   html.div([class(scoped("container")), ..attrs], [
-    html.p([class(scoped("title"))], title),
-    html.p([], description),
-    html.div([class(scoped("actions"))], actions),
+    html.div([class(scoped("wrapper"))], [
+      html.p([class(scoped("title"))], title),
+      html.div([class(scoped("description"))], description),
+      html.div([class(scoped("actions"))], actions),
+    ]),
   ])
 }
 
