@@ -6,7 +6,6 @@ import gleam/dynamic
 import gleam/function
 import gleam/option.{type Option, None, Some}
 import gleam/result
-import gleam/string
 import lucide
 import lustre
 import lustre/attribute.{class}
@@ -293,8 +292,7 @@ pub fn view(
           attribute.type_("file"),
           case accepts {
             [] -> attribute.none()
-            // TODO: Use Lustre provided `accept` function once they fixed separator character
-            _ -> attribute.attribute("accept", string.join(accepts, ","))
+            _ -> attribute.accept(accepts)
           },
           ..attrs
         ]),
