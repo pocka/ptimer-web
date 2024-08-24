@@ -92,7 +92,7 @@ fn result_all_errors(
   a: List(Result(data, error)),
 ) -> Result(List(data), List(error)) {
   case result.partition(a) {
-    #(data, []) -> Ok(data)
+    #(data, []) -> Ok(data |> list.reverse())
     #(_, errors) -> Error(errors)
   }
 }
