@@ -10,6 +10,7 @@ import lustre/attribute.{class}
 import lustre/element
 import lustre/element/html
 import storybook
+import ui/logo
 
 // VIEW
 
@@ -39,7 +40,14 @@ pub fn menu(
   children: List(element.Element(msg)),
 ) -> element.Element(msg) {
   html.nav([class(scoped("menu")), ..attrs], [
-    html.div([class(scoped("list"))], children),
+    html.div([class(scoped("list"))], [
+      logo.view([
+        class(scoped("logo")),
+        attribute.role("img"),
+        attribute.attribute("aria-label", "Ptimer's logo"),
+      ]),
+      ..children
+    ]),
   ])
 }
 

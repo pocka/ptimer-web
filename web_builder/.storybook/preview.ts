@@ -4,5 +4,7 @@
 
 import "../src/main.css";
 import * as lucide from "../src/lucide";
+import * as logo from "../src/ui/logo";
 
 lucide.register();
+logo.register();
