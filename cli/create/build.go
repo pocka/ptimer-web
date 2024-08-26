@@ -30,13 +30,14 @@ func buildPtimerFile(data fileformat.Ptimer, basePath string, dbPath string) err
 
 	_, err = db.Exec(`
 		INSERT OR ABORT INTO metadata (
+			version,
 			title,
 			description,
 			lang
 		) VALUES (
-			?, ?, ?
+			?, ?, ?, ?
 		);
-	`, data.Metadata.Title, data.Metadata.Description, data.Metadata.Language)
+	`, data.Metadata.Version, data.Metadata.Title, data.Metadata.Description, data.Metadata.Language)
 	if err != nil {
 		return fmt.Errorf("Failed to write metadata: %s", err)
 	}

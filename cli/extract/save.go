@@ -19,7 +19,7 @@ import (
 
 func retrieveMetadata(db *sql.DB) (*fileformat.Metadata, error) {
 	rows, err := db.Query(`
-		SELECT title, description, lang FROM metadata LIMIT 1;
+		SELECT version, title, description, lang FROM metadata LIMIT 1;
 	`)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to read metadata record: %s", err)
@@ -33,7 +33,7 @@ func retrieveMetadata(db *sql.DB) (*fileformat.Metadata, error) {
 
 	var metadata fileformat.Metadata
 
-	if err := rows.Scan(&metadata.Title, &metadata.Description, &metadata.Language); err != nil {
+	if err := rows.Scan(&metadata.Version, &metadata.Title, &metadata.Description, &metadata.Language); err != nil {
 		return nil, err
 	}
 

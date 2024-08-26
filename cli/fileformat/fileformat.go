@@ -5,6 +5,7 @@
 package fileformat
 
 type Metadata struct {
+	Version     string  `json:"version"`
 	Title       string  `json:"title"`
 	Description *string `json:"description"`
 	Language    string  `json:"lang"`
