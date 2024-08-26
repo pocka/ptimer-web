@@ -9,6 +9,7 @@ enum FileFormatError: Error {
 }
 
 struct Metadata {
+	let version: String
 	let title: String
 	let description: String?
 	let language: String
@@ -16,12 +17,13 @@ struct Metadata {
 	static func fromDB(db: Connection) throws -> Metadata {
 		let metadata = Table("metadata")
 
+		let version = Expression<String>("version")
 		let title = Expression<String>("title")
 		let description = Expression<String?>("description")
 		let language = Expression<String>("lang")
 
 		if let record = try db.pluck(metadata) {
-			return Metadata(title: record[title], description: record[description], language: record[language])
+			return Metadata(version: record[version], title: record[title], description: record[description], language: record[language])
 		} else {
 			throw FileFormatError.noMetadata
 		}

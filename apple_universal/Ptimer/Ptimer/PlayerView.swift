@@ -176,7 +176,7 @@ struct PlayerView: View {
 
 #Preview {
 	let metadata = Metadata(
-		title: "Dummy", description: "Dummy timer for preview", language: "en-US"
+		version: "1.0", title: "Dummy", description: "Dummy timer for preview", language: "en-US"
 	)
 
 	let steps: [Step] = [
