@@ -1,4 +1,5 @@
 CREATE TABLE metadata (
+	version TEXT NOT NULL,
 	title TEXT NOT NULL,
 	description TEXT,
 	lang TEXT NOT NULL
