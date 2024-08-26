@@ -32,7 +32,7 @@ async function parseFile(
 		db.checkRc(rc);
 
 		const metadata = db.exec({
-			sql: "SELECT title, description, lang FROM metadata LIMIT 1;",
+			sql: "SELECT version, title, description, lang FROM metadata LIMIT 1;",
 			returnValue: "resultRows",
 			rowMode: "object",
 		});
