@@ -158,6 +158,7 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
           False ->
             ptimer.Ptimer(
               metadata: metadata.Metadata(
+                version: "1.0",
                 title: "Sample timer",
                 description: Some("Description"),
                 lang: "en-GB",

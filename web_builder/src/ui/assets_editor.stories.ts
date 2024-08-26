@@ -11,6 +11,7 @@ import { sampleWav } from "../storybook_data";
 import { story } from "./assets_editor.gleam";
 
 const metadata: Metadata = {
+	version: "1.0",
 	title: "Title",
 	description: null,
 	lang: "en-US",

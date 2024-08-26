@@ -11,7 +11,12 @@ import gleam/string
 // TYPE
 
 pub type Metadata {
-  Metadata(title: String, description: Option(String), lang: String)
+  Metadata(
+    version: String,
+    title: String,
+    description: Option(String),
+    lang: String,
+  )
 }
 
 pub type Field {
@@ -24,8 +29,9 @@ pub type Field {
 
 pub fn decode(value: dynamic.Dynamic) -> Result(Metadata, dynamic.DecodeErrors) {
   value
-  |> dynamic.decode3(
+  |> dynamic.decode4(
     Metadata,
+    dynamic.field("version", dynamic.string),
     dynamic.field("title", dynamic.string),
     dynamic.field("description", dynamic.optional(dynamic.string)),
     dynamic.field("lang", dynamic.string),
@@ -68,6 +74,7 @@ pub fn encode(metadata: Metadata) -> Result(json.Json, EncodeError) {
         json.object([
           title,
           lang,
+          #("version", json.string(metadata.version)),
           #("description", json.nullable(metadata.description, json.string)),
         ]),
       )

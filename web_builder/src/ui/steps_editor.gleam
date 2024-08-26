@@ -679,7 +679,7 @@ pub fn story(args: storybook.Args, ctx: storybook.Context) -> storybook.Story {
       fn(_) {
         let timer =
           ptimer.Ptimer(
-            metadata: metadata.Metadata("Sample Story", None, "en-US"),
+            metadata: metadata.Metadata("1.0", "Sample Story", None, "en-US"),
             steps:,
             assets: [],
           )

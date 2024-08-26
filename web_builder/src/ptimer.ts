@@ -9,6 +9,7 @@ export interface Ptimer {
 }
 
 export interface Metadata {
+	readonly version: "1.0";
 	readonly title: string;
 	readonly description: string | null;
 	readonly lang: string;

@@ -48,13 +48,17 @@ async function parse(
 		db.checkRc(rc);
 
 		const metadata = db.exec({
-			sql: "SELECT title, description, lang FROM metadata LIMIT 1;",
+			sql: "SELECT version, title, description, lang FROM metadata LIMIT 1;",
 			returnValue: "resultRows",
 			rowMode: "object",
 		}) as unknown as Metadata[];
 
 		if (!metadata[0]) {
 			throw new Error("File does not have metadata row.");
+		}
+
+		if (metadata[0].version !== "1.0") {
+			throw new Error(`Unknown version: ${metadata[0].version}`);
 		}
 
 		const steps = db.exec({
@@ -115,14 +119,15 @@ async function compile(sqlite: Sqlite3Static, timer: Ptimer): Promise<Uint8Array
 		db.exec({
 			sql: `
   			INSERT OR ABORT INTO metadata (
+					version,
   				title,
   				description,
   				lang
   			) VALUES (
-  				?, ?, ?
+  				?, ?, ?, ?
   			);
 			`,
-			bind: [timer.metadata.title, timer.metadata.description, timer.metadata.lang],
+			bind: [timer.metadata.version, timer.metadata.title, timer.metadata.description, timer.metadata.lang],
 		});
 
 		const insertAsset = db.prepare(`

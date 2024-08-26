@@ -312,7 +312,7 @@ pub fn release(ptimer: Ptimer) -> Nil {
 }
 
 pub const empty: Ptimer = Ptimer(
-  metadata.Metadata(title: "", description: None, lang: "en-US"),
+  metadata.Metadata(version: "1.0", title: "", description: None, lang: "en-US"),
   [],
   [],
 )

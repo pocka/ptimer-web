@@ -18,6 +18,7 @@ export default {
 	args: {
 		timer: {
 			metadata: {
+				version: "1.0",
 				title: "Sample Timer",
 				description: null,
 				lang: "en-US",
@@ -58,6 +59,7 @@ export const MissingRequiredFields: Story = {
 	args: {
 		timer: {
 			metadata: {
+				version: "1.0",
 				title: "",
 				description: null,
 				lang: "",
@@ -93,6 +95,7 @@ export const ConstraintsViolations: Story = {
 	args: {
 		timer: {
 			metadata: {
+				version: "1.0",
 				title: "Sample Timer ".repeat(500),
 				description: null,
 				lang: "en-US",
@@ -128,6 +131,7 @@ export const NoSteps: Story = {
 	args: {
 		timer: {
 			metadata: {
+				version: "1.0",
 				title: "Sample Timer",
 				description: null,
 				lang: "en-US",
