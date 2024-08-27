@@ -14,10 +14,10 @@
 		"useTabs": true
 	},
 	"excludes": [
-		"web_player/node_modules",
-		"web_player/dist",
-		"web_player/elm-stuff",
-		"web_player/.parcel-cache"
+		"node_modules",
+		"dist",
+		"elm-stuff",
+		"build"
 	],
 	"exec": {
 		"commands": [
