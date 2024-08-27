@@ -11,3 +11,25 @@
 #  Why: Filesize is unnecessary large. Also it might include platform dependent files
 #       such as executables and caches.
 node_modules
+
+# What: Elm compiler's temporary directory
+#  Why: It's not designed to be checked-in.
+elm-stuff
+
+# What: Built files goes here
+#  Why: Checking-in built files causes sync problem between built files and source files.
+/dist
+
+# What: BEAM (VM) files.
+#  Why: These are temporary or garbage files.
+*.beam
+*.ez
+erl_crash.dump
+
+# What: Gleam build artifacts.
+#  Why: This directory contains build files and environment specific intermediate
+#       files.
+/build
+
+# What: Built Storybook files (default location).
+/storybook-static
