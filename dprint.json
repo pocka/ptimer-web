@@ -26,14 +26,6 @@
 				"exts": ["elm"]
 			},
 			{
-				"command": "gofmt",
-				"exts": ["go"]
-			},
-			{
-				"command": "swiftformat stdin --config apple_universal/.swiftformat",
-				"exts": ["swift"]
-			},
-			{
 				"command": "gleam format --stdin",
 				"exts": ["gleam"]
 			}
