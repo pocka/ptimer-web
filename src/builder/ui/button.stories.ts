@@ -20,6 +20,9 @@ export default {
 	render(args, ctx) {
 		return story(args, ctx);
 	},
+	parameters: {
+		app: "builder",
+	},
 	args: {
 		type: "button",
 		variant: "primary",

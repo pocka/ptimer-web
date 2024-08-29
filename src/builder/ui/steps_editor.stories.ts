@@ -15,6 +15,10 @@ interface Args {
 
 export default {
 	render: story,
+	parameters: {
+		app: "builder",
+		layout: "fullscreen",
+	},
 	args: {
 		steps: [
 			{
@@ -32,9 +36,6 @@ export default {
 				duration_seconds: 5,
 			},
 		],
-	},
-	parameters: {
-		layout: "fullscreen",
 	},
 } satisfies Meta<Args>;
 

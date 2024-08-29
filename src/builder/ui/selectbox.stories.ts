@@ -16,6 +16,9 @@ interface Args {
 
 export default {
 	render: story,
+	parameters: {
+		app: "builder",
+	},
 	args: {
 		options: ["foo", "bar", "baz"],
 		defaultValue: "bar",

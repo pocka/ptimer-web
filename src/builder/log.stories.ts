@@ -12,6 +12,9 @@ interface Args {
 
 export default {
 	render: story,
+	parameters: {
+		app: "builder",
+	},
 	args: {
 		empty: false,
 	},
