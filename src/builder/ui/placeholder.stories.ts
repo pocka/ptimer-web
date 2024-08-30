@@ -13,9 +13,6 @@ interface Args {
 
 export default {
 	render: story,
-	parameters: {
-		app: "builder",
-	},
 	args: {
 		title: "No tasks",
 		description: "Congratulations! You have zero tasks remaining!",

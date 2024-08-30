@@ -4,10 +4,8 @@
 	"devDependencies": {
 		"@storybook/addon-essentials": "^8.2.8",
 		"@storybook/addon-interactions": "^8.2.8",
-		"@storybook/core-events": "^8.2.8",
 		"@storybook/html": "^8.2.8",
 		"@storybook/html-vite": "^8.2.8",
-		"@storybook/preview-api": "^8.2.8",
 		"@storybook/test": "^8.2.8",
 		"@storybook/test-runner": "^0.19.1",
 		"elm": "^0.19.1-6",
