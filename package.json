@@ -18,9 +18,12 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build",
-		"storybook": "storybook dev --no-open --port 6006",
-		"build:storybook": "storybook build",
-		"test:storybook": "test-storybook"
+		"storybook/player": "storybook dev --config-dir .storybook/player --no-open --port 6006",
+		"storybook/builder": "storybook dev --config-dir .storybook/builder --no-open --port 6007",
+		"build:storybook/player": "storybook build --config-dir .storybook/player --output-dir storybook-static/player",
+		"build:storybook/builder": "storybook build --config-dir .storybook/builder --output-dir storybook-static/builder",
+		"test:storybook/player": "test-storybook --config-dir .storybook/player",
+		"test:storybook/builder": "test-storybook --config-dir .storybook/builder --url http://localhost:6007"
 	},
 	"dependencies": {
 		"@diffusionstudio/vits-web": "^1.0.2",

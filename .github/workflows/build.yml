@@ -56,7 +56,7 @@ jobs:
       - name: Check Gleam types
         run: "gleam check"
 
-  build-storybook:
+  build-player-storybook:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -73,19 +73,44 @@ jobs:
       - name: Install dependencies
         run: "bun i"
       - name: Build Storybook
-        run: "bun run build:storybook"
+        run: "bun run build:storybook/player"
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: storybook
-          path: storybook-static
+          name: player-storybook
+          path: storybook-static/player
+
+  build-builder-storybook:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Gleam
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: "27"
+          gleam-version: "1.4"
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: "1.1"
+      - name: Install dependencies
+        run: "bun i"
+      - name: Build Storybook
+        run: "bun run build:storybook/builder"
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-storybook
+          path: storybook-static/builder
 
   prep-artifact-for-pages:
     # Deploy only on master branch
     if: github.ref == 'refs/heads/master'
     needs:
       - build
-      - build-storybook
+      - build-player-storybook
+      - build-builder-storybook
     runs-on: ubuntu-latest
     steps:
       - name: Download main artifacts
@@ -126,7 +151,8 @@ jobs:
 
   test-storybook:
     needs:
-      - build-storybook
+      - build-player-storybook
+      - build-builder-storybook
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -134,8 +160,7 @@ jobs:
       - name: Download built Storybook
         uses: actions/download-artifact@v4
         with:
-          path: storybook-static
-          name: storybook
+          pattern: "*-storybook"
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
         with:
@@ -151,9 +176,11 @@ jobs:
         run: "npx playwright install --with-deps"
       - name: Run tests
         run: |
-          npx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
-            "npx http-server storybook-static --port 6006 --silent" \
-            "npx wait-on tcp:6006 && bun run test:storybook --browsers chromium,firefox,webkit"
+          npx concurrently -k -s first -n "SB_PLAYER,SB_BUILDER,TEST_PLAYER,TEST_BUILDER" \
+            "npx http-server player-storybook --port 6006 --silent" \
+            "npx http-server builder-storybook --port 6007 --silent" \
+            "npx wait-on tcp:6006 && bun run test:storybook/player --browsers chromium,firefox,webkit" \
+            "npx wait-on tcp:6007 && bun run test:storybook/builder --browsers chromium,firefox,webkit"
 
   cleanup:
     needs:

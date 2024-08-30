@@ -6,9 +6,15 @@ import type { StorybookConfig } from "@storybook/html-vite";
 
 export default {
 	framework: "@storybook/html-vite",
-	stories: ["../src/**/*.stories.ts"],
+	stories: ["../../src/builder/**/*.stories.ts"],
 	addons: ["@storybook/addon-essentials", "@storybook/addon-interactions"],
 	core: {
+		builder: {
+			name: "@storybook/builder-vite",
+			options: {
+				viteConfigPath: new URL("../../vite.config.js", import.meta.url).pathname,
+			},
+		},
 		disableTelemetry: true,
 		disableWhatsNewNotifications: true,
 	},
