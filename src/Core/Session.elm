@@ -3,7 +3,7 @@
 -- SPDX-License-Identifier: Apache-2.0
 
 
-module Player.Session exposing (Msg(..), Session, init, subscriptions, update)
+module Core.Session exposing (Msg(..), Session, init, subscriptions, update)
 
 import WakeLock
 

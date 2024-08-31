@@ -3,7 +3,7 @@
 -- SPDX-License-Identifier: Apache-2.0
 
 
-port module Player.Preferences exposing (AudioMuteState(..), Model, Msg(..), init, subscriptions, update)
+port module Core.Preferences exposing (AudioMuteState(..), Model, Msg(..), init, subscriptions, update)
 
 import Json.Decode as JD
 import Json.Encode as JE

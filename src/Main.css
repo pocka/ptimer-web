@@ -6,7 +6,7 @@
 
 @import "./shared.css";
 @import "./Player.css";
-@import "./Player/Menu.css";
+@import "./Core/Menu.css";
 @import "./UI/DropZone.css";
 
 .main--file-picker-scene {

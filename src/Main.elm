@@ -6,14 +6,14 @@
 module Main exposing (main)
 
 import Browser
+import Core.Menu as Menu
+import Core.Preferences as Preferences
+import Core.Session as Session
 import Html exposing (div, input, label, p, text)
 import Html.Attributes exposing (class)
 import Html.Events
 import Json.Decode
 import Player
-import Player.Menu as Menu
-import Player.Preferences as Preferences
-import Player.Session as Session
 import Ptimer.Parser
 import Ptimer.Ptimer as Ptimer
 import UI.DropZone as DropZone

@@ -3,13 +3,13 @@
 -- SPDX-License-Identifier: Apache-2.0
 
 
-module Player.Menu exposing (Msg(..), view)
+module Core.Menu exposing (Msg(..), view)
 
+import Core.Preferences as Preferences
+import Core.Session as Session
 import Html
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import Player.Preferences as Preferences
-import Player.Session as Session
 import WakeLock
 
 

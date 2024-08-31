@@ -5,10 +5,10 @@
 
 port module Player exposing (Model, Msg, init, subscriptions, update, view)
 
+import Core.Preferences as Preferences
 import Html
 import Html.Attributes exposing (class, disabled)
 import Html.Events exposing (onClick)
-import Player.Preferences as Preferences
 import Ptimer.Ptimer as Ptimer
 import Task
 import Time
