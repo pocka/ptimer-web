@@ -4,14 +4,8 @@
 
 import type { VoiceId } from "@diffusionstudio/vits-web";
 
-import { AsyncWorkerMessanger, isResponseMessage, request } from "@/builder/workers/helpers";
-import {
-	HEARTBEAT,
-	type HeartbeatRequest,
-	RUN,
-	type RunRequest,
-	type RunResponse,
-} from "@/builder/workers/tts/message";
+import { AsyncWorkerMessanger, isResponseMessage, request } from "@/workers/helpers";
+import { HEARTBEAT, type HeartbeatRequest, RUN, type RunRequest, type RunResponse } from "@/workers/tts/message";
 
 class TTS extends AsyncWorkerMessanger {
 	constructor(worker: Worker) {
@@ -67,7 +61,7 @@ class TTS extends AsyncWorkerMessanger {
 type Result<T, E = string> = { value: T } | { error: E };
 
 export function newTTSEngine(callback: (tts: Result<TTS>) => void): void {
-	const worker = new Worker(new URL("@/builder/workers/tts/worker.ts", import.meta.url), {
+	const worker = new Worker(new URL("@/workers/tts/worker.ts", import.meta.url), {
 		type: "module",
 	});
 

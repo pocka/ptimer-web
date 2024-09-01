@@ -5,8 +5,6 @@
 import builder/log
 import builder/lucide
 import builder/platform_support/transferable_streams
-import builder/ptimer
-import builder/storybook
 import builder/ui/assets_editor
 import builder/ui/button
 import builder/ui/export_scene
@@ -26,6 +24,8 @@ import lustre/effect
 import lustre/element
 import lustre/element/html
 import lustre/event
+import ptimer
+import storybook
 
 // MODEL
 

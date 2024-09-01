@@ -5,7 +5,7 @@
 import { type Meta, type StoryObj } from "@storybook/html";
 import { expect, waitFor, within } from "@storybook/test";
 
-import { type Ptimer } from "../ptimer";
+import { type Ptimer } from "@/ptimer";
 
 import { story } from "./export_scene.gleam";
 

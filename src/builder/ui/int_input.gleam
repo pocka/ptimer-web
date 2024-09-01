@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import builder/storybook
 import gleam/dynamic
 import gleam/int
 import gleam/option.{type Option, None, Some}
@@ -12,6 +11,7 @@ import lustre/attribute.{type Attribute, class}
 import lustre/element
 import lustre/element/html
 import lustre/event
+import storybook
 
 // VIEW
 

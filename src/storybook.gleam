@@ -10,7 +10,7 @@ pub type Story
 
 pub type Args
 
-@external(javascript, "@/builder/storybook.ffi.ts", "render")
+@external(javascript, "@/storybook.ffi.ts", "render")
 pub fn story(
   args: Args,
   ctx: Context,

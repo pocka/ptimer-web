@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import builder/ptimer/object_url
 import gleam/dynamic
 import gleam/result
+import ptimer/object_url
 
 pub opaque type TTS {
   Engine(ref: dynamic.Dynamic)

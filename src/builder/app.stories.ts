@@ -33,31 +33,31 @@ export const CreateFromScratch = {
 		await userEvent.click(root.getByRole("button", { name: "Metadata" }));
 
 		if (shouldPressCreateButton) {
-			await userEvent.click(root.getByRole("button", { name: /Create new/i }));
+			await waitFor(() => userEvent.click(root.getByRole("button", { name: /Create new/i })));
 		}
 
-		await userEvent.type(root.getByRole("textbox", { name: /title/i }), "New Timer");
+		await waitFor(() => userEvent.type(root.getByRole("textbox", { name: /title/i }), "New Timer"));
 		await userEvent.type(root.getByRole("textbox", { name: /description/i }), "Description text,\nSecond line.");
 		await userEvent.type(root.getByRole("textbox", { name: /lang/i }), "{backspace}{backspace}GB");
 
 		await userEvent.click(root.getByRole("button", { name: "Steps" }));
-		await userEvent.click(root.getByRole("button", { name: /add step/i }));
-		await userEvent.type(root.getByRole("textbox", { name: /title/i }), "Step One");
+		await waitFor(() => userEvent.click(root.getByRole("button", { name: /add step/i })));
+		await waitFor(() => userEvent.type(root.getByRole("textbox", { name: /title/i }), "Step One"));
 		await userEvent.type(root.getByRole("textbox", { name: /description/i }), "Description for{enter}Step One");
 		await userEvent.selectOptions(root.getByRole("combobox", { name: /type$/i }), "Timer");
-		await userEvent.type(root.getByRole("textbox", { name: /duration/i }), "{backspace}120");
+		await waitFor(() => userEvent.type(root.getByRole("textbox", { name: /duration/i }), "{backspace}120"));
 
 		await userEvent.click(root.getByRole("button", { name: "Assets" }));
-		await userEvent.upload(root.getByLabelText(/add asset/i), sampleWav);
+		await waitFor(() => userEvent.upload(root.getByLabelText(/add asset/i), sampleWav));
 
 		await userEvent.click(root.getByRole("button", { name: "Steps" }));
-		await userEvent.selectOptions(root.getByRole("combobox", { name: /sound/i }), "sample.wav");
+		await waitFor(() => userEvent.selectOptions(root.getByRole("combobox", { name: /sound/i }), "sample.wav"));
 
 		// Go to "Export" scene
 		await userEvent.click(root.getByRole("button", { name: "Export" }));
 
 		// Compile then download a generated file
-		await userEvent.click(root.getByRole("button", { name: /compile/i }));
+		await waitFor(() => userEvent.click(root.getByRole("button", { name: /compile/i })));
 		await waitFor(() =>
 			expect(root.getByRole("link", { name: /download/i })).toHaveAttribute("download", "New Timer.ptimer")
 		);
@@ -72,13 +72,13 @@ export const ChangeInvalidatesDownloadLink = {
 
 		// Change timer name
 		await userEvent.click(root.getByRole("button", { name: "Metadata" }));
-		await userEvent.type(root.getByRole("textbox", { name: /title/i }), "{backspace}R");
+		await waitFor(() => userEvent.type(root.getByRole("textbox", { name: /title/i }), "{backspace}R"));
 
 		// Go to "Export" scene
 		await userEvent.click(root.getByRole("button", { name: "Export" }));
 
 		// Make sure the Download link is not active
-		await expect(root.getByRole("button", { name: /download/i })).toBeDisabled();
+		await waitFor(() => expect(root.getByRole("button", { name: /download/i })).toBeDisabled());
 
 		// Compile again
 		await userEvent.click(root.getByRole("button", { name: /compile/i }));
@@ -110,16 +110,16 @@ export const CreateFromScratchUsingErrorListJump = {
 		await userEvent.click(root.getByRole("button", { name: "Metadata" }));
 
 		if (shouldPressCreateButton) {
-			await userEvent.click(root.getByRole("button", { name: /Create new/i }));
+			await waitFor(() => userEvent.click(root.getByRole("button", { name: /Create new/i })));
 		}
 
 		// Create empty step
 		await userEvent.click(root.getByRole("button", { name: "Steps" }));
-		await userEvent.click(root.getByRole("button", { name: /add step/i }));
+		await waitFor(() => userEvent.click(root.getByRole("button", { name: /add step/i })));
 
 		// Go to "Export" scene
 		await userEvent.click(root.getByRole("button", { name: "Export" }));
-		await expect(root.getAllByRole("listitem")).toHaveLength(2);
+		await waitFor(() => expect(root.getAllByRole("listitem")).toHaveLength(2));
 
 		// Jump to metadata title
 		// NOTE: Due to `listitem` does not expose its text content as name, and testing-library
@@ -128,7 +128,7 @@ export const CreateFromScratchUsingErrorListJump = {
 		await userEvent.click(within(root.getAllByRole("listitem")[0]!).getByRole("button"));
 
 		// Check Metadata scene is active
-		await expect(root.getByLabelText(/lang.* code/i)).toBeInTheDocument();
+		await waitFor(() => expect(root.getByLabelText(/lang.* code/i)).toBeInTheDocument());
 
 		// Fill metadata title (field should have focus)
 		await waitFor(() => expect(root.getByRole("textbox", { name: /title/i })).toHaveFocus());
@@ -138,13 +138,13 @@ export const CreateFromScratchUsingErrorListJump = {
 		await userEvent.click(root.getByRole("button", { name: "Export" }));
 
 		// Make sure the metadata title error has gone
-		await expect(root.getAllByRole("listitem")).toHaveLength(1);
+		await waitFor(() => expect(root.getAllByRole("listitem")).toHaveLength(1));
 
 		// Jump to step title
 		await userEvent.click(within(root.getByRole("listitem")).getByRole("button"));
 
 		// Check Step scene is active
-		await expect(root.getByRole("button", { name: /add step/i })).toBeInTheDocument();
+		await waitFor(() => expect(root.getByRole("button", { name: /add step/i })).toBeInTheDocument());
 
 		// Fill step title (field should have focus)
 		await waitFor(() => expect(root.getByRole("textbox", { name: /title/i })).toHaveFocus());
@@ -154,7 +154,7 @@ export const CreateFromScratchUsingErrorListJump = {
 		await userEvent.click(root.getByRole("button", { name: "Export" }));
 
 		// Compile
-		await userEvent.click(root.getByRole("button", { name: /compile/i }));
+		await waitFor(() => userEvent.click(root.getByRole("button", { name: /compile/i })));
 		await waitFor(() =>
 			expect(root.getByRole("link", { name: /download/i })).toHaveAttribute("download", "New Timer.ptimer")
 		);
@@ -206,13 +206,13 @@ export const CreateFromScratchOnlyWithKeyboard = {
 			await userEvent.keyboard("{enter}");
 
 			if (shouldPressCreateButton) {
-				await tabTo(root.getByRole("button", { name: /Create new/i }));
+				await waitFor(() => tabTo(root.getByRole("button", { name: /Create new/i })));
 				await userEvent.keyboard("{enter}");
 			}
 		});
 
 		await step("Fill metadata", async () => {
-			await tabTo(root.getByRole("textbox", { name: /title/i }));
+			await waitFor(() => tabTo(root.getByRole("textbox", { name: /title/i })));
 			await userEvent.keyboard("New Timer");
 			await userEvent.tab();
 			await userEvent.keyboard("Description text,\nSecond line.");
@@ -224,9 +224,9 @@ export const CreateFromScratchOnlyWithKeyboard = {
 			await tabTo(root.getByRole("button", { name: "Steps" }));
 			await userEvent.keyboard("{enter}");
 
-			await tabTo(root.getByRole("button", { name: /add step/i }));
+			await waitFor(() => tabTo(root.getByRole("button", { name: /add step/i })));
 			await userEvent.keyboard("{enter}");
-			await tabTo(root.getByRole("textbox", { name: /title/i }));
+			await waitFor(() => tabTo(root.getByRole("textbox", { name: /title/i })));
 			await userEvent.keyboard("Step One");
 			await userEvent.tab();
 			await userEvent.keyboard("Description for{enter}Step One");
@@ -246,7 +246,7 @@ export const CreateFromScratchOnlyWithKeyboard = {
 			await tabTo(root.getByRole("button", { name: "Assets" }));
 			await userEvent.keyboard("{enter}");
 
-			const addAssetButton = root.getByLabelText(/add asset/i);
+			const addAssetButton = await waitFor(() => root.getByLabelText(/add asset/i));
 			await tabTo(addAssetButton);
 			await userEvent.upload(addAssetButton, sampleWav);
 		});
@@ -255,7 +255,7 @@ export const CreateFromScratchOnlyWithKeyboard = {
 			await tabTo(root.getByRole("button", { name: "Steps" }));
 			await userEvent.keyboard("{enter}");
 
-			const soundCombobox = root.getByRole("combobox", { name: /sound/i });
+			const soundCombobox = await waitFor(() => root.getByRole("combobox", { name: /sound/i }));
 			await tabTo(soundCombobox);
 			await userEvent.selectOptions(soundCombobox, "sample.wav");
 		});
@@ -264,7 +264,7 @@ export const CreateFromScratchOnlyWithKeyboard = {
 			await tabTo(root.getByRole("button", { name: "Export" }));
 			await userEvent.keyboard("{enter}");
 
-			await tabTo(root.getByRole("button", { name: /compile/i }));
+			await waitFor(() => tabTo(root.getByRole("button", { name: /compile/i })));
 			await userEvent.keyboard("{enter}");
 
 			await waitFor(() =>

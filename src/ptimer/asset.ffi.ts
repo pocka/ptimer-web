@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { type Asset } from "@/builder/ptimer";
+import { type Asset } from "@/ptimer";
 
 export function fromFile(id: number, file: File): Asset {
 	if (import.meta.env.DEV) {

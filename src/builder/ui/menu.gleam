@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import builder/lucide
-import builder/storybook
 import builder/ui/logo
 import gleam/dynamic
 import gleam/result
@@ -11,6 +10,7 @@ import lustre
 import lustre/attribute.{class}
 import lustre/element
 import lustre/element/html
+import storybook
 
 // VIEW
 

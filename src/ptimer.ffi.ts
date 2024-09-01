@@ -12,10 +12,10 @@ import {
 	PARSE,
 	type ParseRequest,
 	type ParseResponse,
-} from "@/builder/workers/engine/message";
-import { AsyncWorkerMessanger, isResponseMessage, request } from "@/builder/workers/helpers";
+} from "@/workers/engine/message";
+import { AsyncWorkerMessanger, isResponseMessage, request } from "@/workers/helpers";
 
-import { type Ptimer } from "@/builder/ptimer";
+import { type Ptimer } from "@/ptimer";
 
 class Engine extends AsyncWorkerMessanger {
 	constructor(worker: Worker) {
@@ -119,7 +119,7 @@ class Engine extends AsyncWorkerMessanger {
 type Result<T, E = string> = { value: T } | { error: E };
 
 export function newEngine(callback: (engine: Result<Engine>) => void) {
-	const worker = new Worker(new URL("@/builder/workers/engine/worker.ts", import.meta.url), {
+	const worker = new Worker(new URL("@/workers/engine/worker.ts", import.meta.url), {
 		type: "module",
 	});
 

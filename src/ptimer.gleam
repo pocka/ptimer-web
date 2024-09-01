@@ -2,10 +2,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import builder/ptimer/asset
-import builder/ptimer/metadata
-import builder/ptimer/object_url
-import builder/ptimer/step
 import gleam/dict.{type Dict}
 import gleam/dynamic
 import gleam/function
@@ -14,6 +10,10 @@ import gleam/json
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/result
+import ptimer/asset
+import ptimer/metadata
+import ptimer/object_url
+import ptimer/step
 
 pub type Ptimer {
   Ptimer(
@@ -164,6 +164,13 @@ pub type EngineLoadError {
   EngineDecodeError(dynamic.DecodeErrors)
 }
 
+pub fn engine_load_error_to_string(err: EngineLoadError) -> String {
+  case err {
+    RuntimeError(details) -> details
+    EngineDecodeError(_) -> "Received unexpected message payload"
+  }
+}
+
 fn decode_result(
   value: dynamic.Dynamic,
   ok: dynamic.Decoder(payload),
@@ -192,7 +199,7 @@ fn decode_load_engine_payload(
   |> result.flatten
 }
 
-@external(javascript, "@/builder/ptimer.ffi.ts", "newEngine")
+@external(javascript, "@/ptimer.ffi.ts", "newEngine")
 fn load_engine(on_result: fn(dynamic.Dynamic) -> Nil) -> Nil
 
 pub fn new_engine(on_created: fn(Result(Engine, EngineLoadError)) -> Nil) -> Nil {
@@ -213,6 +220,16 @@ pub type ParseError {
   UnexpectedError(String)
   IllegalErrorType
   ParseResultDecodeError(dynamic.DecodeErrors)
+}
+
+pub fn parse_error_to_string(err: ParseError) -> String {
+  case err {
+    InvalidSQLite3File -> "The file is not a valid .ptimer file"
+    SchemaViolation -> "The file is not a valid .ptimer file (SchemaViolation)"
+    UnexpectedError(details) -> details
+    IllegalErrorType -> "Unexpected error (IllegalErrorType)"
+    ParseResultDecodeError(_) -> "Received unexpected message payload"
+  }
 }
 
 fn decode_parse_error(
@@ -241,7 +258,7 @@ fn decode_parse_result(value: dynamic.Dynamic) -> Result(Ptimer, ParseError) {
   |> result.flatten
 }
 
-@external(javascript, "@/builder/ptimer.ffi.ts", "parse")
+@external(javascript, "@/ptimer.ffi.ts", "parse")
 fn parse_internal(
   engine: dynamic.Dynamic,
   file: dynamic.Dynamic,
@@ -287,7 +304,7 @@ fn decode_compile_result(value: dynamic.Dynamic) -> Result(String, CompileError)
   |> result.flatten
 }
 
-@external(javascript, "@/builder/ptimer.ffi.ts", "compile")
+@external(javascript, "@/ptimer.ffi.ts", "compile")
 fn compile_internal(
   engine: dynamic.Dynamic,
   timer: dynamic.Dynamic,

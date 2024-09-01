@@ -1,0 +1,244 @@
+/*
+SPDX-FileCopyrightText: 2024 Shota FUJI <pockawoooh@gmail.com>
+
+SPDX-License-Identifier: Apache-2.0
+*/
+
+.view {
+	position: absolute;
+	display: block;
+	inset: 0;
+
+	overflow: hidden;
+	user-select: none;
+	transition: visibility 0s 0s linear;
+}
+.inactive.view {
+	pointer-events: none;
+	visibility: hidden;
+	transition-delay: 1s;
+}
+
+.start {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+	width: calc(100vw + 100vh);
+	top: 50%;
+	left: 50%;
+	font-size: var(--text-lg);
+	font-weight: bold;
+	padding: calc(var(--space-px-xl) + 1.25em);
+
+	background-color: oklch(var(--color-fg));
+	color: oklch(var(--color-bg));
+	cursor: pointer;
+	text-align: center;
+
+	transform: translate(-50%, -50%) translateX(25vw) rotate(60deg);
+	transition: transform 0.2s 0.1s ease;
+}
+.inactive .start {
+	transform: translate(-50%, -50%) translateX(25vw) rotate(60deg) translateX(-100%);
+	transition-delay: 0.2s;
+}
+.start:focus-visible {
+	text-decoration: underline;
+}
+
+.start-text {
+	transform: perspective(1em) rotate(-60deg) rotateY(10deg) rotateX(8deg) translateX(0.25em);
+	transition: scale 0.1s linear, opacity 0.2s 0.5s ease-out;
+}
+.inactive .start-text {
+	opacity: 0;
+	transition-delay: 0s, 0s;
+}
+@media (hover: hover) {
+	.start:hover > .start-text {
+		scale: 1.1;
+	}
+	.start:active > .start-text {
+		scale: 0.99;
+	}
+}
+
+.metadata {
+	display: flex;
+	flex-direction: column;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	padding: var(--space-px-xl);
+	gap: var(--space-px-lg);
+}
+
+.title {
+	font-size: var(--text-xl);
+	font-weight: bold;
+
+	transition: opacity 0.4s ease-in 0.4s, translate 0.3s ease-out 0.3s;
+}
+.inactive .title {
+	opacity: 0;
+	translate: -100% 0;
+	transition-delay: 0s, 0.3s;
+}
+
+.description {
+	font-size: var(--text-sm);
+
+	transition: opacity 0.4s ease-in 0.5s, translate 0.3s ease-out 0.4s;
+}
+.inactive .description {
+	opacity: 0;
+	translate: -100% 0;
+	transition-delay: 0s, 0.3s;
+}
+
+.completed-title {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+
+	transform: translate(-50%, -50%);
+	transition: opacity 0.2s 0.8s ease-out;
+}
+.inactive .completed-title {
+	opacity: 0;
+	transition-delay: 0s;
+}
+
+.back {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: var(--space-px-xl);
+	font-size: var(--text-xl);
+	font-weight: bold;
+
+	background-color: oklch(var(--color-fg));
+	color: oklch(var(--color-bg));
+	cursor: pointer;
+	text-transform: uppercase;
+
+	transition: transform 0.2s 0.4s ease-out;
+}
+.back:focus-visible {
+	text-decoration: underline;
+}
+@media (hover: hover) {
+	.back:hover > .back-text {
+		scale: 1.1;
+		rotate: 2deg;
+	}
+	.back:active > .back-text {
+		scale: 0.99;
+	}
+}
+.inactive .back {
+	transform: translateY(100%);
+	transition-delay: 0s;
+}
+
+.bg-container {
+	position: fixed;
+	inset: 0;
+
+	overflow: hidden;
+	user-select: none;
+	pointer-events: none;
+}
+
+@keyframes fade-in {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: var(--_opacity-target, 1);
+	}
+}
+
+@keyframes shadow-slide {
+	from {
+		translate: -0.2em -0.2em;
+	}
+
+	to {
+		translate: 0 0;
+	}
+}
+
+.title-shadow {
+	--_opacity-target: 0.01;
+
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	font-size: max(15vw, 15vh);
+	font-weight: bolder;
+	white-space: nowrap;
+
+	transform: perspective(1em) translate(-50%, -50%) translate(-0.5em, -0.5em) rotateY(3deg) rotate(
+		-40deg
+	);
+	animation: 0.4s ease 0.2s both fade-in, 0.4s ease 0.2s both shadow-slide;
+}
+
+.step-action {
+	--_circle-size: max(120vw, 100vh);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-end;
+	position: absolute;
+	left: 50%;
+	bottom: 40vh;
+	width: var(--_circle-size);
+	height: var(--_circle-size);
+	font-size: var(--text-xl);
+	font-weight: bold;
+	padding-bottom: var(--space-px-xl);
+
+	background-color: oklch(var(--color-fg));
+	border-radius: 50%;
+	color: oklch(var(--color-bg));
+
+	translate: -50% 0;
+	transition: rotate ease-out 0.2s, scale ease-out 0.15s 0.2s;
+}
+button.step-action {
+	cursor: pointer;
+}
+.inactive .step-action {
+	rotate: 180deg;
+	scale: 0;
+	transition: rotate ease-out 0.2s, scale ease-out 0.2s 0.3s;
+}
+.active + .inactive .step-action {
+	rotate: -180deg;
+}
+.step-view.active + .step-view.inactive .step-action {
+	scale: 1;
+}
+
+.step-title {
+	position: absolute;
+	bottom: var(--space-px-lg);
+	left: 50%;
+	font-size: var(--text-xl);
+	font-weight: bold;
+
+	transform: translateX(-50%) scaleX(1);
+	transition: transform ease-out 0.2s 0.3s;
+}
+.inactive .step-title {
+	transform: translateX(-50%) scaleX(0);
+	transition: transform ease-out 0.2s;
+}

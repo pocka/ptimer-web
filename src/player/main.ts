@@ -2,4 +2,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import "../../src/player/main.css";
+import { main } from "./main.gleam";
+
+main();

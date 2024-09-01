@@ -3,10 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import builder/lucide
-import builder/ptimer
-import builder/ptimer/asset
-import builder/ptimer/step
-import builder/storybook
 import builder/ui/button
 import builder/ui/field
 import builder/ui/placeholder
@@ -23,6 +19,10 @@ import lustre/attribute.{type Attribute, class}
 import lustre/effect
 import lustre/element
 import lustre/element/html
+import ptimer
+import ptimer/asset
+import ptimer/step
+import storybook
 
 // MODEL
 

@@ -4,12 +4,6 @@
 
 import builder/log
 import builder/lucide
-import builder/ptimer
-import builder/ptimer/asset
-import builder/ptimer/metadata
-import builder/ptimer/object_url
-import builder/ptimer/step
-import builder/storybook
 import builder/ui/button
 import gleam/dict
 import gleam/dynamic
@@ -23,6 +17,12 @@ import lustre/attribute.{type Attribute, class}
 import lustre/effect
 import lustre/element
 import lustre/element/html
+import ptimer
+import ptimer/asset
+import ptimer/metadata
+import ptimer/object_url
+import ptimer/step
+import storybook
 
 // MODEL
 

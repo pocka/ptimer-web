@@ -2,11 +2,9 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import builder/datetime.{type DateTime}
 import builder/platform_support/transferable_streams
-import builder/ptimer
-import builder/storybook
 import builder/tts
+import datetime.{type DateTime}
 import gleam/dynamic
 import gleam/int
 import gleam/list
@@ -15,6 +13,8 @@ import lustre
 import lustre/attribute.{class}
 import lustre/element.{text}
 import lustre/element/html
+import ptimer
+import storybook
 
 // MODEL
 
@@ -68,35 +68,22 @@ pub fn append(logs: List(Log), action: Action, severity: Severity) -> List(Log) 
 
 // VIEW
 
-fn parse_error_to_string(err: ptimer.ParseError) -> String {
-  case err {
-    ptimer.InvalidSQLite3File -> "The file is not a valid .ptimer file"
-    ptimer.SchemaViolation ->
-      "The file is not a valid .ptimer file (SchemaViolation)"
-    ptimer.UnexpectedError(details) -> details
-    ptimer.IllegalErrorType -> "Unexpected error (IllegalErrorType)"
-    ptimer.ParseResultDecodeError(_) -> "Received unexpected message payload"
-  }
-}
-
-fn engine_load_error_to_string(err: ptimer.EngineLoadError) -> String {
-  case err {
-    ptimer.RuntimeError(details) -> details
-    ptimer.EngineDecodeError(_) -> "Received unexpected message payload"
-  }
-}
-
 fn action(action: Action) -> element.Element(msg) {
   case action {
     CreateNew -> text("Initialized a new timer.")
     StartLoadingEngine -> text("Loading Ptimer engine...")
     EngineLoaded -> text("Loaded Ptimer engine.")
     EngineLoadingFailure(err) ->
-      text("Failed to load Ptimer engine: " <> engine_load_error_to_string(err))
+      text(
+        "Failed to load Ptimer engine: "
+        <> ptimer.engine_load_error_to_string(err),
+      )
     StartParsing -> text("Parsing .ptimer file...")
     ParseSuccess -> text("Successfuly parsed .ptimer file.")
     ParseFailure(err) ->
-      text("Failed to parse .ptimer file: " <> parse_error_to_string(err))
+      text(
+        "Failed to parse .ptimer file: " <> ptimer.parse_error_to_string(err),
+      )
     DetectedTransferableStreamSupported ->
       text("Detected Transferable Streams support.")
     DetectedTransferableStreamNotSupported ->

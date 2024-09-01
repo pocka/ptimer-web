@@ -4,11 +4,11 @@
 
 pub type DateTime
 
-@external(javascript, "@/builder/datetime.ffi.ts", "now")
+@external(javascript, "@/datetime.ffi.ts", "now")
 pub fn now() -> DateTime
 
-@external(javascript, "@/builder/datetime.ffi.ts", "to_timestamp")
+@external(javascript, "@/datetime.ffi.ts", "to_timestamp")
 pub fn timestamp(datetime: DateTime) -> Int
 
-@external(javascript, "@/builder/datetime.ffi.ts", "to_locale_string")
+@external(javascript, "@/datetime.ffi.ts", "to_locale_string")
 pub fn locale_string(datetime: DateTime) -> String

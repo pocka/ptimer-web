@@ -15,6 +15,7 @@ export default defineConfig({
 			input: {
 				main: new URL("./src/index.html", import.meta.url).pathname,
 				builder: new URL("./src/builder/index.html", import.meta.url).pathname,
+				player: new URL("./src/player/index.html", import.meta.url).pathname,
 			},
 		},
 	},

@@ -2,9 +2,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import builder/ptimer
-import builder/ptimer/metadata
-import builder/storybook
 import builder/ui/field
 import builder/ui/textbox
 import gleam/dynamic
@@ -16,6 +13,9 @@ import lustre
 import lustre/attribute.{type Attribute, class}
 import lustre/element
 import lustre/element/html
+import ptimer
+import ptimer/metadata
+import storybook
 
 // VIEW
 

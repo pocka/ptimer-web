@@ -1,0 +1,233 @@
+/*
+SPDX-FileCopyrightText: 2024 Shota FUJI <pockawoooh@gmail.com>
+
+SPDX-License-Identifier: Apache-2.0
+*/
+
+.visually-hidden {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 1px;
+	height: 1px;
+
+	opacity: 0;
+	user-select: none;
+	pointer-events: none;
+}
+
+.layout {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: row-reverse;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+}
+
+.layout.hidden {
+	pointer-events: none;
+}
+
+@keyframes file-picker-appears {
+	from {
+		transform: scale(0);
+	}
+
+	to {
+		transform: scale(1);
+	}
+}
+
+.file-picker {
+	--_size: min(var(--text-xl) * 6.5, 60vw, 60vh);
+	--_fg-alpha: 100%;
+	--_note-size: calc(var(--_size) * 0.06);
+	--_text-area-offset: 85deg;
+	--_meow-meow-easing: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+	grid-area: picker;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--_size);
+	height: var(--_size);
+	font-weight: bold;
+	font-size: min(var(--text-xl), calc(var(--_size) * 0.2));
+	padding: var(--_note-size);
+	box-sizing: content-box;
+	border: 1px solid transparent;
+
+	border-radius: 50%;
+	color: oklch(var(--color-bg) / var(--_fg-alpha));
+	cursor: pointer;
+	user-select: none;
+	overflow: hidden;
+
+	animation: 0.2s ease 0s 1 backwards file-picker-appears;
+	transition: transform 0.2s ease, visibility 0s 0.2s linear;
+}
+.file-picker.hidden {
+	transform: scale(0);
+	visibility: hidden;
+}
+@media (hover: hover) and (not (prefers-reduced-motion: reduce)) {
+	.file-picker:has(:enabled):hover, .file-picker:has(:focus-visible) {
+		--_text-area-offset: 60deg;
+	}
+}
+.file-picker:has(:disabled) {
+	--_fg-alpha: var(--alpha-text-dimmed);
+
+	cursor: not-allowed;
+}
+.file-picker:has(:focus-visible) {
+	border-color: oklch(var(--color-fg));
+	box-shadow: 0 0 0 var(--size-focus-ring) oklch(var(--color-fg) / var(--alpha-focus-ring));
+}
+
+.file-picker-bg {
+	--_bg-size: calc(var(--_size) - var(--_note-size) - var(--space-px-sm) * 2);
+
+	position: absolute;
+	width: var(--_bg-size);
+	height: var(--_bg-size);
+	inset: 0;
+	margin: auto;
+
+	background-color: oklch(var(--color-fg));
+	border-radius: 50%;
+	pointer-events: none;
+}
+
+.file-picker-label {
+	white-space: pre;
+
+	scale: 1.03;
+	rotate: -5deg;
+	translate: 0.4em -0.05em;
+	transform: perspective(var(--_size)) rotateY(20deg);
+	transition: scale 0.3s var(--_meow-meow-easing);
+}
+@media (hover: hover) and (not (prefers-reduced-motion: reduce)) {
+	.file-picker:has(:enabled):hover > .file-picker-label,
+	.file-picker:has(:focus-visible) > .file-picker-label {
+		scale: 1.1;
+	}
+}
+@media (hover: hover) and (prefers-reduced-motion: reduce) {
+	.file-picker:has(:enabled):hover > .file-picker-label,
+	.file-picker:has(:focus-visible) > .file-picker-label {
+		text-decoration: underline;
+	}
+}
+@media not (prefers-reduced-motion: reduce) {
+	.file-picker:has(:enabled):active > .file-picker-label {
+		scale: 1.05;
+	}
+}
+
+.circular-text {
+	--_text-area-angle: 123deg;
+
+	font-family: var(--font-mono);
+	font-size: var(--_note-size);
+	font-weight: normal;
+
+	color: oklch(var(--color-fg));
+}
+
+.circular-char {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+
+	transform: translate(-50%, -50%) rotate(
+		calc(var(--_text-area-angle) / var(--_length) * var(--_index) * -1 + var(--_text-area-offset))
+	) translateY(calc(var(--_size) * 0.5));
+	transition: transform 0.3s var(--_meow-meow-easing);
+}
+
+.menu {
+	--_width: 10rem;
+
+	grid-area: menu;
+	display: flex;
+	flex-direction: column;
+	justify-content: end;
+	gap: var(--space-px-md);
+	padding: var(--space-px-lg);
+	width: var(--_width);
+
+	transform: perspective(var(--_width)) rotateY(15deg);
+}
+
+@keyframes menu-button-slide {
+	from {
+		opacity: 0;
+		translate: -50%;
+	}
+
+	to {
+		opacity: 1;
+		translate: 0%;
+	}
+}
+
+.menu-button {
+	--_bg-alpha: 0%;
+	--_index: 0;
+
+	display: block;
+	width: 100%;
+	padding: var(--space-px-md) var(--space-px-xl);
+	border: 1px solid oklch(var(--color-fg) / var(--alpha-action-border));
+	font-size: var(--text-lg);
+	font-weight: bold;
+
+	background-color: oklch(var(--color-fg) / var(--_bg-alpha));
+	border-radius: var(--radii-md);
+	cursor: pointer;
+	text-align: start;
+	user-select: none;
+
+	animation: 0.2s ease 0.2s 1 backwards menu-button-slide;
+	transform: translate(100%, 50%) rotate(calc(var(--_index) * -5deg)) translate(-100%, -50%);
+	transition: opacity 0.2s 0.1s ease, translate 0.2s 0.1s ease, visibility 0s 0.3s linear;
+}
+.menu-button.hidden {
+	opacity: 0;
+	translate: -50%;
+	visibility: hidden;
+}
+@media (hover: hover) {
+	.menu-button:hover {
+		--_bg-alpha: var(--alpha-action-hover-bg);
+	}
+}
+.menu-button:active {
+	--_bg-alpha: var(--alpha-action-active-bg);
+}
+.menu-button:focus-visible {
+	border-color: oklch(var(--config-fg));
+	box-shadow: 0 0 0 var(--size-focus-ring) oklch(var(--color-fg) / var(--alpha-focus-ring));
+}
+
+@media (max-width: 22rem) {
+	.layout {
+		flex-direction: column;
+		gap: var(--space-px-xl);
+	}
+
+	.menu {
+		gap: var(--space-px-lg);
+
+		transform: none;
+	}
+
+	.menu-button {
+		transform: rotate(1deg) translateX(calc(var(--_index) * 1rem));
+	}
+}

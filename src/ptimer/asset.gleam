@@ -40,7 +40,7 @@ pub fn decode(value: dynamic.Dynamic) -> Result(Asset, dynamic.DecodeErrors) {
   )
 }
 
-@external(javascript, "@/builder/ptimer/asset.ffi.ts", "fromFile")
+@external(javascript, "@/ptimer/asset.ffi.ts", "fromFile")
 fn from_file(id: Int, file: dynamic.Dynamic) -> dynamic.Dynamic
 
 pub fn create(
@@ -102,7 +102,7 @@ pub fn encode(asset: Asset) -> Result(json.Json, EncodeError) {
 
 // MISC
 
-@external(javascript, "@/builder/ptimer/asset.ffi.ts", "revokeObjectURL")
+@external(javascript, "@/ptimer/asset.ffi.ts", "revokeObjectURL")
 fn revoke_object_url(url: String) -> Nil
 
 pub fn release(asset: Asset) -> Nil {

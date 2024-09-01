@@ -1,0 +1,140 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Shota FUJI <pockawoooh@gmail.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+@keyframes bounce {
+	0%, 20%, 100% {
+		transform: translateY(0%);
+	}
+
+	10% {
+		transform: translateY(-0.2rem);
+	}
+}
+
+@keyframes fade {
+	0%, 10%, 100% {
+		opacity: 1;
+	}
+
+	5% {
+		opacity: 0.2;
+	}
+}
+
+.boot {
+	display: flex;
+	position: absolute;
+	inset: 0;
+	padding: var(--space-px-xl);
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-px-lg);
+
+	background-color: oklch(var(--color-bg));
+	overflow: hidden;
+
+	transition: opacity 0.15s 0.7s ease-in;
+}
+
+.loaded {
+	display: none;
+}
+.loaded > .status {
+	transform: translateX(100%) translateX(var(--space-px-lg));
+}
+.loaded > .logs {
+	transform: translateX(-100%) translateX(calc(-1 * var(--space-px-lg)));
+}
+.status, .logs {
+	transition: transform 0.4s 0.5s ease-in;
+}
+@media (prefers-reduced-motion: reduce) {
+	.loaded > .status, .loaded > .logs {
+		transform: none;
+		opacity: 0;
+	}
+
+	.status, .logs {
+		transition-property: opacity;
+	}
+}
+
+.status {
+	display: flex;
+	flex-direction: column;
+	align-items: end;
+	gap: var(--space-px-md);
+	font-weight: bold;
+	font-size: var(--text-md);
+}
+
+.loading {
+	display: flex;
+}
+
+.loading > span {
+	animation: 3s ease 0s infinite both running bounce;
+	animation-delay: calc(var(--_index, 0) * 120ms + 200ms);
+}
+@media (prefers-reduced-motion: reduce) {
+	.loading > span {
+		animation-name: fade;
+	}
+}
+
+.retry {
+	--_bg-alpha: var(--alpha-action-bg);
+
+	font-size: var(--text-sm);
+	font-weight: normal;
+	padding: var(--space-px-xs);
+	border: 1px solid oklch(var(--color-fg) / var(--alpha-action-border));
+
+	background-color: oklch(var(--color-fg) / var(--_bg-alpha));
+	border-radius: var(--radii-sm);
+	cursor: pointer;
+	text-decoration: underline;
+}
+.retry:focus-visible {
+	border-color: currentColor;
+	box-shadow: 0 0 0 var(--size-focus-ring) oklch(var(--color-fg) / var(--alpha-focus-ring));
+}
+
+@media (hover: hover) {
+	.retry:hover {
+		--_bg-alpha: var(--alpha-action-hover-bg);
+	}
+}
+.retry:active {
+	--_bg-alpha: var(--alpha-action-active-bg);
+}
+
+.logs {
+	flex: 1;
+	display: flex;
+	flex-direction: column-reverse;
+	justify-content: end;
+	gap: var(--space-px-lg);
+
+	overflow-y: auto;
+}
+
+.log-entry {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-px-3xs);
+	font-size: var(--text-sm);
+}
+
+.log-ts {
+	color: oklch(var(--color-fg) / var(--alpha-text-dimmed));
+
+	font-size: var(--text-xs);
+}
+
+.error-message {
+	font-style: italic;
+}

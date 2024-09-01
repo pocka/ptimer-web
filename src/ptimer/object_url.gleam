@@ -16,7 +16,7 @@ pub fn from_string(url: String) -> ObjectUrl {
   ObjectUrl(url)
 }
 
-@external(javascript, "@/builder/ptimer/object_url.ffi.ts", "revokeObjectURL")
+@external(javascript, "@/ptimer/object_url.ffi.ts", "revokeObjectURL")
 fn revoke_object_url(url: String) -> Nil
 
 pub fn revoke(url: ObjectUrl) -> Nil {

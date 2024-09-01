@@ -5,7 +5,7 @@
 import { type Meta, type StoryObj } from "@storybook/html";
 import { expect, userEvent, waitFor, within } from "@storybook/test";
 
-import type { Metadata, Ptimer } from "../ptimer";
+import type { Metadata, Ptimer } from "@/ptimer";
 import { sampleWav } from "../storybook_data";
 
 import { story } from "./assets_editor.gleam";
