@@ -118,7 +118,7 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
 
 // EFFECT
 
-@external(javascript, "@/player/core/player.ffi.ts", "raf")
+@external(javascript, "@/castle/core/player.ffi.ts", "raf")
 fn raf(callback: fn() -> Nil) -> Nil
 
 fn schedule_title() -> Effect(Msg) {
@@ -129,7 +129,7 @@ fn schedule_title() -> Effect(Msg) {
   })
 }
 
-@external(javascript, "@/player/core/player.ffi.ts", "tick")
+@external(javascript, "@/castle/core/player.ffi.ts", "tick")
 fn tick(interval: Int, callback: fn(Int) -> Nil) -> Nil
 
 fn schedule_tick() -> effect.Effect(Msg) {
@@ -142,7 +142,7 @@ fn schedule_tick() -> effect.Effect(Msg) {
 
 // VIEW
 
-@external(javascript, "@/player/core/player.ffi.ts", "className")
+@external(javascript, "@/castle/core/player.ffi.ts", "className")
 fn scoped(x: String) -> String
 
 fn scene_view(

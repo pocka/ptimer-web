@@ -13,7 +13,7 @@ import lustre/effect.{type Effect}
 import lustre/element.{type Element, text}
 import lustre/element/html
 import lustre/event
-import player/core
+import castle/core
 import ptimer
 import storybook
 
@@ -188,7 +188,7 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
 
 // EFFECT
 
-@external(javascript, "@/player/shell.ffi.ts", "loadCore")
+@external(javascript, "@/castle/shell.ffi.ts", "loadCore")
 fn ffi_load_core(
   on_error: fn(String) -> Nil,
   on_load: fn(
@@ -224,7 +224,7 @@ fn log(kind: LogKind) -> Effect(Msg) {
 
 // VIEW
 
-@external(javascript, "@/player/shell.ffi.ts", "className")
+@external(javascript, "@/castle/shell.ffi.ts", "className")
 fn scoped(x: String) -> String
 
 fn log_kind_to_element(kind: LogKind) -> Element(msg) {

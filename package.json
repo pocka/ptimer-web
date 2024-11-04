@@ -18,11 +18,11 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build",
-		"storybook/player": "storybook dev --config-dir .storybook/player --no-open --port 6006",
+		"storybook/castle": "storybook dev --config-dir .storybook/castle --no-open --port 6006",
 		"storybook/builder": "storybook dev --config-dir .storybook/builder --no-open --port 6007",
-		"build:storybook/player": "storybook build --config-dir .storybook/player --output-dir storybook-static/player",
+		"build:storybook/castle": "storybook build --config-dir .storybook/castle --output-dir storybook-static/castle",
 		"build:storybook/builder": "storybook build --config-dir .storybook/builder --output-dir storybook-static/builder",
-		"test:storybook/player": "test-storybook --config-dir .storybook/player",
+		"test:storybook/castle": "test-storybook --config-dir .storybook/castle",
 		"test:storybook/builder": "test-storybook --config-dir .storybook/builder --url http://localhost:6007"
 	},
 	"dependencies": {

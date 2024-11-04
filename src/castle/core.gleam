@@ -14,7 +14,7 @@ import lustre/effect.{type Effect}
 import lustre/element.{type Element, text}
 import lustre/element/html
 import lustre/event
-import player/core/player
+import castle/core/player
 import ptimer
 import ptimer/metadata
 import ptimer/step
@@ -87,10 +87,10 @@ fn open(engine: ptimer.Engine, file: dynamic.Dynamic) -> effect.Effect(Msg) {
 
 // VIEW
 
-@external(javascript, "@/player/core.ffi.ts", "className")
+@external(javascript, "@/castle/core.ffi.ts", "className")
 fn scoped(x: String) -> String
 
-@external(javascript, "@/player/core.ffi.ts", "getFile")
+@external(javascript, "@/castle/core.ffi.ts", "getFile")
 fn get_file(ev: dynamic.Dynamic) -> dynamic.Dynamic
 
 const drag_and_drop_text = "Or drag and drop a .ptimer file."

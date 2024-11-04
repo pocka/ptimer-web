@@ -2,12 +2,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import moduleCss from "@/player/core.module.css";
+import moduleCss from "@/castle/core.module.css";
 
 export function className(x: string): string {
 	if (import.meta.env.DEV) {
 		if (!(x in moduleCss)) {
-			console.warn(`Class "${x}" does not exist in @/player/core.module.css`);
+			console.warn(`Class "${x}" does not exist in @/castle/core.module.css`);
 		}
 	}
 
