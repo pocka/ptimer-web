@@ -1,0 +1,98 @@
+/*
+SPDX-FileCopyrightText: 2024 Shota FUJI <pockawoooh@gmail.com>
+
+SPDX-License-Identifier: Apache-2.0
+*/
+
+.layout {
+	--_panel-padding: var(--space-px-xl) var(--space-px-lg);
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column-reverse;
+}
+
+.logs {
+	flex: 1;
+	display: flex;
+	flex-direction: column-reverse;
+	gap: var(--space-px-xl);
+	padding: var(--_panel-padding);
+
+	overflow-y: auto;
+}
+
+.main {
+	display: block;
+	position: relative;
+	min-height: calc(var(--space-px-md) * pow(var(--scale), 13));
+	padding: var(--_panel-padding);
+	border-top: 1px solid oklch(var(--color-border) / var(--alpha-border-medium));
+}
+
+.button {
+	padding: var(--space-px-xs) var(--space-px-md);
+	font-size: var(--text-md);
+	font-weight: 600;
+	border: 1px solid oklch(var(--color-fg));
+
+	background-color: oklch(var(--color-fg));
+	border-radius: var(--radii-sm);
+	color: oklch(var(--color-bg));
+	cursor: pointer;
+}
+
+.outline-button {
+	composes: button;
+
+	border-color: currentColor;
+
+	background-color: transparent;
+	color: oklch(var(--color-fg));
+}
+
+.loading {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: var(--text-md);
+	width: 100%;
+	height: 100%;
+
+	color: oklch(var(--color-fg) / var(--alpha-text-dimmed));
+}
+
+.idle {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: var(--space-px-md);
+}
+
+.next-step {
+	flex: 1;
+	font-size: var(--text-sm);
+	align-self: flex-end;
+	white-space: nowrap;
+
+	color: oklch(var(--color-fg) / var(--alpha-text-dimmed));
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+
+.countdown {
+	font-feature-settings: "tnum";
+}
+
+.visually-hidden {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	user-select: none;
+	opacity: 0;
+}

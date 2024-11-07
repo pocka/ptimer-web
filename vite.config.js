@@ -16,6 +16,7 @@ export default defineConfig({
 				main: new URL("./src/index.html", import.meta.url).pathname,
 				builder: new URL("./src/builder/index.html", import.meta.url).pathname,
 				castle: new URL("./src/castle/index.html", import.meta.url).pathname,
+				simple: new URL("./src/simple/index.html", import.meta.url).pathname,
 			},
 		},
 	},

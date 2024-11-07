@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import lustre
 import castle/shell
+import lustre
 
 pub fn main() {
   let app_instance = lustre.application(shell.init, shell.update, shell.view)

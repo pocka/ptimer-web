@@ -1,0 +1,16 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Shota FUJI <pockawoooh@gmail.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+:root:not([data-theme-override="light"]):not([data-contrast-override="no-preference"]) {
+	--color-bg-l: 15%;
+	--color-fg-l: 99%;
+
+	--alpha-text-dimmed: 80%;
+	--alpha-action-bg: 5%;
+	--alpha-action-hover-bg: 15%;
+	--alpha-action-active-bg: 25%;
+	--alpha-focus-ring: 40%;
+}

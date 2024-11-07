@@ -19,10 +19,13 @@
 		"dev": "vite",
 		"build": "vite build",
 		"storybook/castle": "storybook dev --config-dir .storybook/castle --no-open --port 6006",
+		"storybook/simple": "storybook dev --config-dir .storybook/simple --no-open --port 6008",
 		"storybook/builder": "storybook dev --config-dir .storybook/builder --no-open --port 6007",
 		"build:storybook/castle": "storybook build --config-dir .storybook/castle --output-dir storybook-static/castle",
+		"build:storybook/simple": "storybook build --config-dir .storybook/simple --output-dir storybook-static/simple",
 		"build:storybook/builder": "storybook build --config-dir .storybook/builder --output-dir storybook-static/builder",
 		"test:storybook/castle": "test-storybook --config-dir .storybook/castle",
+		"test:storybook/simple": "test-storybook --config-dir .storybook/simple",
 		"test:storybook/builder": "test-storybook --config-dir .storybook/builder --url http://localhost:6007"
 	},
 	"dependencies": {

@@ -1,0 +1,53 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Shota FUJI <pockawoooh@gmail.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+@import "@fontsource-variable/inter";
+
+:root {
+	--font-sans: "Inter Variable", sans-serif;
+
+	/* approx. Plastic ratio */
+	--scale: calc(53 / 40);
+
+	--hue: 260deg;
+	--chroma: 3%;
+
+	--color-bg-l: 99%;
+	--color-bg: var(--color-bg-l) var(--chroma) var(--hue);
+
+	--color-fg-l: 25%;
+	--color-fg: var(--color-fg-l) var(--chroma) var(--hue);
+
+	--color-border-l: var(--color-fg-l);
+	--color-border: var(--color-fg-l) var(--chroma) var(--hue);
+
+	--space-px-md: 8px;
+	--space-px-sm: calc(var(--space-px-md) / var(--scale));
+	--space-px-xs: calc(var(--space-px-sm) / var(--scale));
+	--space-px-2xs: calc(var(--space-px-xs) / var(--scale));
+	--space-px-3xs: calc(var(--space-px-2xs) / var(--scale));
+	--space-px-lg: calc(var(--space-px-md) * var(--scale));
+	--space-px-xl: calc(var(--space-px-lg) * var(--scale));
+
+	--text-md: 1rem;
+	--text-sm: calc(var(--text-md) / var(--scale));
+	--text-xs: calc(var(--text-sm) / var(--scale));
+	--text-lg: calc(var(--text-md) * var(--scale));
+	--text-xl: calc(var(--text-lg) * var(--scale));
+
+	--radii-md: 3px;
+	--radii-sm: calc(var(--radii-md) / var(--scale));
+
+	--size-focus-ring: 3px;
+
+	--alpha-border-medium: 12%;
+	--alpha-text-dimmed: 60%;
+	--alpha-action-border: 0%;
+	--alpha-action-bg: 2%;
+	--alpha-action-hover-bg: 5%;
+	--alpha-action-active-bg: 15%;
+	--alpha-focus-ring: 15%;
+}

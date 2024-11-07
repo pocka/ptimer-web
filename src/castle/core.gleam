@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+import castle/core/player
 import gleam/dynamic
 import gleam/int
 import gleam/list
@@ -14,7 +15,6 @@ import lustre/effect.{type Effect}
 import lustre/element.{type Element, text}
 import lustre/element/html
 import lustre/event
-import castle/core/player
 import ptimer
 import ptimer/metadata
 import ptimer/step

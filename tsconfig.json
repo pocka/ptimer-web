@@ -16,6 +16,6 @@
 		},
 		"types": ["vite/client"]
 	},
-	"include": ["./**/*.ts"],
+	"include": ["./**/*.ts", ".storybook/**/*.ts"],
 	"exclude": ["./build", "node_modules"]
 }

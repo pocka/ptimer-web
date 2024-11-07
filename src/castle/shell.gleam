@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+import castle/core
 import datetime.{type DateTime}
 import gleam/dynamic
 import gleam/int
@@ -13,7 +14,6 @@ import lustre/effect.{type Effect}
 import lustre/element.{type Element, text}
 import lustre/element/html
 import lustre/event
-import castle/core
 import ptimer
 import storybook
 
