@@ -4,7 +4,6 @@
 
 import { defineConfig } from "vite";
 import gleam from "vite-gleam";
-import elm from "vite-plugin-elm";
 
 export default defineConfig({
 	root: new URL("./src", import.meta.url).pathname,
@@ -36,5 +35,5 @@ export default defineConfig({
 		// onnxruntime-web is not compatible with "iife" format (default value)
 		format: "es",
 	},
-	plugins: [gleam(), elm()],
+	plugins: [gleam()],
 });

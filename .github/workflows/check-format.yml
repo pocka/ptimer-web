@@ -25,7 +25,5 @@ jobs:
         with:
           otp-version: "27"
           gleam-version: "1.4"
-      - name: Install elm-format
-        run: npm i -g elm-format
       - name: Check format with dprint
         uses: dprint/check@v2.2

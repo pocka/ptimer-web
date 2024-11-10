@@ -8,12 +8,9 @@
 		"@storybook/html-vite": "^8.2.8",
 		"@storybook/test": "^8.2.8",
 		"@storybook/test-runner": "^0.19.1",
-		"elm": "^0.19.1-6",
-		"elm-format": "^0.8.7",
 		"typescript": "^5.5.4",
 		"vite": "^5.3.5",
-		"vite-gleam": "^0.4.3",
-		"vite-plugin-elm": "^3.0.1"
+		"vite-gleam": "^0.4.3"
 	},
 	"scripts": {
 		"dev": "vite",

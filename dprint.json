@@ -16,15 +16,10 @@
 	"excludes": [
 		"node_modules",
 		"dist",
-		"elm-stuff",
 		"build"
 	],
 	"exec": {
 		"commands": [
-			{
-				"command": "npx elm-format --stdin",
-				"exts": ["elm"]
-			},
 			{
 				"command": "gleam format --stdin",
 				"exts": ["gleam"]
