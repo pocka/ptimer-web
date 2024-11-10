@@ -2,4 +2,4 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import "../../src/player/main.css";
+import "../../src/castle/main.css";

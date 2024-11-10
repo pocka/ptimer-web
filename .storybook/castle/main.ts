@@ -6,7 +6,7 @@ import type { StorybookConfig } from "@storybook/html-vite";
 
 export default {
 	framework: "@storybook/html-vite",
-	stories: ["../../src/player/**/*.stories.ts"],
+	stories: ["../../src/castle/**/*.stories.ts"],
 	addons: ["@storybook/addon-essentials", "@storybook/addon-interactions"],
 	core: {
 		builder: {
