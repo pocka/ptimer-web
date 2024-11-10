@@ -56,7 +56,7 @@ jobs:
       - name: Check Gleam types
         run: "gleam check"
 
-  build-player-storybook:
+  build-castle-storybook:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -73,12 +73,36 @@ jobs:
       - name: Install dependencies
         run: "bun i"
       - name: Build Storybook
-        run: "bun run build:storybook/player"
+        run: "bun run build:storybook/castle"
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: player-storybook
-          path: storybook-static/player
+          name: castle-storybook
+          path: storybook-static/castle
+
+  build-simple-storybook:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Gleam
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: "27"
+          gleam-version: "1.4"
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: "1.1"
+      - name: Install dependencies
+        run: "bun i"
+      - name: Build Storybook
+        run: "bun run build:storybook/simple"
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: simple-storybook
+          path: storybook-static/simple
 
   build-builder-storybook:
     runs-on: ubuntu-latest
@@ -109,7 +133,8 @@ jobs:
     if: github.ref == 'refs/heads/master'
     needs:
       - build
-      - build-player-storybook
+      - build-castle-storybook
+      - build-simple-storybook
       - build-builder-storybook
     runs-on: ubuntu-latest
     steps:
@@ -136,7 +161,8 @@ jobs:
     needs:
       - check
       - prep-artifact-for-pages
-      - test-player-storybook
+      - test-castle-storybook
+      - test-simple-storybook
       - test-builder-storybook
     permissions:
       pages: write
@@ -150,9 +176,9 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-  test-player-storybook:
+  test-castle-storybook:
     needs:
-      - build-player-storybook
+      - build-castle-storybook
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -161,7 +187,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: "storybook-static"
-          name: "player-storybook"
+          name: "castle-storybook"
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
         with:
@@ -179,7 +205,38 @@ jobs:
         run: |
           npx concurrently -k -s first -n "SB,TEST" \
             "npx http-server storybook-static --port 6006 --silent" \
-            "npx wait-on tcp:6006 && bun run test:storybook/player --browsers chromium,firefox,webkit"
+            "npx wait-on tcp:6006 && bun run test:storybook/castle --browsers chromium,firefox,webkit"
+
+  test-simple-storybook:
+    needs:
+      - build-simple-storybook
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Download built Storybook
+        uses: actions/download-artifact@v4
+        with:
+          path: "storybook-static"
+          name: "simple-storybook"
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: "1.1"
+      # Needs Node.js since bunx is not compatible with npx
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+      - name: Install dependencies
+        run: "bun i"
+      - name: Setup Playwright
+        run: "npx playwright install --with-deps"
+      - name: Run tests
+        run: |
+          npx concurrently -k -s first -n "SB,TEST" \
+            "npx http-server storybook-static --port 6006 --silent" \
+            "npx wait-on tcp:6006 && bun run test:storybook/simple --browsers chromium,firefox,webkit"
 
   test-builder-storybook:
     needs:
@@ -216,7 +273,8 @@ jobs:
     needs:
       - deploy
       - test-builder-storybook
-      - test-player-storybook
+      - test-castle-storybook
+      - test-simple-storybook
     runs-on: ubuntu-latest
     steps:
       - name: Delete artifacts
