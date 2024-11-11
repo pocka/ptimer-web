@@ -1,0 +1,70 @@
+/*
+SPDX-FileCopyrightText: 2024 Shota FUJI <pockawoooh@gmail.com>
+
+SPDX-License-Identifier: Apache-2.0
+*/
+
+@import "./vars.css";
+
+:where(body, body :not(svg, svg *)) {
+	all: unset;
+	box-sizing: border-box;
+	border: 1px solid transparent;
+}
+
+:root {
+	font-display: swap;
+	font-family: var(--font-sans);
+}
+
+body {
+	display: block;
+	font-size: 1rem;
+	line-height: 1.25;
+	padding: var(--space-px-md) var(--space-px-lg);
+
+	background-color: oklch(var(--color-bg));
+	color: oklch(var(--color-fg));
+}
+
+body :focus-visible {
+	border-color: oklch(var(--color-focus));
+	box-shadow: 0 0 0 var(--size-focus-ring) oklch(var(--color-focus) / var(--alpha-focus-ring));
+}
+
+.links {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 30rem), 1fr));
+	align-content: stretch;
+	gap: var(--space-px-xl);
+}
+
+.link {
+	--_bg-alpha: var(--alpha-action-bg);
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-px-sm);
+	padding: var(--space-px-md) var(--space-px-lg);
+
+	background-color: oklch(var(--color-fg) / var(--_bg-alpha));
+	border-color: oklch(var(--color-border) / var(--alpha-action-border));
+	border-radius: var(--radii-md);
+	cursor: pointer;
+}
+@media (hover: hover) {
+	.link:hover {
+		--_bg-alpha: var(--alpha-action-hover-bg);
+	}
+}
+.link:active {
+	--_bg-alpha: var(--alpha-action-active-bg);
+}
+
+.link-title {
+	font-size: var(--text-md);
+	font-weight: 600;
+}
+
+.link-description {
+	font-size: var(--text-md);
+}
