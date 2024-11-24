@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+import { gleam } from "@pocka/rollup-plugin-gleam";
 import { defineConfig } from "vite";
-import gleam from "vite-gleam";
 
 export default defineConfig({
 	root: new URL("./src", import.meta.url).pathname,

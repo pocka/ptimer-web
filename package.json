@@ -2,6 +2,7 @@
 	"private": true,
 	"type": "module",
 	"devDependencies": {
+		"@pocka/rollup-plugin-gleam": "^0.1.0",
 		"@storybook/addon-essentials": "^8.2.8",
 		"@storybook/addon-interactions": "^8.2.8",
 		"@storybook/html": "^8.2.8",
@@ -9,8 +10,7 @@
 		"@storybook/test": "^8.2.8",
 		"@storybook/test-runner": "^0.19.1",
 		"typescript": "^5.5.4",
-		"vite": "^5.3.5",
-		"vite-gleam": "^0.4.3"
+		"vite": "^5.3.5"
 	},
 	"scripts": {
 		"dev": "vite",
